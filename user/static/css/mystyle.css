@@ -1,0 +1,150 @@
+
+.label-for-input{
+  display: block;
+  text-align: center;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+}
+
+.separator{
+  background-color: #c0c0c0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  margin-left: 10px;
+  margin-right: 10px;
+  height:0.2rem;
+
+}
+.input-file{
+  border-radius: 2rem;
+}
+
+.container-content{
+  margin-top: 0.5rem;
+  border-radius: 1rem;
+  background-color: #e0e0e0;
+  padding: 1rem;
+}
+.pdf-canvas{
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+/*  margin-top: 5rem;
+  margin-bottom: 5rem;*/
+  padding:5rem;
+}
+
+.image-div{
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+/*  margin-top: 5rem;
+  margin-bottom: 5rem;*/
+  padding:5rem;
+}
+.input-output-img{
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.tool-btn{
+  width:10%; 
+  min-width: 100px; 
+  height: 40px; 
+  display: inline-block; 
+}
+
+/********************************************************************
+* 页脚
+*********************************************************************/
+.foot-wrap{
+  background-color: #aabbcc;
+  margin-top:1rem;
+  position:absolute;
+  bottom:0;
+  width:100%;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  border-radius: 2rem;
+}
+
+ 
+}
+.row-content{
+  >h3{
+    color:#DDD;
+    font-size:16px;
+    font-weight: 300;
+    line-height: 16px;
+    margin:40px 0 30px 34px;
+  }
+  >ul{
+    font-size:13px;
+    line-height:24px;
+    >li{
+      list-style:none;
+      >a{
+        color:#878B91;
+        &:hover{
+          text-decoration:none;
+          color:#c1ba62;
+        }
+      }
+    }   
+  }
+} 
+
+ul.social{
+margin:0;
+padding:0;
+width:100%;
+text-align:center;
+  >li{
+    display:inline-block;
+    > a{
+      display:inline-block;
+      font-size:18px;
+      line-height:30px;
+      .square(30px);
+      border-radius:1rem;
+      background-color:@gray-light;
+      color:#fff;
+      margin:0 0.5px 0.5px 0;
+      &:hover{
+      text-decoration:none;
+      background-color:@link-hover-color;
+      }
+    }
+  }
+}
+
+
+.file {
+    position: relative;
+    display: inline-block;
+    background: #D0EEFF;
+    border: 1px solid #99D3F5;
+    border-radius: 4px;
+    padding: 4px 12px;
+    overflow: hidden;
+    color: #1E88C7;
+    text-decoration: none;
+    text-indent: 0;
+    line-height: 20px;
+}
+.file input {
+    position: absolute;
+    font-size: 100px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+}
+.file:hover {
+    background: #AADFFD;
+    border-color: #78C3F3;
+    color: #004974;
+    text-decoration: none;
+}

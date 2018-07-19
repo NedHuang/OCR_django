@@ -20,5 +20,11 @@ from . import views
 urlpatterns = [
     url(r'^login/', views.login, name='login'),
     url(r'^register/', views.register, name = 'register'),
-    url(r'^logout/', views.logout, name = 'logout')
+    url(r'^logout/', views.logout, name = 'logout'),
+    url(r'^main/', views.main, name = 'main'),
+    url(r'^upload/',views.upload, name = 'upload'),
+    url(r'^file_management/',views.file_management, name = 'file_management'),
+    url(r'^anonymous/',views.anonymous, name = 'anonymous'),
+    url(r'^ajax/', views.ajax, name = 'ajax'),
+    url(r'^resetByUsernameForm/', views.resetByUsernameForm, name = 'resetByUsernameForm'),
 ]

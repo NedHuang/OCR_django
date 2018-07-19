@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>版面理解服务 - 数字出版技术国家重点实验室</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+  <!-- CSS Libs -->
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap.min.css' %}">
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'lib/css/font-awesome.min.css"> -->
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/fontawesome/css/all.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/animate.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap-switch.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/checkbox3.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/jquery.dataTables.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/dataTables.bootstrap.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/select2.min.css' %}">
+  <!-- CSS App -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/css/themes/flat-green.css' %}">
+  <!-- Animation CSS-->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/animate.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/main.css' %}">
+
+
+</head>
+
+<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;">
+
+
+<div id="loading" style = "width:0%; height: 0%; display: block"  >
+  <div id="loading-center" style = "width:100%; height: 100%; " >
+    <div style ="padding-top: 20%; width:100%">
+   <!--    <p id ='loading_flag'style ="width: 20rem; margin-right: auto; margin-left: auto;position: middle; font-size: 5rem" hidden>正在识别。。。</p> -->
+    </div>
+    <div id="loading-center-absolute" style = "width:100%; height: 100%">
+      <div class="object" id="object_one"></div>
+      <div class="object" id="object_two"></div>
+      <div class="object" id="object_three"></div>
+      <div class="object" id="object_four"></div>
+      <div class="object" id="object_five"></div>
+      <div class="object" id="object_six"></div>
+      <div class="object" id="object_seven"></div>
+      <div class="object" id="object_eight"></div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div class="app-container">
+    <div class="row content-container">
+      <nav class="navbar navbar-default navbar-fixed-top navbar-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-expand-toggle">
+              <i class="fa fa-bars icon"></i>
+            </button>
+            <ol class="breadcrumb navbar-breadcrumb">
+              <li class="active"><i class="fa fa-globe"></i> 数字出版技术国家重点实验室</li>
+            </ol>
+            <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+              <i class="fa fa-th icon"></i>
+            </button>
+          </div>
+          <ul class="nav navbar-nav navbar-right">
+            <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+              <i class="fa fa-times icon"></i>
+            </button>
+            <li>
+              <a href="#">首页</a>
+            </li>
+            <li>
+                <a href="#">文档整理</a>
+            </li>
+            <li class="dropdown danger">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">其他服务</a>
+              <ul class="dropdown-menu danger  animated fadeInDown">
+                <li>
+                  <ul class="list-group notifications">
+                    <a href="#">
+                      <li class="list-group-item" onclick ="window.location.href = '{% static 'knowledge_service/page.html'">
+                         <i class="fa fa-mortar-board"></i> 知识服务
+                      </li>
+                    </a>
+                    <a href="#">
+                      <li class="list-group-item">
+                         <i class="fa fa-pencil-square-o"></i> 机器写作
+                      </li>
+                    </a>
+                    <a href="http://www.founder.com/" target="blank">
+                      <li class="list-group-item message">
+                        方正集团
+                      </li>
+                    </a>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="dropdown profile">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
+              <ul class="dropdown-menu animated fadeInDown">
+                <li class="profile-img">
+                  <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                </li>
+                <li>
+                  <div class="profile-info">
+                    <h4 class="username">Emily Hart</h4>
+                    <p>emily_hart@email.com</p>
+                    <div class="btn-group margin-bottom-2x" role="group">
+                      <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
+                      <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
+                      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="side-menu sidebar-inverse">
+        <nav class="navbar navbar-default" role="navigation">
+          <div class="side-menu-container">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">
+
+                <div class="icon fa fa-newspaper-o"></div>
+                <div class="title">版面理解</div>
+              </a>
+              <button type="button" class="navbar-expand-toggle pull-right visible-xs">
+                <i class="fa fa-times icon"></i>
+              </button>
+            </div>
+            <ul class="nav navbar-nav" >
+
+              
+              <li>
+                <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
+                </a>
+              </li>
+              <li>
+                <a id='table_a' onclick = 'change_category_to_table();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="table_button" class="title" onclick = "change_button('table_button')"><p id ="table_p">标注表格</p></span>
+                </a>
+              </li>
+              <li>
+                <a id='formula_a' onclick= 'change_category_to_formula();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="formula_button" class="title" onclick = "change_button('formula_button')"><p id="formula_p">标注公式</p></span>
+                </a>
+              </li>
+              <li>
+                <a id='erase_a' onclick = 'erase_mode()'>
+                  <span class="icon fa fa-eraser "></span><span id="erase_button" class="title" onclick = "change_button('erase_button')"><p id ="erase_p">删除对象</p></span>
+                </a>
+              </li>
+              <li >
+                <a onclick = 'undo()'>
+                  <span class="icon fa fa-undo"></span><span class="title">撤销操作</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = 'redo()'>
+                  <span class="icon fa fa-redo"></span><span class="title">恢复操作</span>
+                </a>
+              </li>
+
+              <li>
+                <a onclick = 'save_change_to_server()'>
+                  <span class="icon fa fa-upload"></span><span class="title">上传结果</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = ''>
+                  <span class="icon fa fa-download"></span><span class="title">导出结果</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = 'get_data()'>
+                  <span class="icon fa fa-sync"></span><span class="title">重新识别</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = 'hahaha()'>
+                  <span class="icon fa fa-trash"></span><span class="title">hahaah</span>
+                </a>
+              </li>
+
+
+            </ul>
+          </div>
+          <!-- /.navbar-collapse -->
+        </nav>
+      </div>
+      <!-- Main Content -->
+      <div class="container-fluid">
+        <div class="side-body" >
+          <div id = "editor-menu-container" class="row " style="background-color: rgb(232, 236, 230);margin: 0px;padding: 0px;">
+              <div class="row-fluid" >
+                <div class="  col-sm-2 col-md-3  col-lg-3 span3" >
+  <!--                 <form id="upload" enctype="multipart/form-data" method="post">
+                    <label for="file" class="btn btn-info">导入文件</label>
+                    <input  type="file" name="file" id="file" onchange="loadFile(this.files[0])" style="display:none">
+                    <button type="button" class="btn btn-primary">文件类型</button>
+                    <button type="button" class="btn btn-success" onclick = "uploadDoc()">开始识别</button>
+                  </form> -->
+
+                    <form method="post" action="/user/upload/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                       <label> 上传文件 </label>
+                       <input type="file" name="myfile" />
+                       <br/>
+                       <input type="submit" value="upload"/>
+                    </form>
+                    {{message}}
+
+
+<!--                   <input type="file" name="file" id="file_upload">
+                  <input type="button" value="上传" onclick="FileUpload()"> -->
+
+                </div>
+                <div class=" col-sm-7 col-md-7 col-lg-6 span5 ">
+                  <button type="button" class="btn btn-default" onclick='showFirstPage()'>首页</button>
+                  <button type="button" class="btn btn-default" onclick='showPrevPage()'>上一页</button>
+                  <button type="button" class="btn btn-default" onclick='showNextPage()'>下一页</button>
+                  <button type="button" class="btn btn-default" onclick='showLastPage()'>末页</button>
+
+
+                  <button type="button" class="btn btn-default" >页码</button>
+                  <label class="form-inline">
+                    <input type="number" id="myNumber" class="form-control" value="1" min="1" style="width:70px">
+                    <!-- <input type="number" class="form-control"  style="width: 70px" /> -->
+                  </label>
+                  <button type="button" class="btn btn-default" onclick="select_page()">跳转</button>
+                   <label class="form-inline"><p id = "total_page">总页数: 0</p></label>
+                </div>
+
+                <div class="  col-sm-3 col-md-2 col-lg-3 span4">
+                  <button type="button" class="btn btn-default"> <i class="fa fa-file-text-o"></i> </button>
+                  <span id="filename" style="vertical-align:middle" >未上传文件</span>
+                </div>
+              </div>
+
+          </div>
+          <div id = 'editor-container' class="container editor" style="background-color: #eeeeee; border :1px solid" >
+            <canvas id='editor_canvas' style = "position: absolute;  z-index: 1;" width = 0; height = 0></canvas>
+            <!-- <canvas id='dummy_canvas' style = "position: absolute; margin-top: 50px; z-index: 2" ></canvas> -->
+            <img id='input_img' style = "position: absolute;  z-index: 0">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+<!-- 注销 -->
+  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          
+          </h4>
+        </div>
+        <div class="modal-body">
+          确认注销账户？
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            确认注销
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 账户管理 -->
+  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          
+          </h4>
+        </div>
+        <div class="modal-body">
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            确认注销
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <footer class="app-footer">
+      <div class="wrapper">
+        <span class="pull-right">2.1 <a href="#"><i class="fa fa-long-arrow-up"></i></a></span> © 2018 Copyright. </a>
+      </div>
+    </footer>
+    
+      <!-- Javascript Libs -->
+      <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/bootstrap.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/Chart.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/bootstrap-switch.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/jquery.matchHeight-min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/jquery.dataTables.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/dataTables.bootstrap.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/select2.full.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/ace/ace.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/ace/mode-html.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/ace/theme-github.js' %}"></script>
+      <!-- Javascript -->
+      <script type="text/javascript" src="{% static 'javascript/app.js' %}"></script>
+      <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
+      <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script>
+
+
+
+  <script type="text/javascript">
+    window.onload = resize_editor_region();
+    function resize_editor_region(){
+      var w = document.getElementById('editor-menu-container').clientWidth;
+      $('#editor-container').css('width',parseInt(w)-10);
+      }
+
+      $(window).resize(function () {          //当浏览器大小变化时
+       // alert($(window).height());          //浏览器时下窗口可视区域高度
+       // alert($(document).height());        //浏览器时下窗口文档的高度
+       // alert($(document.body).height());   //浏览器时下窗口文档body的高度
+       // alert($(document.body).outerHeight(true)); //浏览器时下窗口文档body的总高度 包括border padding margin
+       resize_editor_region();
+    });
+  
+    function change_button(b){
+      var buttons = ['image_button','table_button','formula_button','erase_button'];
+      var ps =['image_p','table_p','formula_p','erase_p'];
+      var as =['image_a','table_a','formula_a','erase_a'];
+      var j = -1;
+      
+      for(var i = 0; i < 4; i++){
+        if(b == buttons[i]){
+          j = i;
+           $('#'+buttons[i]).css('background-color','#e0e0e0');
+          $('#'+as[j]).css('background-color','#e0e0e0');    
+          if(j==0){
+            $('#'+ps[i]).css('color','#3232CD');
+          }
+          if(j==1){
+            $('#'+ps[i]).css('color','#32CD32');
+          }
+          if(j==2){
+            $('#'+ps[i]).css('color','#F5270B');
+          }          
+          if(j==3){
+            $('#'+ps[i]).css('color','#16A085');
+          }
+          console.log(b)
+        }
+      }
+      for(var i = 0; i < 4; i++){
+        if(j != i){
+          $('#'+buttons[i]).css('background-color','');
+          $('#'+as[i]).css('background-color','');
+          $('#'+ps[i]).css('color','');
+          console.log(b)
+        }
+      }
+    }
+
+    function FileUpload() {
+        var form_data = new FormData();
+        var file_info =document.getElementById('file_upload')[0].files[0];
+        form_data.append('file',file_info);
+        //if(file_info==undefined)暂且不许要判断是否有附件
+            //alert('你没有选择任何文件');
+            //return false
+        $.ajax({
+            url:'/user/upload/',
+            type:'POST',
+            data: form_data,
+            processData: false,  // tell jquery not to process the data
+            contentType: false, // tell jquery not to set contentType
+            success: function(callback) {
+                console.log('ojbk')
+            }
+        });
+      }
+
+function hahaha(){
+
+  var postdata = {
+  'data':'I am screwed',
+  'operation':'test',
+   'csrfmiddlewaretoken':$('[name="csrfmiddlewaretoken"]').val(),
+};
+  $.ajax({
+    url:'/user/ajax/',
+    type:'POST',
+    data: postdata,
+    // datatype: 'json',
+    success:function(res){
+      alert(res)
+    },
+    error:function(err){
+       alert('网络连接失败,稍后重试',err);
+    }
+  })
+}
+  </script>
+
+</body>
+
+</html>
