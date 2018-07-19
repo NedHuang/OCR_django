@@ -16,7 +16,7 @@ from django.core.validators import validate_email
 import os
 import PyPDF2
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -148,11 +148,48 @@ def main(request):
 		return HttpResponse(request.POST.get('data'))
 	return render(request,'main.html',{'message':'message'+request.session['username']})
 
+# 根据post的action字段来执行不同function
 def ajax(request):
 	if request.method =='POST':
-		if request.POST.get('operation') =='test':
+		if request.POST.get('action') =='test':
 			print(request.POST.get('data'))
 			return HttpResponse(request.POST.get('data'))
+		# if request.POST.get('action') =='delete_file':
+		# 	return delete_file(request)
+# @ensure_csrf_cookie
+# @csrf_exempt
+# def delete_file(request):
+# 	t = loader.get_template('file_management.html')
+# 	files = File.objects.all()
+# 	c ={'files':files}
+# 	if request.POST.get('file_guid') != None:
+# 		delete_file_guid = request.POST.get('file_guid')
+# 		print(delete_file_guid)
+# 		File.objects.filter(file_guid = delete_file_guid).delete()
+# 		t = loader.get_template('file_management.html')
+# 		files = File.objects.all()
+# 		c ={'files':files}
+# 	return HttpResponse(t.render(c,request))
+# @require_http_methods(["POST"])
+@ensure_csrf_cookie
+@csrf_exempt
+def delete_file(request):
+	# t = loader.get_template('file_management.html')
+	# files = File.objects.all()
+	# c ={'files':files}
+	print(request.POST)
+	if request.method =='POST':
+		print('post')
+		if request.POST.get('file_guid') != None:
+			print(request.POST.get('file_guid'))
+			delete_file_guid = request.POST.get('file_guid')
+			File.objects.filter(file_guid = delete_file_guid).delete()
+			t = loader.get_template('file_management.html')
+			files = File.objects.all()
+			c ={'files':files}
+	return HttpResponse(c)
+
+
 
 def upload(request):
 	t = loader.get_template('main.html')

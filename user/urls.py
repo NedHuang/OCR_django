@@ -26,5 +26,6 @@ urlpatterns = [
     url(r'^file_management/',views.file_management, name = 'file_management'),
     url(r'^anonymous/',views.anonymous, name = 'anonymous'),
     url(r'^ajax/', views.ajax, name = 'ajax'),
+    url(r'^delete_file/', views.delete_file, name = 'delete_file'),
     url(r'^resetByUsernameForm/', views.resetByUsernameForm, name = 'resetByUsernameForm'),
 ]

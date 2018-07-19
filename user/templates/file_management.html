@@ -29,7 +29,7 @@
 
 </head>
 
-<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;">
+<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;" onclick="reset()">
 
 
 <div id="loading" style = "width:0%; height: 0%; display: block"  >
@@ -197,12 +197,11 @@
         </nav>
       </div>
       <!-- Main Content -->
-      <div class="container-fluid">
+      <div class="container-fluid" id = 'edit_container'>
         <div class="side-body" id = 'file_management_container'>
           <table class="table table-striped">
             <thead>
               <tr>
-                <th scope="col">选择</th>
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
                 <th scope="col">分组</th>
@@ -211,12 +210,12 @@
             </thead>
 
           {% for file in files %}
-            <tr oncontextmenu="edit()">
-              <td><input type="checkbox" name="delete" value={{file.guid}} />
+            <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)">
               <td>{{ file.filename }}</td>
               <td>{{ file.owner.username}}</td>
               <td>{{ file.groups}}</td>
               <td>{{ file.co_editor}}</td>
+              <td>{{ file.file_guid}}</td>
             </tr>
           {% endfor %}
           </table>
@@ -254,7 +253,7 @@
   </div>
 
   <!-- 账户管理 -->
-  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 200px">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -278,6 +277,55 @@
         </div>
       </div>
     </div>
+  </div>
+
+
+  <!--  确定删除文件的model -->
+  <div class="modal fade" id="delete_file_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          
+          </h4>
+        </div>
+        <div id ="delete_file_model_body" class="modal-body">
+          删除文件？
+        </div>
+        <div class="modal-footer">
+          <button onclick="delete_file()" type="button" class="btn btn-default" data-dismiss="modal">
+            删除
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!--   对文件的右键菜单 -->
+  <div id="edit_menu" class="menus" style="display:none">
+    <table border="1"  bgcolor="#cccccc" style="border:thin;z-index: 1;width: 200px;background-color: #AAAAAA; opacity: 1;" cellspacing="0" >
+      <tr>
+        <td  style="cursor:default;border:outset 1;" align="center" >
+        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
+        </td>
+      </tr>
+      <tr>
+        <td style=" cursor:default;border:outset 1;" align="center" onclick="">
+        <button style ="border-radius:0.5rem;">分组</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="cursor:default;border:outset 1;" align="center" onclick="">
+        <button style ="border-radius:0.5rem;">共享</button>
+        </td>
+      </tr>
+    </table>
   </div>
 
     <footer class="app-footer">
@@ -310,9 +358,78 @@
 
 
   <script type="text/javascript">
-    function edit(){
-      
+    var current_file_guid = '';
+    var current_filename='';
+    function edit(e){
+      var edit_container = $('#edit_container');   
+      var edit_menu = $('#edit_menu');
+      var left_edge = 0;
+      var top_edge = 0;
+      // var rightedge = edit_container.clientWidth-edit_menu.clientX;
+      // var bottomedge = edit_container.clientHeight-edit_menu.clientY;
+      // console.log(edit_container.width());
+      // console.log(edit_container.height());
+      // console.log(e.clientX);
+      // console.log(e.clientY);
+      // console.log(edit_menu.width());
+      // console.log(edit_menu.height());
+      // pop at right
+      if(edit_container.width() - e.clientX > edit_menu.width()){
+        left_edge = e.clientX +'px'; 
+      }else{
+        left_edge = e.clientX - edit_menu.width() +'px';
+      }
+      // pop below where you clicked
+      if(edit_container.height - e.clientY > edit_menu.height()){
+        top_edge = e.clientY + 'px';
+      }
+      else{
+        top_edge = e.clientY + 'px';
+      }
+      $('#edit_menu').show().css({'left':left_edge,'top':top_edge,'position':'absolute'});
+      event.returnValue = false;
     }
+
+
+    function select_file(element){
+      current_file_guid = element.id;
+      console.log(current_file_guid);
+    }
+
+
+    function reset(){
+      console.log('reset');
+      $('.menus').hide();
+      // current_file_guid = '';
+      // current_filename = '';
+    }
+
+    function delete_file(){
+      var post_data = {
+        'action':'delete_file',
+        'file_guid': current_file_guid,
+      }
+      console.log(post_data);
+      $.ajax({
+        url:'/user/delete_file/'+current_file_guid,
+        type:'POST',
+        data:post_data,
+        // processData: false,  // tell jquery not to process the data
+        // contentType: false, // tell jquery not to set contentType
+        success:function(res){
+          alert(res)
+        },
+        error:function(err){
+          $('#loading').hide().css('display','none');
+           alert('网络连接失败,稍后重试',err);
+        }
+      })
+      // url ='/user/delete_file/';
+      // $.post(url, {'file_guid':current_file_guid})
+    }
+
+
+
   </script>
 
 </body>
