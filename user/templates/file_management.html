@@ -145,7 +145,7 @@
 
               <li>
                 <a id='image_a'>
-                  <span class="icon fa fa-folder "></span><span id="image_button" class="title"  ><p id ="to_shared_with_me">与我共享</p></span>
+                  <span class="icon fa fa-folder "></span><span onclick='show_shared_with_me()' id="image_button" class="title"  ><p id ="to_shared_with_me">与我共享</p></span>
                 </a>
               </li>
             </ul>
@@ -163,7 +163,7 @@
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
                 <th scope="col">分组</th>
-                <th scope="col">共享者</th>
+                <th scope="col">GUID</th>
               </tr>
             </thead>
 
@@ -172,7 +172,7 @@
               <td>{{ file.filename }}</td>
               <td>{{ file.owner.username}}</td>
               <td>{{ file.groups}}</td>
-              <td>{{ file.co_editor}}</td>
+             <!--  <td>{{ file.co_editor}}</td> -->
               <td>{{ file.file_guid}}</td>
             </tr>
           {% endfor %}
@@ -187,22 +187,22 @@
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
                 <th scope="col">分组</th>
+                <th scope="col">共享者</th>
+                <th scope="col" >查看</th>
               </tr>
             </thead>
 
-          {% for file in files %}
-            <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)">
-              <td>{{ file.filename }}</td>
-              <td>{{ file.owner.username}}</td>
-              <td>{{ file.groups}}</td>
-              <td>{{ file.co_editor}}</td>
+          {% for s in shares %}
+            <tr id = {{s.shared_file.file_guid}} oncontextmenu="edit(event), select_file(this)">
+              <td>{{ s.shared_file.filename }}</td>
+              <td>{{ s.shared_file.owner.username}}</td>
+              <td>{{ s.shared_file.groups}}</td>
+              <td>{{ s.shared_file.file_guid}}</td>
+              <td><a href=path{{s.shared_file.path}}>查看</a></td>
             </tr>
           {% endfor %}
           </table>
         </div>
-
-
-
       </div>
     </div>
 
@@ -272,7 +272,6 @@
             &times;
           </button>
           <h4 class="modal-title" id="myModalLabel">
-          
           </h4>
         </div>
         <div id ="delete_file_model_body" class="modal-body">
@@ -429,11 +428,10 @@
     }
     function share(){
       var share_to_input = $('#share_to_user_id').val();
-      // var co_editors = share_to_input.split('\n');
-      // console.log(users);
+      // alert(current_file_guid)
       var post_data = {
         'co_editors' : share_to_input,
-        'file': current_file_guid,
+        'file_guid': current_file_guid,
       };
       console.log(post_data);
 
@@ -443,11 +441,36 @@
         data:post_data,
         success:function(res){
           console.log('已发送');
-          alert(res);
+          if(res['correct_co_editors'].length !=0){
+            alert('已经分析给下列用户'+ res['correct_co_editors']);
+          }
+          if(res['wrong_input'].length != 0){
+            alert('未找到下列用户'+res['wrong_input']);
+          }
         },
         error:function(err){
           alert('网络连接失败,稍后重试',err);
         }
+      })
+    }
+
+    function show_shared_with_me(){
+      var post_data = {
+        'action': 'show_shared_with_me()'
+      }
+      console.log('show_shared_with_me')
+      $.ajax({
+        url: '/user/show_shared_with_me/',
+        type:'POST',
+        data:post_data,
+        success:function(res){
+          alert(res['correct_co_editors']);
+        },
+        error:function(err){
+          alert(err);
+        }
+
+
       })
     }
 

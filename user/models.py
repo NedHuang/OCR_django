@@ -51,10 +51,10 @@ class Object(models.Model):
 
 #operator:谁发起的共享, user_guid：分享给谁, permission
 class Share(models.Model):
-	file_guid = models.CharField(max_length=256,default='')
-	user_guid = models.CharField(max_length=256,default='') 
+	shared_file = models.ForeignKey(File, on_delete=models.CASCADE, default = None)
+	share_user_guid = models.CharField(max_length=1000,default='') 
 	permission = models.CharField(max_length=256,default='')
-	operator_guid = models.CharField(max_length=256,default='')
+	owner = models.ForeignKey(User, on_delete=models.CASCADE,default = None)
 
 
 # the information about the group

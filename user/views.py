@@ -1,5 +1,5 @@
 from django.template import loader
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import fields
@@ -7,8 +7,7 @@ from django.forms import widgets
 from django.core.validators import RegexValidator
 from django.shortcuts import render,redirect,HttpResponse
 from io import BytesIO
-from .models import User
-from .models import File
+from .models import User,File,Object,Share,Group,UserGroup
 from .forms import RegisterForm,LoginForm,ResetByUsernameForm
 import datetime
 import uuid
@@ -18,6 +17,7 @@ import PyPDF2
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json
 from django.db.models import Q
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -45,6 +45,7 @@ def login(request):
 			password = form.cleaned_data.get('password')
 			session_uuid = str(uuid.uuid1())
 			request.session['username'] = username
+			request.session['user_guid'] = User.objects.filter(username=username)[0].user_guid
 			request.session['login'] = True
 			request.session.set_expiry(60*60*24)  # sesson 1天后过期
 			
@@ -162,14 +163,19 @@ def ajax(request):
 @ensure_csrf_cookie
 @csrf_exempt
 def delete_file(request):
-
 	print(request.POST)
 	if request.method =='POST':
-		print('post')
 		if request.POST.get('file_guid') != None:
 			print(request.POST.get('file_guid'))
 			delete_file_guid = request.POST.get('file_guid')
+			delete_file_path = File.objects.filter(file_guid = delete_file_guid)[0].path
+			print('path:'+delete_file_path)
+			if os.path.exists(delete_file_path):  
+   	 			os.remove(delete_file_path)
+			# file表中删除
 			File.objects.filter(file_guid = delete_file_guid).delete()
+			# share表中删除（cascade)///
+
 			t = loader.get_template('file_management.html')
 			files = File.objects.all()
 			c ={'files':files}
@@ -182,33 +188,50 @@ def share_file(request):
 	#正确的用户名
 	correct_co_editors = []
 	#错误的用户名
-	wrong_co_editors = []
+	wrong_input = []
+	matched_co_editors = None
+	shared_file = None
 	if request.method == 'POST':
+		owner_guid = request.session.get('user_guid')
 		file_guid = request.POST.get('file_guid')
 		co_editors = request.POST.get('co_editors').split('\n')
-		print(co_editors)
+		if File.objects.filter(file_guid = file_guid).exists():
+			print('file exists')
+			shared_file = File.objects.filter(file_guid = request.POST.get('file_guid'))[0]
 
+		owner = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
+		
+		print('file_guid: ' + shared_file.file_guid)
+		print( 'co_editors: '+str(co_editors))
+		print('owner_guid: ' + str(owner_guid))
+		print('ownser_username: '+owner.username)
 
-
+		if not owner:
+			return HttpResponse('failed to share')
 		for i in co_editors: # i是输入的字段（用户名或者邮箱）
 			# 只会match到一个，除非A的用户名叫xxx@yyy.com,B的邮箱也是xxx@yyy.com, 在注册时检查一下？
-			matched_co_editors = User.objects.filter(Q(username=i) | Q(email=i))
-			for j in matched_co_editors:
-				correct_co_editors.append(j.username)
-				j.co_edit_files +=','+file_guid
-
-			# if not matched_co_editor:
-			# 	wrong_co_editors.append(i)
-			# else:
-			# 	correct_co_editors.append(matched_co_editor.username)
-			# 	matched_co_editor.update(co_edit_files=matched_co_editor.co_edit_files +','+file_guid)
-
-	print(correct_co_editors)
-	return HttpResponse('hahahahs');
-
-
-
-
+			if User.objects.filter(Q(username=i) | Q(email=i)).exists():
+				matched_co_editors = User.objects.filter(Q(username=i) | Q(email=i))[0]
+				# print('matched_co_editors: ' + matched_co_editors.username)
+			else:
+				matched_co_editors = None
+			if matched_co_editors:
+				correct_co_editors.append(matched_co_editors.username)
+				share = Share()
+				share.owner = owner
+				share.share_user_guid = matched_co_editors.user_guid
+				share.shared_file = shared_file
+				share.permission = 'share'
+				share.save()
+				print('matched_co_editors: ' + matched_co_editors.username)
+				print(shared_file.filename)
+				print(owner.username)
+			else:
+				wrong_input.append(i)
+	response_data = {}
+	response_data['correct_co_editors']= correct_co_editors
+	response_data['wrong_input']=wrong_input
+	return JsonResponse(response_data)
 
 
 
@@ -260,8 +283,12 @@ def get_total_page(file_path):
 
 def file_management(request):
 	t = loader.get_template('file_management.html')
-	files = File.objects.all()
-	c ={'files':files}
+	username = request.session.get('username')
+	user = User.objects.filter(username=username)[0]
+	files = File.objects.filter(owner = user)
+	share = Share.objects.filter(share_user_guid = request.session.get('user_guid'))
+	c ={'files':files,'shares':share,}
+	print(files)
 	return HttpResponse(t.render(c,request))
 
 
