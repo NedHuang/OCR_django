@@ -137,68 +137,26 @@
               </button>
             </div>
             <ul class="nav navbar-nav" >
-
-              
               <li>
-                <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
-                  <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
-                </a>
-              </li>
-              <li>
-                <a id='table_a' onclick = 'change_category_to_table();edit_mode();'>
-                  <span class="icon fa fa-pen "></span><span id="table_button" class="title" onclick = "change_button('table_button')"><p id ="table_p">标注表格</p></span>
-                </a>
-              </li>
-              <li>
-                <a id='formula_a' onclick= 'change_category_to_formula();edit_mode();'>
-                  <span class="icon fa fa-pen "></span><span id="formula_button" class="title" onclick = "change_button('formula_button')"><p id="formula_p">标注公式</p></span>
-                </a>
-              </li>
-              <li>
-                <a id='erase_a' onclick = 'erase_mode()'>
-                  <span class="icon fa fa-eraser "></span><span id="erase_button" class="title" onclick = "change_button('erase_button')"><p id ="erase_p">删除对象</p></span>
-                </a>
-              </li>
-              <li >
-                <a onclick = 'undo()'>
-                  <span class="icon fa fa-undo"></span><span class="title">撤销操作</span>
-                </a>
-              </li>
-              <li>
-                <a onclick = 'redo()'>
-                  <span class="icon fa fa-redo"></span><span class="title">恢复操作</span>
+                <a id='image_a'>
+                  <span class="icon fa fa-folder "></span><span id="image_button" class="title"  ><p id ="to_my_files">我的文档</p></span>
                 </a>
               </li>
 
               <li>
-                <a onclick = 'save_change_to_server()'>
-                  <span class="icon fa fa-upload"></span><span class="title">上传结果</span>
+                <a id='image_a'>
+                  <span class="icon fa fa-folder "></span><span id="image_button" class="title"  ><p id ="to_shared_with_me">与我共享</p></span>
                 </a>
               </li>
-              <li>
-                <a onclick = ''>
-                  <span class="icon fa fa-download"></span><span class="title">导出结果</span>
-                </a>
-              </li>
-              <li>
-                <a onclick = 'get_data()'>
-                  <span class="icon fa fa-sync"></span><span class="title">重新识别</span>
-                </a>
-              </li>
-              <li>
-                <a onclick = 'reset()'>
-                  <span class="icon fa fa-trash"></span><span class="title">放弃更改</span>
-                </a>
-              </li>
-
             </ul>
           </div>
           <!-- /.navbar-collapse -->
         </nav>
       </div>
       <!-- Main Content -->
-      <div class="container-fluid" id = 'edit_container'>
-        <div class="side-body" id = 'file_management_container'>
+      <div class="container-fluid" id = 'file_management_main_container'>
+        <!-- 我的文件 -->
+        <div class="side-body" id = 'file_management_my_file'>
           <table class="table table-striped">
             <thead>
               <tr>
@@ -220,6 +178,31 @@
           {% endfor %}
           </table>
         </div>
+
+        <!--与我共享 -->
+        <div class="side-body" id = 'file_management_my_file'>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">文件名</th>
+                <th scope="col">上传者</th>
+                <th scope="col">分组</th>
+              </tr>
+            </thead>
+
+          {% for file in files %}
+            <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)">
+              <td>{{ file.filename }}</td>
+              <td>{{ file.owner.username}}</td>
+              <td>{{ file.groups}}</td>
+              <td>{{ file.co_editor}}</td>
+            </tr>
+          {% endfor %}
+          </table>
+        </div>
+
+
+
       </div>
     </div>
 
@@ -307,22 +290,50 @@
     </div>
   </div>
 
+
+    <!--  共享给其他人的model -->
+  <div class="modal fade" id="share_file_model" tabindex="-1" role="dialog" aria-labelledby="share_files" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+            
+          </h4>
+        </div>
+        <div id ="delete_file_model_body" class="modal-body">
+          <textarea type="text" id='share_to_user_id' name='share_to_user' placeholder='请输入用户名或者邮箱，以回车分隔'></textarea>
+        </div>
+        <div class="modal-footer">
+          <button onclick="share()" type="button" class="btn btn-default" data-dismiss="modal">
+            确定
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <!--   对文件的右键菜单 -->
   <div id="edit_menu" class="menus" style="display:none">
     <table border="1"  bgcolor="#cccccc" style="border:thin;z-index: 1;width: 200px;background-color: #AAAAAA; opacity: 1;" cellspacing="0" >
       <tr>
         <td  style="cursor:default;border:outset 1;" align="center" >
-        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
         </td>
       </tr>
       <tr>
-        <td style=" cursor:default;border:outset 1;" align="center" onclick="">
-        <button style ="border-radius:0.5rem;">分组</button>
+        <td style=" cursor:default;border:outset 1;" align="center" >
+          <button style ="border-radius:0.5rem;">分组</button>
         </td>
       </tr>
       <tr>
-        <td style="cursor:default;border:outset 1;" align="center" onclick="">
-        <button style ="border-radius:0.5rem;">共享</button>
+        <td style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_model" >共享</button>
         </td>
       </tr>
     </table>
@@ -361,26 +372,17 @@
     var current_file_guid = '';
     var current_filename='';
     function edit(e){
-      var edit_container = $('#edit_container');   
+      var file_management_main_container = $('#file_management_main_container');   
       var edit_menu = $('#edit_menu');
       var left_edge = 0;
       var top_edge = 0;
-      // var rightedge = edit_container.clientWidth-edit_menu.clientX;
-      // var bottomedge = edit_container.clientHeight-edit_menu.clientY;
-      // console.log(edit_container.width());
-      // console.log(edit_container.height());
-      // console.log(e.clientX);
-      // console.log(e.clientY);
-      // console.log(edit_menu.width());
-      // console.log(edit_menu.height());
-      // pop at right
-      if(edit_container.width() - e.clientX > edit_menu.width()){
+      if(file_management_main_container.width() - e.clientX > edit_menu.width()){
         left_edge = e.clientX +'px'; 
       }else{
         left_edge = e.clientX - edit_menu.width() +'px';
       }
       // pop below where you clicked
-      if(edit_container.height - e.clientY > edit_menu.height()){
+      if(file_management_main_container.height - e.clientY > edit_menu.height()){
         top_edge = e.clientY + 'px';
       }
       else{
@@ -417,15 +419,36 @@
         // processData: false,  // tell jquery not to process the data
         // contentType: false, // tell jquery not to set contentType
         success:function(res){
-          alert(res)
+          alert(String(res));
+          location.reload();
         },
         error:function(err){
-          $('#loading').hide().css('display','none');
            alert('网络连接失败,稍后重试',err);
         }
       })
-      // url ='/user/delete_file/';
-      // $.post(url, {'file_guid':current_file_guid})
+    }
+    function share(){
+      var share_to_input = $('#share_to_user_id').val();
+      // var co_editors = share_to_input.split('\n');
+      // console.log(users);
+      var post_data = {
+        'co_editors' : share_to_input,
+        'file': current_file_guid,
+      };
+      console.log(post_data);
+
+      $.ajax({
+        url:'/user/share_file/',
+        type:'POST',
+        data:post_data,
+        success:function(res){
+          console.log('已发送');
+          alert(res);
+        },
+        error:function(err){
+          alert('网络连接失败,稍后重试',err);
+        }
+      })
     }
 
 

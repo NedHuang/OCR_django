@@ -17,6 +17,7 @@ import os
 import PyPDF2
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json
+from django.db.models import Q
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -156,27 +157,12 @@ def ajax(request):
 			return HttpResponse(request.POST.get('data'))
 		# if request.POST.get('action') =='delete_file':
 		# 	return delete_file(request)
-# @ensure_csrf_cookie
-# @csrf_exempt
-# def delete_file(request):
-# 	t = loader.get_template('file_management.html')
-# 	files = File.objects.all()
-# 	c ={'files':files}
-# 	if request.POST.get('file_guid') != None:
-# 		delete_file_guid = request.POST.get('file_guid')
-# 		print(delete_file_guid)
-# 		File.objects.filter(file_guid = delete_file_guid).delete()
-# 		t = loader.get_template('file_management.html')
-# 		files = File.objects.all()
-# 		c ={'files':files}
-# 	return HttpResponse(t.render(c,request))
-# @require_http_methods(["POST"])
+
+
 @ensure_csrf_cookie
 @csrf_exempt
 def delete_file(request):
-	# t = loader.get_template('file_management.html')
-	# files = File.objects.all()
-	# c ={'files':files}
+
 	print(request.POST)
 	if request.method =='POST':
 		print('post')
@@ -188,6 +174,47 @@ def delete_file(request):
 			files = File.objects.all()
 			c ={'files':files}
 	return HttpResponse(c)
+
+@ensure_csrf_cookie
+@csrf_exempt
+def share_file(request):
+	print(request.POST)
+	#正确的用户名
+	correct_co_editors = []
+	#错误的用户名
+	wrong_co_editors = []
+	if request.method == 'POST':
+		file_guid = request.POST.get('file_guid')
+		co_editors = request.POST.get('co_editors').split('\n')
+		print(co_editors)
+
+
+
+		for i in co_editors: # i是输入的字段（用户名或者邮箱）
+			# 只会match到一个，除非A的用户名叫xxx@yyy.com,B的邮箱也是xxx@yyy.com, 在注册时检查一下？
+			matched_co_editors = User.objects.filter(Q(username=i) | Q(email=i))
+			for j in matched_co_editors:
+				correct_co_editors.append(j.username)
+				j.co_edit_files +=','+file_guid
+
+			# if not matched_co_editor:
+			# 	wrong_co_editors.append(i)
+			# else:
+			# 	correct_co_editors.append(matched_co_editor.username)
+			# 	matched_co_editor.update(co_edit_files=matched_co_editor.co_edit_files +','+file_guid)
+
+	print(correct_co_editors)
+	return HttpResponse('hahahahs');
+
+
+
+
+
+
+
+
+
+
 
 
 

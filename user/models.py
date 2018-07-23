@@ -40,16 +40,46 @@ class File(models.Model):
 		+self.file_guid+'\tpath: '+ self.path+'\tdate_upload: '+str(self.date_uploaded)\
 		+'\tlast_modified' + str(self.last_modified)
 
-class object(models.Model):
-	file = models.ForeignKey(File, on_delete=models.CASCADE)
-	categoty = models.CharField(max_length=256,default='')
-	content = models.CharField(max_length=256,default='')
+class Object(models.Model):
+	file_id = models.ForeignKey(File, on_delete=models.CASCADE)
+	category = models.CharField(max_length=256,default='') #figure
+	coordinate = models.CharField(max_length=256,default='') # "shang,xia,zuo,you"
+	status = models.CharField(max_length=256,default='')
+	# editor = models.CharField(max_length=256,default='')
+	editor = models.ForeignKey(User, on_delete=models.CASCADE,default = None)
+
+
+#operator:谁发起的共享, user_guid：分享给谁, permission
+class Share(models.Model):
+	file_guid = models.CharField(max_length=256,default='')
+	user_guid = models.CharField(max_length=256,default='') 
+	permission = models.CharField(max_length=256,default='')
+	operator_guid = models.CharField(max_length=256,default='')
+
+
+# the information about the group
+class Group(models.Model):
+	owner = models.ForeignKey(User, on_delete=models.CASCADE)
+	group_id = models.CharField(max_length=256,default='')
+	date_registration = models.DateTimeField('date account created', default=timezone.now)
 
 
 
 
 
 
+# relationship between user and group 
+class UserGroup(models.Model):
+	user_guid = models.CharField(max_length=256,default='')
+	group_id = models.CharField(max_length=256,default='')
+
+
+
+#join groupuser and file_share
+# group 单独的表
+# 分享 -》单独的表
+#权限:
+#user_guid 是主键
 
 
 
