@@ -9,6 +9,7 @@ class User(models.Model):
 	cellphone = models.CharField(max_length=256)	#用户电话号码
 	email = models.CharField(max_length=256)		#用户的邮箱
 	account_type = models.CharField(max_length=256)	#账户类型
+	
 	groups = models.TextField(default ='')						#用户所属的组
 	co_edit_files = models.TextField(default='')				#用户可以编辑的文件（共享但不拥有）
 
@@ -70,8 +71,8 @@ class Group(models.Model):
 
 # relationship between user and group 
 class UserGroup(models.Model):
-	user_guid = models.CharField(max_length=256,default='')
-	group_id = models.CharField(max_length=256,default='')
+	user_guid = models.ForeignKey(User,on_delete=CASCADE,default=None)
+	group = models.ForeignKey(Group,default=None)
 
 
 

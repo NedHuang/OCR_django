@@ -198,13 +198,11 @@ def share_file(request):
 		if File.objects.filter(file_guid = file_guid).exists():
 			print('file exists')
 			shared_file = File.objects.filter(file_guid = request.POST.get('file_guid'))[0]
-
 		owner = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
-		
-		print('file_guid: ' + shared_file.file_guid)
-		print( 'co_editors: '+str(co_editors))
-		print('owner_guid: ' + str(owner_guid))
-		print('ownser_username: '+owner.username)
+		# print('file_guid: ' + shared_file.file_guid)
+		# print( 'co_editors: '+str(co_editors))
+		# print('owner_guid: ' + str(owner_guid))
+		# print('ownser_username: '+owner.username)
 
 		if not owner:
 			return HttpResponse('failed to share')
