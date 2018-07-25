@@ -45,28 +45,17 @@ def login(request):
 			password = form.cleaned_data.get('password')
 			session_uuid = str(uuid.uuid1())
 			request.session['username'] = username
-			request.session['user_guid'] = User.objects.filter(username=username)[0].user_guid
+			request.session['user_guid'] = str(User.objects.filter(username=username)[0].user_guid)
 			request.session['login'] = True
 			request.session.set_expiry(60*60*24)  # sesson 1天后过期
 			
 			return HttpResponseRedirect('/user/main/')
 		return HttpResponse(t.render(c,request))
 
-def anonymous(request):
-	user = User()
-	username_and_guid = str(uuid.uuid1())
-	user.username = username_and_guid
-	user.user_guid = username_and_guid
-	user.account_type = 'temp'
-	user.save()
-	request.session.flush()
-	request.session['login'] = False
-	request.session['username'] = username_and_guid
-	return HttpResponseRedirect('/user/main/')
-
 
 # 注册
 def register(request):
+	print('register')
 	if request.method =='GET':
 		request.session.flush()
 		t = loader.get_template('register.html')
@@ -83,10 +72,9 @@ def register(request):
 			user.password = form.cleaned_data.get('password_1')
 			user.cellphone = form.cleaned_data.get('cellphone')
 			user.email = form.cleaned_data.get('email')
-			user.user_guid = str(uuid.uuid1())
 			user.account_type = 'plastic'
 			user.save()
-
+			print(user.instr())
 			t = loader.get_template('login.html')
 			loginform = LoginForm()
 			c ={'message' :'注册成功，请重新登录','form':loginform}
@@ -185,9 +173,9 @@ def delete_file(request):
 @csrf_exempt
 def share_file(request):
 	print(request.POST)
-	#正确的用户名
+	#正确的输入
 	correct_co_editors = []
-	#错误的用户名
+	#错误的输入，提示用户输错了
 	wrong_input = []
 	matched_co_editors = None
 	shared_file = None
@@ -199,11 +187,6 @@ def share_file(request):
 			print('file exists')
 			shared_file = File.objects.filter(file_guid = request.POST.get('file_guid'))[0]
 		owner = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
-		# print('file_guid: ' + shared_file.file_guid)
-		# print( 'co_editors: '+str(co_editors))
-		# print('owner_guid: ' + str(owner_guid))
-		# print('ownser_username: '+owner.username)
-
 		if not owner:
 			return HttpResponse('failed to share')
 		for i in co_editors: # i是输入的字段（用户名或者邮箱）
