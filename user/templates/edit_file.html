@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>版面理解服务 - 数字出版技术国家重点实验室</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+  <!-- CSS Libs -->
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap.min.css' %}">
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'lib/css/font-awesome.min.css"> -->
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/fontawesome/css/all.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/animate.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap-switch.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/checkbox3.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/jquery.dataTables.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/dataTables.bootstrap.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/select2.min.css' %}">
+  <!-- CSS App -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/css/themes/flat-green.css' %}">
+  <!-- Animation CSS-->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/animate.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/main.css' %}">
+
+
+</head>
+
+<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;">
+
+
+<div id="loading" style = "width:0%; height: 0%; display: block"  >
+  <div id="loading-center" style = "width:100%; height: 100%; " >
+    <div style ="padding-top: 20%; width:100%">
+   <!--    <p id ='loading_flag'style ="width: 20rem; margin-right: auto; margin-left: auto;position: middle; font-size: 5rem" hidden>正在识别。。。</p> -->
+    </div>
+    <div id="loading-center-absolute" style = "width:100%; height: 100%">
+      <div class="object" id="object_one"></div>
+      <div class="object" id="object_two"></div>
+      <div class="object" id="object_three"></div>
+      <div class="object" id="object_four"></div>
+      <div class="object" id="object_five"></div>
+      <div class="object" id="object_six"></div>
+      <div class="object" id="object_seven"></div>
+      <div class="object" id="object_eight"></div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div class="app-container">
+    <div class="row content-container">
+      <nav class="navbar navbar-default navbar-fixed-top navbar-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-expand-toggle">
+              <i class="fa fa-bars icon"></i>
+            </button>
+            <ol class="breadcrumb navbar-breadcrumb">
+              <li class="active"><i class="fa fa-globe"></i> 数字出版技术国家重点实验室</li>
+            </ol>
+            <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+              <i class="fa fa-th icon"></i>
+            </button>
+          </div>
+          <ul class="nav navbar-nav navbar-right">
+            <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+              <i class="fa fa-times icon"></i>
+            </button>
+            <li>
+              <a href="#">首页</a>
+            </li>
+            <li>
+                <a href="#">文档整理</a>
+            </li>
+            <li class="dropdown danger">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">其他服务</a>
+              <ul class="dropdown-menu danger  animated fadeInDown">
+                <li>
+                  <ul class="list-group notifications">
+                    <a href="#">
+                      <li class="list-group-item" onclick ="window.location.href = '{% static 'knowledge_service/page.html'">
+                         <i class="fa fa-mortar-board"></i> 知识服务
+                      </li>
+                    </a>
+                    <a href="#">
+                      <li class="list-group-item">
+                         <i class="fa fa-pencil-square-o"></i> 机器写作
+                      </li>
+                    </a>
+                    <a href="http://www.founder.com/" target="blank">
+                      <li class="list-group-item message">
+                        方正集团
+                      </li>
+                    </a>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="dropdown profile">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
+              <ul class="dropdown-menu animated fadeInDown">
+                <li class="profile-img">
+                  <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                </li>
+                <li>
+                  <div class="profile-info">
+                    <h4 class="username">Emily Hart</h4>
+                    <p>emily_hart@email.com</p>
+                    <div class="btn-group margin-bottom-2x" role="group">
+                      <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
+                      <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
+                      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="side-menu sidebar-inverse">
+        <nav class="navbar navbar-default" role="navigation">
+          <div class="side-menu-container">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">
+
+                <div class="icon fa fa-newspaper-o"></div>
+                <div class="title">版面理解</div>
+              </a>
+              <button type="button" class="navbar-expand-toggle pull-right visible-xs">
+                <i class="fa fa-times icon"></i>
+              </button>
+            </div>
+            <ul class="nav navbar-nav" >
+
+              
+              <li>
+                <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
+                </a>
+              </li>
+              <li>
+                <a id='table_a' onclick = 'change_category_to_table();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="table_button" class="title" onclick = "change_button('table_button')"><p id ="table_p">标注表格</p></span>
+                </a>
+              </li>
+              <li>
+                <a id='formula_a' onclick= 'change_category_to_formula();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="formula_button" class="title" onclick = "change_button('formula_button')"><p id="formula_p">标注公式</p></span>
+                </a>
+              </li>
+              <li>
+                <a id='erase_a' onclick = 'erase_mode()'>
+                  <span class="icon fa fa-eraser "></span><span id="erase_button" class="title" onclick = "change_button('erase_button')"><p id ="erase_p">删除对象</p></span>
+                </a>
+              </li>
+              <li >
+                <a onclick = 'undo()'>
+                  <span class="icon fa fa-undo"></span><span class="title">撤销操作</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = 'redo()'>
+                  <span class="icon fa fa-redo"></span><span class="title">恢复操作</span>
+                </a>
+              </li>
+
+              <li>
+                <a onclick = 'save_change_to_server()'>
+                  <span class="icon fa fa-upload"></span><span class="title">上传结果</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = ''>
+                  <span class="icon fa fa-download"></span><span class="title">导出结果</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = 'get_data()'>
+                  <span class="icon fa fa-sync"></span><span class="title">重新识别</span>
+                </a>
+              </li>
+              <li>
+                <a onclick = 'hahaha()'>
+                  <span class="icon fa fa-trash"></span><span class="title">hahaah</span>
+                </a>
+              </li>
+
+
+            </ul>
+          </div>
+          <!-- /.navbar-collapse -->
+        </nav>
+      </div>
+      <!-- Main Content -->
+      <div class="container-fluid">
+        <div class="side-body" >
+          <div id = "editor-menu-container" class="row " style="background-color: rgb(232, 236, 230);margin: 0px;padding: 0px;">
+              <div class="row-fluid" >
+                <div class="  col-sm-2 col-md-3  col-lg-3 span3" >
+
+<!-- 
+                    <form method="post" action="/user/upload/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                       <label> 上传文件 </label>
+                       <input type="file" name="myfile" />
+                       <br/>
+                       <input type="submit" value="upload"/>
+                    </form> -->
+                    {{message}}
+
+                  <form id='upload' enctype="multipart/form-data" method ='post'>
+                    <input type="file" name="file_upload" id="file_upload">
+                    <input type="button" value="上传" onclick="FileUpload()">
+                  </form>
+
+                </div>
+                <div class=" col-sm-7 col-md-7 col-lg-6 span5 ">
+                  <button type="button" class="btn btn-default" onclick='showFirstPage()'>首页</button>
+                  <button type="button" class="btn btn-default" onclick='showPrevPage()'>上一页</button>
+                  <button type="button" class="btn btn-default" onclick='showNextPage()'>下一页</button>
+                  <button type="button" class="btn btn-default" onclick='showLastPage()'>末页</button>
+
+
+                  <button type="button" class="btn btn-default" >页码</button>
+                  <label class="form-inline">
+                    <input type="number" id="myNumber" class="form-control" value="1" min="1" style="width:70px">
+                    <!-- <input type="number" class="form-control"  style="width: 70px" /> -->
+                  </label>
+                  <button type="button" class="btn btn-default" onclick="select_page()">跳转</button>
+                   <label class="form-inline"><p id = "total_page">总页数: 0</p></label>
+                </div>
+
+                <div class="  col-sm-3 col-md-2 col-lg-3 span4">
+                  <button type="button" class="btn btn-default"> <i class="fa fa-file-text-o"></i> </button>
+                  <span id="filename" style="vertical-align:middle" >未上传文件</span>
+                </div>
+              </div>
+
+          </div>
+          <div id = 'editor-container' class="container editor" style="background-color: #eeeeee; border :1px solid" >
+            <canvas id='editor_canvas' style = "position: absolute;  z-index: 1;" width = 0; height = 0></canvas>
+            <!-- <canvas id='dummy_canvas' style = "position: absolute; margin-top: 50px; z-index: 2" ></canvas> -->
+            <img id='input_img' style = "position: absolute;  z-index: 0">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+<!-- 注销 -->
+  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          
+          </h4>
+        </div>
+        <div class="modal-body">
+          确认注销账户？
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            确认注销
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 账户管理 -->
+  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          
+          </h4>
+        </div>
+        <div class="modal-body">
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            确认注销
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <footer class="app-footer">
+      <div class="wrapper">
+        <span class="pull-right">2.1 <a href="#"><i class="fa fa-long-arrow-up"></i></a></span> © 2018 Copyright. </a>
+      </div>
+    </footer>
+    
+      <!-- Javascript Libs -->
+      <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/bootstrap.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/Chart.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/bootstrap-switch.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/jquery.matchHeight-min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/jquery.dataTables.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/dataTables.bootstrap.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/select2.full.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/ace/ace.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/ace/mode-html.js' %}"></script>
+      <script type="text/javascript" src="{% static 'lib/js/ace/theme-github.js' %}"></script>
+      <!-- Javascript -->
+      <script type="text/javascript" src="{% static 'javascript/app.js' %}"></script>
+      <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
+      <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script>
+
+
+
+  <script type="text/javascript">
+    /****************************************
+    * 自带的function
+    *
+    *
+    *****************************************/
+    window.onload = resize_editor_region();
+    function resize_editor_region(){
+      var w = document.getElementById('editor-menu-container').clientWidth;
+      $('#editor-container').css('width',parseInt(w)-10);
+      }
+
+      $(window).resize(function () {          //当浏览器大小变化时
+       // alert($(window).height());          //浏览器时下窗口可视区域高度
+       // alert($(document).height());        //浏览器时下窗口文档的高度
+       // alert($(document.body).height());   //浏览器时下窗口文档body的高度
+       // alert($(document.body).outerHeight(true)); //浏览器时下窗口文档body的总高度 包括border padding margin
+       resize_editor_region();
+    });
+  
+    function change_button(b){
+      var buttons = ['image_button','table_button','formula_button','erase_button'];
+      var ps =['image_p','table_p','formula_p','erase_p'];
+      var as =['image_a','table_a','formula_a','erase_a'];
+      var j = -1;
+      
+      for(var i = 0; i < 4; i++){
+        if(b == buttons[i]){
+          j = i;
+           $('#'+buttons[i]).css('background-color','#e0e0e0');
+          $('#'+as[j]).css('background-color','#e0e0e0');    
+          if(j==0){
+            $('#'+ps[i]).css('color','#3232CD');
+          }
+          if(j==1){
+            $('#'+ps[i]).css('color','#32CD32');
+          }
+          if(j==2){
+            $('#'+ps[i]).css('color','#F5270B');
+          }          
+          if(j==3){
+            $('#'+ps[i]).css('color','#16A085');
+          }
+          console.log(b)
+        }
+      }
+      for(var i = 0; i < 4; i++){
+        if(j != i){
+          $('#'+buttons[i]).css('background-color','');
+          $('#'+as[i]).css('background-color','');
+          $('#'+ps[i]).css('color','');
+          console.log(b)
+        }
+      }
+    }
+
+    function FileUpload() {
+      var file = $('#file_upload')[0].files[0]
+      alert(file)
+      var form_data = new FormData()
+      form_data.append('file', file)
+        $.ajax({
+            url:'/user/upload/',
+            type:'POST',
+            data: form_data,
+            processData: false,  // tell jquery not to process the data
+            contentType: false, // tell jquery not to set contentType
+            success: function(res) {
+                alert(res['message']);
+                console.log('ojbk');
+            },
+            error: function(err){
+              alert(err['message']);
+            }
+        });
+      }
+
+function hahaha(){
+  var postdata = {
+  'data':'I am screwed',
+  'action':'test',
+   'csrfmiddlewaretoken':$('[name="csrfmiddlewaretoken"]').val(),
+};
+  $.ajax({
+    url:'/user/ajax/',
+    type:'POST',
+    data: postdata,
+    // datatype: 'json',
+    success:function(res){
+      alert(res)
+    },
+    error:function(err){
+       alert('网络连接失败,稍后重试',err);
+    }
+  })
+}
+
+
+/****************************************
+* draw
+*
+*
+*****************************************/
+
+/*****************************************************************************
+created by Mingzhe Huang @ Founder IT Group, 06/2018
+
+declare variables
+1.  returned, added, deleted分别是 含有 服务器传回来的识别框，用户添加的识别框，服务器传回但是被删掉的识别框（false positive的例子) 的数组
+2.  _backups后缀意为备份，想用户提供一键清除所有改动服务
+3.  每一个识别框长以json形式存储，包含 category 和 vertexes属性，前者可以为table,formula, image, 后者为一个包含四个点坐标(x,y)[左,上，右,下]
+4.  box_category 是全局变量，修改此变量以改变生成的识别框的种类
+5.  action_array:记录用户的操作的数组，每一项是一个json, 下称为action, index 为此array的某元素的位置。未有操作时， index初始化为-1；
+6.  action为json格式，包含act和obj 两个属性，act为string,记录其操作类型， obj为操作对象(识别框),例如
+    action = {'act': 'add_new_box', 'obj':{'category': 'table','coordinates':[左,上,右,下]}}
+7.  point_pair 含有两个点的坐标，记录鼠标按下与松开的位置（对角线的两个顶点生成矩形）
+8.  对于任何操作，抛弃当前index以及之后的action, 把本操作加入action_array(undo 和 redo的规则)
+9.  涉及到 delete的操作，清空canvas，调用 draw_all() 根据已经更新的数组重新绘制
+******************************************************************************/
+
+/******************************************************************************
+set some dummy variables
+******************************************************************************/
+
+
+// var returned_backups = [{'category': 'image','coordinates':[10,10,100,100]}, {'category': 'table','coordinates':[50,50,140,140]}];
+// var returned = [{'category': 'image','coordinates':[10,10,100,100]}, {'category': 'table','coordinates':[50,50,140,140]}];
+
+/******************************************************************************
+declare variables
+声明变量
+******************************************************************************/
+
+
+var canvas = document.getElementById('editor_canvas');
+var context = canvas.getContext('2d');
+var returned_backups = [];
+var added_backups = [];
+var deleted_backups = [];
+var returned = [];
+var added = [];
+var deleted = [];
+
+var action_array = [];
+var box_category = 'table';
+var index = - 1;
+var point_pair = [];
+var page;
+var total_page;
+
+
+
+
+
+
+/*********************************************************
+functions
+各种方法
+**********************************************************/
+
+//显示图片
+function showImg(url){
+  console.log('show img: '+ url );
+  $('#input_img').attr('src',url);
+}
+
+//将保存在 localstorage 中的识别结果保存进 变量
+function load_boxes(){
+  returned = localStorage.getItem('returned_boxes');
+  added = localStorage.getItem('added_boxes');
+  deleted = localStorage.getItem('deleted_boxes');
+
+  returned_backups = localStorage.getItem('returned_boxes');
+  added_backups = localStorage.getItem('added_boxes');
+  deleted_backups = localStorage.getItem('deleted_boxes');
+}
+
+
+/*********************************************************
+监听事件.
+**********************************************************/
+// mousedown behavior while in edit mode，编辑模式下的mousedown事件
+edit_mousedown = function(e) {
+  //保存鼠标点击的坐标，并且画辅助线（定位十字）
+  // a point is a array with two element, x-coordinate and y-coordinate,
+  // add the point where user start to draw the box to point pair
+  draw_auxiliary_line(e.offsetX,e.offsetY);
+  var point_start = [e.offsetX,e.offsetY];
+  point_pair.push(point_start);
+}
+
+edit_mouseup = function(e){
+  // make add the point where user release the left button of mouse to point pair
+  var point_end = [e.offsetX,e.offsetY];
+  point_pair.push(point_end);
+  // the four coordinates for drawing a bounding box
+  var upper_left = new Array();
+  var upper_right = new Array();
+  var lower_left = new Array();
+  var lower_right = new Array();
+
+  var left = Math.min(point_pair[0][0],point_pair[1][0]);
+  var right = Math.max(point_pair[0][0],point_pair[1][0]);
+  var top = Math.min(point_pair[0][1],point_pair[1][1]);
+  var bot = Math.max(point_pair[0][1],point_pair[1][1]);
+  var coor = [left, top, right, bot]
+  console.log(coor);
+
+  var new_box = {'category':box_category,'coordinates':coor};
+  var new_action ={'act':'add_new_box', 'obj':new_box};
+
+  added.push(new_box);
+  // check if we need to abandon the modification(the rest of the action_array)
+  if(index == action_array.length - 1){
+    draw(new_box);
+    action_array.push(new_action);
+    index = index + 1;
+  }
+  else{
+    // replace everything in the action_array after the index by this new_action
+    draw(new_box);
+    action_array.splice(index + 1,action_array.length - index , new_action);
+    // action_array.push(new_action);
+    // no need to update index, because splice replaces the everything starts from the index
+    index = index + 1;
+    console.log('abandon');
+
+  }
+  point_pair = [];
+  draw_all();
+  // console.log('added length: ' + added.length + ', returned length: ' + returned.length + ', deleted.length: ' + deleted.length);
+}
+
+//鼠标按下显示定位十字,向上下左右各画15像素
+function draw_auxiliary_line(x,y){
+  console.log('draw_auxiliary_line');
+  context.strokeStyle = '#000000';
+  context.beginPath();
+  context.moveTo(x,y);
+  context.lineTo(x+15,y);
+  context.stroke();
+  context.moveTo(x,y);
+  context.lineTo(x,y+15);
+  context.stroke();
+  context.moveTo(x,y);
+  context.lineTo(x-15,y);
+  context.stroke();
+  context.moveTo(x,y);
+  context.lineTo(x,y-15);
+  context.stroke();
+  context.closePath();
+}
+
+
+/*********************************************************
+添加/删除 box
+**********************************************************/
+// this function generates an array of points and for each points, it calls delete_box()
+//删除模式的事件，点击记录位置，删除box,鼠标抬起则重新绘制
+erase_mousedown = function(e){
+  eraser_path = [];
+  x_start = e.offsetX;
+  y_start = e.offsetY;
+  console.log('click at: '+ x_start + ',' + y_start);
+  delete_box(x_start,y_start);
+
+}
+// 哈密顿距离 大于 20像素，则点的坐标array(不用了)
+erase_onmousemove = function (e) {}
+
+erase_mouseup = function () {
+  console.log('erase_mouseup');
+  //delete_box(eraser_path);
+  draw_all();
+  canvas.onmousemove = null;
+}
+
+// call calculate_distance for each box and it returns true if the distance <= 10 pixel。
+// if the box is in added array, just delete, otherwise, delete and append it into deleted array
+// 遍历 returned以及added中的box, 计算x,y是否在矩形中，是则删除，并且记录操作
+function delete_box(x,y){
+  for(var j =0; j < added.length;j++){
+    var left = added[j].coordinates[0];
+    var top = added[j].coordinates[1];
+    var right = added[j].coordinates[2];
+    var bot = added[j].coordinates[3];
+    if(calculate_diatance(x,y,left,top,right,bot)){
+      var deleted_box = added[j];
+      added.splice(j,1);
+      var new_action = {'act':'delete_added_box', 'obj':deleted_box};
+      // update the index when delete a box
+      j = j - 1;
+      if(index == action_array.length - 1){
+        action_array.push(new_action);
+        index = index + 1;
+      }
+      else{
+        action_array.splice(index, action_array.length - index);
+        action_array.push(new_action);
+      }
+    }
+  }
+
+  for(var j =0; j < returned.length;j++){
+    var left = returned[j].coordinates[0];
+    var top = returned[j].coordinates[1];
+    var right = returned[j].coordinates[2];
+    var bot = returned[j].coordinates[3];
+    if(calculate_diatance(x,y,left,top,right,bot)){
+      var deleted_box = returned[j];
+      returned.splice(j,1);
+      // record this false positive instance by pushing the box into 'deleted'array
+      deleted.push(deleted_box);
+      var new_action = {'act':'delete_returned_box', 'obj':deleted_box};
+      // update the index
+      j = j - 1;
+      if(index == action_array.length - 1){
+        action_array.push(new_action);
+        index = index + 1;
+      }
+      else{
+        action_array.splice(index, action_array.length - index);
+        action_array.push(new_action);
+      }
+    }
+  }
+}
+
+// if the sum of distance from the point to a pair of edges is smaller than the height/width + 20 pixel, return true;
+// 计算。。点到到两边的坐标查一正一副，则在此范围内
+function calculate_diatance(x,y,x_1,y_1,x_2,y_2){
+  if ((x-x_1)*(x-x_2) <= 0  && (y-y_1)*(y-y_2) <= 0){
+    console.log("delete box: " + parseInt(x_1) + ", " + parseInt(y_1) + ", " + parseInt(x_2) +', '+parseInt(y_2));
+    return true;
+  }
+  return false;
+}
+
+
+/*********************************************************
+画图
+**********************************************************/
+
+function draw(input_box){
+  //根据 box的category属性选择不同的颜色
+  var coordinates = input_box['coordinates'];
+      context.strokeStyle = '#3232CD';
+  if(input_box.category == 'image'){
+    console.log('draw image');
+    context.lineWidth = 2;
+    context.strokeStyle = '#3232CD';
+  }
+
+  if(input_box.category == 'formula'){
+    context.lineWidth = 2;
+    context.strokeStyle = '#F5270B';
+  }
+  if(input_box.category == 'table'){
+    context.lineWidth = 2;
+    context.strokeStyle = '#32CD32';
+  }
+  // draw the box
+  context.beginPath();
+  //左，上，右，下
+  context.moveTo(coordinates[0],coordinates[1]);//左上
+  context.lineTo(coordinates[2],coordinates[1]); //右上
+  context.stroke();
+  context.moveTo(coordinates[2],coordinates[1]);//右上
+  context.lineTo(coordinates[2],coordinates[3]); //右下
+  context.stroke();
+  context.moveTo(coordinates[2],coordinates[3]);//右下
+  context.lineTo(coordinates[0],coordinates[3]);//左下
+  context.stroke();
+  context.moveTo(coordinates[0],coordinates[3]);//左下
+  context.lineTo(coordinates[0],coordinates[1]);//左上
+  context.stroke();
+
+  //console.log('draw rectangle: ' + input_box);
+  context.closePath();
+}
+
+//绘制所有的识别结果(added 和 returned中的 box对象)
+function draw_all(){
+  console.log('re-draw ' + added.length +'items in added and ' + returned.length + ' items in returned, in index ' + index);
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  for (var i = 0; i < added.length; i++) {
+    //console.log('added.length '+added.length);
+    draw(added[i]);
+  }
+  for (var i = 0; i < returned.length; i++) {
+    draw(returned[i]);
+  }
+}
+
+// 清除画布
+function reset_canvas(){
+  context.clearRect(0, 0, canvas.width, canvas.height);
+}
+/*********************************************************
+操作+实现逻辑
+**********************************************************/
+// enter the edit mode and change the eventlistner
+//进入编辑（添加标注)模式，改变画布的事件监听
+function edit_mode(){
+  console.log('enter edit_mode');
+  canvas = document.getElementById('editor_canvas');
+  context = canvas.getContext('2d');
+  canvas.removeEventListener('mousedown',erase_mousedown);
+  canvas.removeEventListener('onmousemove', erase_onmousemove);
+  canvas.removeEventListener('mouseup',erase_mouseup);
+  canvas.addEventListener('mousedown', edit_mousedown);
+  canvas.addEventListener('mouseup',edit_mouseup);
+}
+
+
+// change the eventlistener
+//进入删除模式，改变画布的事件监听
+function erase_mode(){
+  var canvas = document.getElementById('editor_canvas');
+  var context = canvas.getContext('2d');
+  canvas.removeEventListener('mousedown', edit_mousedown);
+  canvas.removeEventListener('mouseup',edit_mouseup);
+  context.lineWidth = 2;
+  context.strokeStyle = '#000000';
+  canvas.addEventListener('mousedown',erase_mousedown);
+  canvas.addEventListener('onmousemove', erase_onmousemove);
+  canvas.addEventListener('mouseup',erase_mouseup);
+}
+
+
+// 撤销操作。根据移动action_array中的指针。并且执行相反的操作（不记录在action_array中，但是修改画布，更新 added, returned,和 deleted中的对象）
+// 其实用两个stack来做就好了: 3 这边一点也不elegant
+function undo(){
+  //console.log('before undo, index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
+  if(index == -1){
+    // nothing can be undone, disable the button
+    alert('nothing can be undone');
+  }
+  else{
+    var last_action = action_array[index];
+    console.log(last_action.act);
+    index = index - 1;
+    if(last_action.act == 'add_new_box'){
+      added.splice(added.length-1,1);
+      console.log('2');
+      draw_all();
+      //console.log('undo adding box, after undo, index is: ' + index +', action length is: ' + action_array.length + ', added length is ' + added.length);
+    }
+    if(last_action.act == 'delete_added_box'){
+      // alert('undo delete_added_box');
+      added.push(last_action.obj);
+      console.log('3');
+      draw_all();
+      //console.log('undo deleting added box, after undo, index is: ' + index +', action length is: ' + action_array.length + ', added length is ' + added.length);
+    }
+    if(last_action.act == 'delete_returned_box'){
+      returned.push(last_action.obj);
+      deleted.pop();
+      console.log('4');
+      // returned.push(deleted.pop());
+      draw_all();
+    }
+  }
+}
+
+// 同上。更新指针位置，并且做新的操作。
+function redo(){
+  console.log('before redo index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
+  if(index >= action_array.length-1){
+    alert('nothing can be redone');
+  }else{
+    index = index + 1;
+    var action_to_be_revoked = action_array[index];
+    if(action_to_be_revoked.act == 'add_new_box'){
+      added.push(action_to_be_revoked.obj);
+      console.log('5');
+      draw_all();
+      console.log('after redo index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
+    }
+    if(action_to_be_revoked.act == 'delete_added_box'){
+      added.pop(action_to_be_revoked.obj);
+      console.log('6');
+      draw_all();
+    }
+    if(action_to_be_revoked.act == 'delete_returned_box'){
+      returned.pop();
+      deleted.push(action_to_be_revoked.obj);
+      // deleted.push(returned.pop());
+      console.log('7');
+      draw_all();
+    }
+  }
+}
+
+//改变添加的box的category属性，
+function change_category_to_formula(){
+  box_category = 'formula';
+}
+
+function change_category_to_image(){
+  box_category = 'image';
+}
+
+function change_category_to_table(){
+  box_category = 'table';
+}
+
+//保存修改，将参数存入 backups
+//backups数组允许用户保存修改但是暂时不上传到服务器(被枪毙的功能)
+function save_change(){
+  console.log('save_change');
+  returned_backups = new Array();
+  returned_backups = returned.concat();
+  added_backups = new Array();
+  added_backups = added.concat();
+  deleted_backups = new Array();
+  deleted_backups = deleted.concat();
+}
+
+//重置所有改动, abandon all changes， 所有数组设置为backups
+function reset() {
+  returned = new Array();
+  returned = returned_backups.concat();
+  added = new Array();
+  added = added_backups.concat();
+  deleted = new Array();
+  deleted = deleted_backups.concat();
+}
+
+
+
+
+
+//将保存后的结果传回 server
+function save_change_to_server(){
+  // in case of error raised by PHP 5 to enpty array
+  if(returned_backups.length == 0){returned_backups.push('');}
+  if(added_backups.length == 0){added_backups.push('');}
+  if(deleted_backups.length == 0){deleted_backups.push('');}
+  save_change();
+  var obj =
+  {
+    'operation': 'save_change',
+    'filename': localStorage.getItem('filename'),
+    'username': localStorage.getItem('username'),
+    'page' : localStorage.getItem('page'),
+    'extension': localStorage.getItem('extension'),
+    'file_directory':localStorage.getItem('file_directory'),
+    'returned_boxes': returned_backups,
+    'added_boxes': added_backups,
+    'deleted_boxes': deleted_backups,
+    'canvas_width' : localStorage.getItem('canvas_width'),
+    'original_width': localStorage.getItem('original_width'),
+  }
+  console.log('save_change_to_server');
+  console.log(JSON.stringify(obj));
+  // alert("operation: " + obj['operation']);
+  $.ajax(
+  {
+    url: '../php/convert.php',
+    type:'post',
+    data: obj,
+    // processData:false,
+    // contentType:false,
+
+    success:function(res){
+      console.log(res);
+      // alert(res);
+      alert('您所做的修改已保存到服务器');
+    },
+    error:function(err){
+      alert('网络链接失败');
+    }
+  })
+}
+
+
+
+
+
+// 请求进行文档识别，并且传回txt文件内容，再绘制标识框
+function get_data(){
+  console.log('get_data');
+  var obj =
+  {
+    'operation': 'get_data',
+    'filename': localStorage.getItem('filename'),
+    'username': localStorage.getItem('username'),
+    'page' : localStorage.getItem('page'),
+    'extension': localStorage.getItem('extension'),
+    'file_directory':localStorage.getItem('file_directory'),
+  };
+  //显示浮层
+  loading();
+  $.ajax(
+  {
+    url: '../php/convert.php',
+    type:'post',
+    data: obj,
+    // processData:false,
+    // contentType:false,
+    success:function(res){
+      console.log(res);
+      obj = JSON.parse(res);
+      var box_array = [];
+      var imginfo = obj['imginfo'];
+      var cav_width = parseInt($('#editor_canvas').width());
+      var ratio = parseFloat(cav_width) / parseFloat(imginfo[0]);
+      var boxes = obj['returned_boxes'].split('\n');
+      for(var i = 0; i < boxes.length; i++){
+        var box = boxes[i].split(' ');
+        if( !(box[4] == "table" || box[4] == "formula" ||box[4] == "image") ){
+        }
+        else{
+          if(box[5] != 'deleted'){
+            // console.log(box);
+            var box_str = '{ "category" : ' +'"'+ box[4]+'"' +', "coordinates" : [' + parseFloat(box[0])*ratio +', '
+            +parseFloat(box[1])*ratio +', '+ parseFloat(box[2])*ratio +', ' +parseFloat(box[3])*ratio +']}';
+            // console.log('yes '+box_str);
+            var b = JSON.parse(box_str);
+            console.log(b);
+            box_array.push(b);
+          }
+        }
+      }
+      returned_backups = new Array().concat(box_array);
+      added_backups = new Array();
+      deleted_backups = new Array();
+      returned = returned_backups.concat();
+      added = added_backups.concat();
+      deleted = deleted_backups.concat();
+      draw_all();
+      //隐藏浮层
+      un_loading();
+    },
+    error:function(err){
+      //隐藏浮层
+      un_loading();
+      alert('网络链接失败');
+    }
+  })
+}
+
+
+//请求服务器将PDF转换成png,然后执行get_data()
+
+function get_image(){
+  console.log('get_image');
+  loading();
+  var obj =
+  {
+    'operation': 'get_image',
+    'filename': localStorage.getItem('filename'),
+    'username': localStorage.getItem('username'),
+    'page' : localStorage.getItem('page'),
+    'extension': localStorage.getItem('extension'),
+    'file_directory':localStorage.getItem('file_directory'),
+  };
+
+  $.ajax(
+  {
+    url: '../php/convert.php',
+    type:'post',
+    data: obj,
+    // processData:false,
+    // contentType:false,
+    success:function(res){
+      console.log(res);
+      obj = JSON.parse(res);
+      var page_directory = obj['page_directory'];
+      var img_url = obj['img_url'];
+      var completed_page_array = obj['completed_page_array'];
+      var imginfo = obj['imginfo'];
+      var errorcode = obj['errorcode'];
+      showImg(img_url);
+      reset_canvas();
+      resize_canvas_img(parseInt(imginfo['0']),parseInt(imginfo['1']));
+      un_loading();
+      get_data();
+      
+      console.log('set height to ')
+    },
+    error:function(err){
+      un_loading();
+     
+      alert('网络链接失败');
+    }
+  })
+}
+
+
+//翻页操作。发起get_img() get_data()请求
+// 切换到下一页
+function showNextPage(){
+  page = parseInt(localStorage.getItem('page'));
+  console.log('page: ' +page);
+  total_page = parseInt(localStorage.getItem('total_page'));
+  console.log( + page + "out of" + total_page);
+  if(page < total_page){
+    page = parseInt(page) + 1;
+    localStorage.setItem('page',page);
+    document.getElementById('myNumber').value = page;
+    console.log('showNextPage ' + page + "out of" + total_page);
+    get_image();
+  }else{
+    alert("已到达最后一页");
+  }
+}
+
+//切换到前一页
+function showPrevPage(){
+  page = parseInt(localStorage.getItem('page'));
+  total_page = parseInt(localStorage.getItem('total_page'));
+  console.log( + page + "out of" + total_page);
+  if(page > 1){
+    page = parseInt(page) - 1;
+    localStorage.setItem('page',page);
+    console.log('showPrevPage ' + page + "out of" + total_page);
+    document.getElementById('myNumber').value = page;
+    get_image();
+  }else{
+    alert("已到达一页");
+  }
+}
+
+
+//切换到第一页
+function showFirstPage(){
+  page = parseInt(localStorage.getItem('page'));
+  total_page = parseInt(localStorage.getItem('total_page'));
+  console.log( + page + "out of" + total_page);
+  page = 1;
+  localStorage.setItem('page',page);
+  document.getElementById('myNumber').value = page;
+  get_image();
+}
+
+//切换到最后一页
+function showLastPage(){
+  page = parseInt(localStorage.getItem('page'));
+  total_page = parseInt(localStorage.getItem('total_page'));
+  console.log( + page + "out of" + total_page);
+  page = total_page;
+  localStorage.setItem('page',page);
+  document.getElementById('myNumber').value = page;
+  get_image();
+}
+
+//选择页码
+function select_page() {
+  var selected_page = document.getElementById("myNumber").value;
+  total_page = localStorage.getItem('total_page');
+  console.log('selected_page: '  + selected_page);
+  total_page = parseInt(localStorage.getItem('total_page'));
+  page = selected_page;
+  localStorage.setItem('page',page);
+  if(selected_page <=0 || selected_page > total_page){
+    alert("请输入有效的页码");
+  }
+  page = Number(selected_page);
+  get_image();
+  console.log("jump to page: " + page);
+  document.getElementById('myNumber').value = page;
+}
+
+
+//显示等待浮层，阻止用户误操作
+function loading(){
+  $('#loading').css('width','100%').css('height','100%');
+  $('#loading_flag').hide()
+  console.log('loading...' + $('#loading').width() + ' ' +$('#loading').height());
+}
+// 得到data后隐藏浮层 （其实用哪个hide(), show())就行。。嘛，，懒得换了
+
+function un_loading(){
+  $('#loading').css('width','0%').css('height','0%');
+  $('#loading_flag').show()
+  console.log('un_loading...' + $('#loading').width() + ' ' +$('#loading').height());
+}
+
+
+
+
+
+
+
+
+/*********************************************************
+测试用 function
+**********************************************************/
+
+// print all retuened box to console
+function print_returned(){
+  console.log('returned_box:');
+  for(var i =0; i< returned.length; i++){
+    print_box(returned[i]);
+  }
+}
+
+// print all added box to console
+function print_added(){
+  console.log('added_box:');
+  for(var i=0;i<added.length; i++){
+    print_box(added[i]);
+  }
+}
+
+// print all deleted object to console
+function print_deleted(){
+  console.log('deleted_box:' + deleted.length);
+  for(var i =0; i< deleted.length; i++){
+    print_box(deleted[i]);
+  }
+}
+
+function print_box(box){
+  console.log('category: '+box.category+'; coordinates: '+parseInt(box.coordinates[0])+', '+parseInt(box.coordinates[1])+', '+parseInt(box.coordinates[2])+', '+parseInt(box.coordinates[3]));
+}
+
+
+  </script>
+
+</body>
+
+</html>

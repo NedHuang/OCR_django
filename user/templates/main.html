@@ -203,25 +203,21 @@
           <div id = "editor-menu-container" class="row " style="background-color: rgb(232, 236, 230);margin: 0px;padding: 0px;">
               <div class="row-fluid" >
                 <div class="  col-sm-2 col-md-3  col-lg-3 span3" >
-  <!--                 <form id="upload" enctype="multipart/form-data" method="post">
-                    <label for="file" class="btn btn-info">导入文件</label>
-                    <input  type="file" name="file" id="file" onchange="loadFile(this.files[0])" style="display:none">
-                    <button type="button" class="btn btn-primary">文件类型</button>
-                    <button type="button" class="btn btn-success" onclick = "uploadDoc()">开始识别</button>
-                  </form> -->
 
+<!-- 
                     <form method="post" action="/user/upload/" enctype="multipart/form-data">
                     {% csrf_token %}
                        <label> 上传文件 </label>
                        <input type="file" name="myfile" />
                        <br/>
                        <input type="submit" value="upload"/>
-                    </form>
+                    </form> -->
                     {{message}}
 
-
-<!--                   <input type="file" name="file" id="file_upload">
-                  <input type="button" value="上传" onclick="FileUpload()"> -->
+                  <form id='upload' enctype="multipart/form-data" method ='post'>
+                    <input type="file" name="file_upload" id="file_upload">
+                    <input type="button" value="上传" onclick="FileUpload()">
+                  </form>
 
                 </div>
                 <div class=" col-sm-7 col-md-7 col-lg-6 span5 ">
@@ -394,20 +390,22 @@
     }
 
     function FileUpload() {
-        var form_data = new FormData();
-        var file_info =document.getElementById('file_upload')[0].files[0];
-        form_data.append('file',file_info);
-        //if(file_info==undefined)暂且不许要判断是否有附件
-            //alert('你没有选择任何文件');
-            //return false
+      var file = $('#file_upload')[0].files[0]
+      alert(file)
+      var form_data = new FormData()
+      form_data.append('file', file)
         $.ajax({
             url:'/user/upload/',
             type:'POST',
             data: form_data,
             processData: false,  // tell jquery not to process the data
             contentType: false, // tell jquery not to set contentType
-            success: function(callback) {
-                console.log('ojbk')
+            success: function(res) {
+                alert(res['message']);
+                console.log('ojbk');
+            },
+            error: function(err){
+              alert(err['message']);
             }
         });
       }

@@ -162,8 +162,8 @@
               <tr>
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
-                <th scope="col">分组</th>
-                <th scope="col">GUID</th>
+<!--                 <th scope="col">分组</th> -->
+                <th scope="col">编辑</th>
               </tr>
             </thead>
 
@@ -171,12 +171,18 @@
             <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)">
               <td>{{ file.filename }}</td>
               <td>{{ file.owner.username}}</td>
-              <td>{{ file.groups}}</td>
+<!--               <td>{{ file.groups}}</td> -->
              <!--  <td>{{ file.co_editor}}</td> -->
-              <td>{{ file.file_guid}}</td>
+              <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),show_file()">编辑文件</button></td>
             </tr>
           {% endfor %}
           </table>
+        </div>
+
+        <div id= 'upload_file_div' class="side-body">
+          <form id='upload' enctype="multipart/form-data" method ='post'>
+            <input type="file" name="file_upload" id="file_upload"><input type="button" value="上传" onclick="FileUpload()">
+          </form>
         </div>
 
         <!--与我共享 -->
@@ -186,19 +192,19 @@
               <tr>
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
-                <th scope="col">分组</th>
-                <th scope="col">共享者</th>
-                <th scope="col" >查看</th>
+                <!-- <th scope="col">分组</th> -->
+                <!-- <th scope="col"></th> -->
+                <th scope="col" >编辑</th>
               </tr>
             </thead>
 
           {% for s in shares %}
-            <tr id = {{s.shared_file.file_guid}} oncontextmenu="edit(event), select_file(this)">
+            <tr id = {{s.shared_file.file_guid}} oncontextmenu="edit(event), select_file(this)" onclick="select_file(this)">
               <td>{{ s.shared_file.filename }}</td>
               <td>{{ s.shared_file.owner.username}}</td>
-              <td>{{ s.shared_file.groups}}</td>
-              <td>{{ s.shared_file.file_guid}}</td>
-              <td><a href=path{{s.shared_file.path}}>查看</a></td>
+              <!-- <td>{{ s.shared_file.groups}}</td> -->
+              <!-- <td>{{ s.shared_file.file_guid}}</td> -->
+              <td><button id = {{s.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),show_file()">编辑文件</button></td>
             </tr>
           {% endfor %}
           </table>
@@ -418,7 +424,9 @@
         // processData: false,  // tell jquery not to process the data
         // contentType: false, // tell jquery not to set contentType
         success:function(res){
-          alert(String(res));
+          if(res['message'] !='success'){
+            alert(res['message']);
+          }
           location.reload();
         },
         error:function(err){
@@ -470,9 +478,36 @@
           alert(err);
         }
 
-
       })
     }
+
+    function show_file(){
+      alert('aaa'+current_file_guid);
+    }
+
+    function FileUpload() {
+      var file = $('#file_upload')[0].files[0]
+      // alert(file)
+      var form_data = new FormData()
+      form_data.append('file', file)
+        $.ajax({
+            url:'/user/upload/',
+            type:'POST',
+            data: form_data,
+            processData: false,  // tell jquery not to process the data
+            contentType: false, // tell jquery not to set contentType
+            success: function(res) {
+              if(res['message'] != 'success'){
+                alert(res['message']);
+              }
+                // console.log('ojbk');
+                location.reload();
+            },
+            error: function(err){
+              alert(err['message']);
+            }
+        });
+      }
 
 
 

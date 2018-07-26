@@ -121,7 +121,7 @@ class LoginForm(forms.Form):
 				raise ValidationError('密码错误')
 			return password
 		except:
-			raise ValidationError('用户名都错了，我当然不会透露密码是不是对的')
+			raise ValidationError('用户名都错了，我当然不会告诉你密码是不是对的')
 
 	def clean(self):
 		# self.clean_password()

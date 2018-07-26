@@ -25,7 +25,7 @@ class File(models.Model):
 	owner = models.ForeignKey(User, on_delete=models.CASCADE)	#文件的所有者（上传）
 	filename = models.CharField(max_length=256)					#文件原名
 	path = models.CharField(max_length=256)						#文件存储路径
-	totoal_page = models.PositiveIntegerField(default=1)
+	total_page = models.PositiveIntegerField(default=1)
 	date_uploaded = models.DateTimeField('date file uploaded', default=timezone.now)
 	last_modified = models.DateTimeField('date last modified', auto_now = True)
 
@@ -39,7 +39,7 @@ class File(models.Model):
 class Object(models.Model):
 	object_guid = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)
 	file = models.ForeignKey(File, on_delete=models.CASCADE)
-	category = models.CharField(max_length=256,default='') #figure
+	category = models.PositiveIntegerField() #figure
 	coordinate = models.CharField(max_length=256,default='') # "shang,xia,zuo,you"
 	status = models.CharField(max_length=256,default='')
 	editor = models.ForeignKey(User, on_delete=models.CASCADE,default = None)
