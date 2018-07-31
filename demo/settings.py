@@ -122,8 +122,13 @@ USE_TZ = True
 
 # STATIC_URL = '/static/'
 
+# STATIC_URL = '/static/'
+
 STATIC_URL = '/static/'
+k = '/'.join(BASE_DIR.split('/')[:-1])
 
-
-
+STATICFILES_DIRS = (  
+     os.path.join(BASE_DIR, 'static').replace('\\', '/'),  
+     os.path.join(k, 'files').replace('\\', '/'), 
+)
 

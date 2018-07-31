@@ -173,7 +173,7 @@
               <td>{{ file.owner.username}}</td>
 <!--               <td>{{ file.groups}}</td> -->
              <!--  <td>{{ file.co_editor}}</td> -->
-              <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),show_file()">编辑文件</button></td>
+              <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
             </tr>
           {% endfor %}
           </table>
@@ -204,7 +204,7 @@
               <td>{{ s.shared_file.owner.username}}</td>
               <!-- <td>{{ s.shared_file.groups}}</td> -->
               <!-- <td>{{ s.shared_file.file_guid}}</td> -->
-              <td><button id = {{s.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),show_file()">编辑文件</button></td>
+              <td><button id = {{s.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
             </tr>
           {% endfor %}
           </table>
@@ -333,7 +333,7 @@
       </tr>
       <tr>
         <td style=" cursor:default;border:outset 1;" align="center" >
-          <button style ="border-radius:0.5rem;">分组</button>
+          <button type="button" class="btn btn-default" onclick="edit_file()">编辑</button>
         </td>
       </tr>
       <tr>
@@ -396,7 +396,6 @@
       $('#edit_menu').show().css({'left':left_edge,'top':top_edge,'position':'absolute'});
       event.returnValue = false;
     }
-
 
     function select_file(element){
       current_file_guid = element.id;
@@ -477,37 +476,33 @@
         error:function(err){
           alert(err);
         }
-
       })
     }
 
-    function show_file(){
-      alert('aaa'+current_file_guid);
+    function edit_file(){
+      console.log('edit');
+      var post_data = {
+        'file_guid': current_file_guid,
+        'action':'edit_file'
+      };
+      // console.log(post_data);
+      $.ajax({
+        url:'/user/edit_file/',
+        type:'POST',
+        data:post_data,
+        success:function(res){
+          var u = '/user/load_file/?file_guid='+res['file_guid']
+          console.log(u)
+          window.location.href = u;
+        },
+        error:function(err){
+          // alert('网络连接失败,稍后重试',err);
+        }
+      })
+
     }
 
-    function FileUpload() {
-      var file = $('#file_upload')[0].files[0]
-      // alert(file)
-      var form_data = new FormData()
-      form_data.append('file', file)
-        $.ajax({
-            url:'/user/upload/',
-            type:'POST',
-            data: form_data,
-            processData: false,  // tell jquery not to process the data
-            contentType: false, // tell jquery not to set contentType
-            success: function(res) {
-              if(res['message'] != 'success'){
-                alert(res['message']);
-              }
-                // console.log('ojbk');
-                location.reload();
-            },
-            error: function(err){
-              alert(err['message']);
-            }
-        });
-      }
+
 
 
 

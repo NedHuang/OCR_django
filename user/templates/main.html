@@ -104,13 +104,13 @@
             <li class="dropdown profile">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
               <ul class="dropdown-menu animated fadeInDown">
-                <li class="profile-img">
+              <!--   <li class="profile-img">
                   <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
-                </li>
+                </li> -->
                 <li>
                   <div class="profile-info">
-                    <h4 class="username">Emily Hart</h4>
-                    <p>emily_hart@email.com</p>
+                    <h4 class="username">{{username}}</h4>
+                    <p>{{user_email}}</p>
                     <div class="btn-group margin-bottom-2x" role="group">
                       <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
                       <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
@@ -212,7 +212,7 @@
                        <br/>
                        <input type="submit" value="upload"/>
                     </form> -->
-                    {{message}}
+                    
 
                   <form id='upload' enctype="multipart/form-data" method ='post'>
                     <input type="file" name="file_upload" id="file_upload">
@@ -246,7 +246,9 @@
           <div id = 'editor-container' class="container editor" style="background-color: #eeeeee; border :1px solid" >
             <canvas id='editor_canvas' style = "position: absolute;  z-index: 1;" width = 0; height = 0></canvas>
             <!-- <canvas id='dummy_canvas' style = "position: absolute; margin-top: 50px; z-index: 2" ></canvas> -->
-            <img id='input_img' style = "position: absolute;  z-index: 0">
+             {% load staticfiles %}
+            <img id='input_img' src="{% static img_url %}" style = "position: absolute;  z-index: 0">
+            
 
           </div>
         </div>

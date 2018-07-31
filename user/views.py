@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 登录,DONE
 def login(request):
 	# print(request.POST)
-	if request.session.get('log_in') != None:
+	if request.session.get('login') != None:
 		form = LoginForm()
 		return render(request,'login.html',{'form':form,'message':'登录:'+request.session['username']})
 
@@ -164,12 +164,7 @@ def delete_file(request):
 			print('path:'+delete_dir_path)
 			if os.path.exists(delete_dir_path):  
 				shutil.rmtree(delete_dir_path)
-			# file表中删除
 			File.objects.filter(file_guid = delete_file_guid).delete()
-			# share表中删除（cascade)///
-			# t = loader.get_template('file_management.html')
-			# files = File.objects.all()
-			# c ={'files':files}
 			c['message'] = 'success'
 	return JsonResponse(c)
 
@@ -236,8 +231,6 @@ def upload(request):
 		filename = obj.name	#filename
 		username = request.session.get('username') #username
 		file_dir = '' # full path of the file
-		
-		
 		user = User.objects.filter(username=username)[0] if request.session.get('login') else None
 		# print(filename +'\t' + username)
 		
@@ -275,13 +268,16 @@ def get_total_page(file_path):
 
 
 def file_management(request):
+	if (not request.session.get('username')) or (not request.session.get('login')):
+		# form = LoginForm()
+		# return render(request,'login.html',{'form':form})
+		return login(request)
 	t = loader.get_template('file_management.html')
+	print(request.session.get('username'))
 	user = User.objects.filter(username=request.session.get('username'))[0]
 	files = File.objects.filter(owner = user)
 	shares = Share.objects.filter(share_user=user);
-	# print(shares[0].shared_file)
-	# print(files)
-	c ={'messgage':user.username, 'files':files,'shares':shares}
+	c ={'messgage':request.session.get('username'), 'files':files,'shares':shares}
 	return HttpResponse(t.render(c,request))
 
 
@@ -293,8 +289,40 @@ def convert_next_10(file_path,start_page,total_page):
 		print(cmd)
 		os.popen(cmd,'w')
 
-def test(request):
-	print(BASE_DIR)
-	return HttpResponse('123')
+
+@ensure_csrf_cookie
+@csrf_exempt
+def edit_file(request):
+	file_guid = request.POST.get('file_guid')
+	print(file_guid)
+	file = File.objects.filter(file_guid=request.POST.get('file_guid'))[0]
+	file.save()
+	user = User.objects.filter(username=request.session.get('username'))[0]
+	c = {}
+	t=loader.get_template('main.html')
+	c['message'] = file.filename
+	c['last_modified'] = str(file.last_modified)
+	c['file_guid'] =file.file_guid
+	c['path'] = str(file.path)
+	c['page'] = '0'
+	c['username'] = user.username
+	request.session['file_guid'] = file_guid
+	return JsonResponse(c)
 
 
+def load_file(request):
+	print(request.build_absolute_uri())
+	user = User.objects.filter(username = request.session['username'])[0] if User.objects.filter(username = request.session['username']).count() else None
+	t=loader.get_template('main.html')
+	page = request.session.get('page') if request.session.get('page') else 1;
+	file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	path = file.path
+	c = {}
+	c['page'] = page
+	c['username'] = user.username
+	c['user_email'] = user.email
+	c['file_guid'] = request.session['file_guid']
+	# c['img_url'] = '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+	c['img_url'] ='/files/founder/a.pdf/1.png'
+	print(c)
+	return HttpResponse(t.render(c,request))
