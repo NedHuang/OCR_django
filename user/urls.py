@@ -33,6 +33,10 @@ urlpatterns = [
     url(r'^resetByUsernameForm/', views.resetByUsernameForm, name = 'resetByUsernameForm'),
     url(r'^edit_file/$',views.edit_file, name = 'edit_file'),
     url(r'^load_file/', views.load_file, name ='load_file'),
+    url(r'^next_page/$', views.next_page, name ='next_page'),
+    url(r'^prev_page/$', views.prev_page, name ='prev_page'),
+    url(r'^first_page/$', views.first_page, name ='first_page'),
+    url(r'^last_page/$', views.last_page, name ='last_page'),
 
 
 

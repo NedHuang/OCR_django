@@ -27,8 +27,7 @@ declare variables
 声明变量
 ******************************************************************************/
 
-
-var canvas = document.getElementById('editor_canvas');
+r canvas = document.getElementById('editor_canvas');
 var context = canvas.getContext('2d');
 var returned_backups = [];
 var added_backups = [];
@@ -712,3 +711,4 @@ function print_deleted(){
 function print_box(box){
   console.log('category: '+box.category+'; coordinates: '+parseInt(box.coordinates[0])+', '+parseInt(box.coordinates[1])+', '+parseInt(box.coordinates[2])+', '+parseInt(box.coordinates[3]));
 }
+va

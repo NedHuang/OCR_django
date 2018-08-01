@@ -1,3 +1,4 @@
+ # -*- coding: utf-8 -*-
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django import forms
@@ -19,7 +20,6 @@ from django.db.models import Q
 import os, shutil
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 # 登录,DONE
 def login(request):
 	# print(request.POST)
@@ -216,12 +216,6 @@ def share_file(request):
 	return JsonResponse(response_data)
 
 
-
-
-
-
-
-
 @csrf_exempt
 def upload(request):
 	c ={}  #return message
@@ -238,9 +232,9 @@ def upload(request):
 			c['message']='已存在同名文件，请先修改文件名后上传'
 			return JsonResponse(c)
 		if request.session.get('login'):
-			file_dir = BASE_DIR +'/files/'+username+'/'+filename+'/'
+			file_dir = BASE_DIR +'/user/static/files/'+username+'/'+filename+'/'
 		else:
-			file_dir = BASE_DIR +'/files/temp/'+username+'/'+filename+'/'
+			file_dir = BASE_DIR +'/user/static/files/temp/'+username+'/'+filename+'/'
 		if not os.path.exists(file_dir):
 			os.makedirs(file_dir)
 		with open(file_dir+filename,'wb') as f:
@@ -292,29 +286,41 @@ def convert_next_10(file_path,start_page,total_page):
 
 @ensure_csrf_cookie
 @csrf_exempt
+# this is the start when you edit the file, it will assign all session vars
 def edit_file(request):
 	file_guid = request.POST.get('file_guid')
-	print(file_guid)
+	print('loadfile: ' + file_guid)
 	file = File.objects.filter(file_guid=request.POST.get('file_guid'))[0]
+	# 为了记录最后访问此文件的时间
 	file.save()
 	user = User.objects.filter(username=request.session.get('username'))[0]
 	c = {}
 	t=loader.get_template('main.html')
+
+	request.session['file_guid'] = file_guid
+	request.session['total_page'] = file.total_page
+	request.session['page'] = 1
+	request.session['path'] = file.path
+	request.session['owner_guid'] = file.owner.user_guid
+	# request.session['username'] = 
 	c['message'] = file.filename
 	c['last_modified'] = str(file.last_modified)
 	c['file_guid'] =file.file_guid
 	c['path'] = str(file.path)
 	c['page'] = '0'
 	c['username'] = user.username
-	request.session['file_guid'] = file_guid
+	# print('file_path: ' + file.path)
 	return JsonResponse(c)
 
-
+@ensure_csrf_cookie
+@csrf_exempt
 def load_file(request):
-	print(request.build_absolute_uri())
 	user = User.objects.filter(username = request.session['username'])[0] if User.objects.filter(username = request.session['username']).count() else None
-	t=loader.get_template('main.html')
-	page = request.session.get('page') if request.session.get('page') else 1;
+	page = 1
+	if request.session.get('page'):
+		page = request.session['page']
+	else:
+		page = request.session['page'] = 1;
 	file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	path = file.path
 	c = {}
@@ -322,7 +328,108 @@ def load_file(request):
 	c['username'] = user.username
 	c['user_email'] = user.email
 	c['file_guid'] = request.session['file_guid']
-	# c['img_url'] = '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
-	c['img_url'] ='/files/founder/a.pdf/1.png'
-	print(c)
+	c['img_url'] ='/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+	c['owner_guid'] = file.owner.user_guid
+	t=loader.get_template('main.html')
 	return HttpResponse(t.render(c,request))
+
+@ensure_csrf_cookie
+@csrf_exempt
+def next_page(request):
+	page = request.session['page']
+	total_page = request.session['total_page']
+	c={}
+	if page < total_page:
+		print( 'page < total_page')
+		page = page + 1
+		c['page'] = page
+		request.session['page'] = page
+		path = request.session['path']
+		next_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+		if not os.path.exists(next_path):
+			print('not exists')
+			img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+			cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+			os.system(cmd)
+
+		c['status'] = 'success'
+		c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+		c['page'] = page
+		c['total_page'] = request.session['total_page']
+		c['username'] = user.username
+		while not os.path.exists(next_path):
+			sleep(1)
+		return JsonResponse(c)
+	else:
+		c['page'] = page
+		c['total_page'] = request.session['total_page']
+		c['status'] ='first_page'
+		c['username'] = user.username
+		return JsonResponse(c)
+
+@csrf_exempt
+def prev_page(request):
+	page = request.session['page']
+	total_page = request.session['total_page']
+	c={}
+	if page > 1:
+		print( 'page > 1')
+		page = page -1
+		c['page'] = page
+		request.session['page'] = page
+		path = request.session['path']
+		c['status'] = 'success'
+		c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+		c['total_page'] = request.session['total_page']
+		c['username'] = user.username
+		return JsonResponse(c)
+	else:
+		c['page'] = page
+		c['total_page'] = request.session['total_page']
+		c['status'] ='first_page'
+		c['username'] = user.username
+		return JsonResponse(c)
+
+
+
+@csrf_exempt
+def last_page(request):
+	c={}
+	request.session['page'] = page = request.session['total_page']
+	path = request.session['path']
+	next_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+	# print(real_path)
+	if not os.path.exists(next_path):
+		print('not exists')
+		img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+		os.system(cmd)
+		c['status'] = 'success'
+		c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+		c['total_page'] = request.session['total_page']
+	return JsonResponse(c)
+	
+
+
+@csrf_exempt
+def first_page(request):
+	c={}
+	request.session['page'] = page = 1
+	path = request.session['path']
+	c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+	c['status'] = 'success'
+	c['total_page'] = request.session['total_page']
+	return JsonResponse(c)
+
+
+# @csrf_exempt
+# def add_box(request):
+# 	page = request.session['page']
+# 	file_guid = request.session['file_guid']
+	
+
+
+
+
+
+
