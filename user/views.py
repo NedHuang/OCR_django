@@ -18,6 +18,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json
 from django.db.models import Q
 import os, shutil
+import time
+from PIL import Image
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 登录,DONE
@@ -223,6 +225,8 @@ def upload(request):
 	if request.method == 'POST':# 获取对象
 		obj = request.FILES.get('file')
 		filename = obj.name	#filename
+		if ' ' in filename:
+			filename = filename.replace(' ','_')
 		username = request.session.get('username') #username
 		file_dir = '' # full path of the file
 		user = User.objects.filter(username=username)[0] if request.session.get('login') else None
@@ -248,6 +252,7 @@ def upload(request):
 			file.filename = filename
 			file.path = file_dir+filename
 			total_page = file.total_page = get_total_page(file_dir+filename)
+
 			file.save()
 			convert_next_10(file.path,1,total_page)
 		else:
@@ -296,41 +301,51 @@ def edit_file(request):
 	user = User.objects.filter(username=request.session.get('username'))[0]
 	c = {}
 	t=loader.get_template('main.html')
-
-	request.session['file_guid'] = file_guid
+	
+	request.session['file_guid'] = str(file_guid)
 	request.session['total_page'] = file.total_page
 	request.session['page'] = 1
 	request.session['path'] = file.path
-	request.session['owner_guid'] = file.owner.user_guid
+	request.session['owner_guid'] = str(file.owner.user_guid)
+	request.session['filename'] = file.filename
 	# request.session['username'] = 
+
 	c['message'] = file.filename
+	c['filename'] = request.session['filename']
 	c['last_modified'] = str(file.last_modified)
-	c['file_guid'] =file.file_guid
 	c['path'] = str(file.path)
-	c['page'] = '0'
-	c['username'] = user.username
-	# print('file_path: ' + file.path)
+	c['page'] = 1
+	c['username'] = request.session['username']
+	c['total_page'] = request.session.get('total_page')
+	print('edit_file')
+	print(c)
 	return JsonResponse(c)
 
 @ensure_csrf_cookie
 @csrf_exempt
 def load_file(request):
 	user = User.objects.filter(username = request.session['username'])[0] if User.objects.filter(username = request.session['username']).count() else None
-	page = 1
-	if request.session.get('page'):
-		page = request.session['page']
-	else:
-		page = request.session['page'] = 1;
+	# if request.session.get('page'):
+	# 	page = request.session['page']
+	# else:
+	page = request.session['page'] = 1;
 	file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	path = file.path
+	print('+++++++++++++++++++++')
+	check_and_convert(request,page)
+	print('---------------------')
 	c = {}
 	c['page'] = page
+	c['total_page'] = request.session.get('total_page')
+	c['filename'] = request.session['filename']
 	c['username'] = user.username
 	c['user_email'] = user.email
 	c['file_guid'] = request.session['file_guid']
 	c['img_url'] ='/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
-	c['owner_guid'] = file.owner.user_guid
+	c['owner_guid'] =request.session['owner_guid']= str(file.owner.user_guid)
 	t=loader.get_template('main.html')
+
+	print(c)
 	return HttpResponse(t.render(c,request))
 
 @ensure_csrf_cookie
@@ -345,26 +360,28 @@ def next_page(request):
 		c['page'] = page
 		request.session['page'] = page
 		path = request.session['path']
-		next_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
-		if not os.path.exists(next_path):
-			print('not exists')
-			img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-			cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
-			os.system(cmd)
-
+		# next_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+		# if not os.path.exists(next_path):
+		# 	print('not exists')
+		# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+		# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+		# 	os.system(cmd)
+		# 	sleep(0.5)
+		size = check_and_convert(request,page)
+		c['image_width'] =size[0]
+		c['image_height'] =size[1]
+		# 	# 在此处添加调用POD的cmd,并且执行
 		c['status'] = 'success'
 		c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
 		c['page'] = page
 		c['total_page'] = request.session['total_page']
-		c['username'] = user.username
-		while not os.path.exists(next_path):
-			sleep(1)
+		c['username'] = request.session.get('username')
 		return JsonResponse(c)
 	else:
 		c['page'] = page
 		c['total_page'] = request.session['total_page']
 		c['status'] ='first_page'
-		c['username'] = user.username
+		c['username'] = request.session.get('username')
 		return JsonResponse(c)
 
 @csrf_exempt
@@ -378,16 +395,29 @@ def prev_page(request):
 		c['page'] = page
 		request.session['page'] = page
 		path = request.session['path']
+		# prev_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+		# if not os.path.exists(prev_path):
+		# 	print('not exists')
+		# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+		# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+		# 	os.system(cmd)
+		# while not os.path.exists(prev_path):
+		# 	time.sleep(0.05)
+		size = check_and_convert(request,page)
+		c['image_width'] =size[0]
+		c['image_height'] =size[1]
+			# 在此处添加调用POD的cmd,并且执行
 		c['status'] = 'success'
 		c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
 		c['total_page'] = request.session['total_page']
-		c['username'] = user.username
+		c['username'] = request.session.get('username')
+		c['page'] = page
 		return JsonResponse(c)
 	else:
 		c['page'] = page
 		c['total_page'] = request.session['total_page']
 		c['status'] ='first_page'
-		c['username'] = user.username
+		c['username'] = request.session.get('username')
 		return JsonResponse(c)
 
 
@@ -397,16 +427,23 @@ def last_page(request):
 	c={}
 	request.session['page'] = page = request.session['total_page']
 	path = request.session['path']
-	next_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+	last_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
 	# print(real_path)
-	if not os.path.exists(next_path):
-		print('not exists')
-		img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
-		os.system(cmd)
-		c['status'] = 'success'
-		c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
-		c['total_page'] = request.session['total_page']
+	# if not os.path.exists(last_path):
+	# 	print('not exists')
+	# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+	# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+	# 	os.system(cmd)
+	# while not os.path.exists(last_path):
+	# 	time.sleep(0.05)
+	size = check_and_convert(request,page)
+	c['image_width'] =size[0]
+	c['image_height'] =size[1]
+	c['status'] = 'success'
+	c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+	c['total_page'] = request.session['total_page']
+	c['username'] = request.session.get('username')
+	c['page'] = page
 	return JsonResponse(c)
 	
 
@@ -416,17 +453,69 @@ def first_page(request):
 	c={}
 	request.session['page'] = page = 1
 	path = request.session['path']
-	c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
+	# first_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+	# # print(real_path)
+	# if not os.path.exists(first_path):
+	# 	print('not exists')
+	# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+	# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+	# 	os.system(cmd)
+	# while not os.path.exists(first_path):
+	# 	time.sleep(0.05)
+	size = check_and_convert(request,page)
+	c['image_width'] =size[0]
+	c['image_height'] =size[1]
 	c['status'] = 'success'
+	c['img_url'] = '/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
 	c['total_page'] = request.session['total_page']
+	c['username'] = request.session.get('username')
+	c['page'] = page
 	return JsonResponse(c)
+
+@ensure_csrf_cookie
+@csrf_exempt
+def select_page(request):
+	c={}
+	path = request.session['path']
+	page = int(request.POST.get('selected_page'))
+	if not 1 <= page <= request.session.get('total_page'):
+		c['status'] = 'fail'
+	else:
+		size = check_and_convert(request,page)
+		c['image_width'] =size[0]
+		c['image_height'] =size[1]
+		c['status'] = 'success'
+		c['page'] = page
+		request.session['page'] = page
+		c['total_page'] = request.session['total_page']
+		c['username'] = request.session.get('username')
+	print(c)
+		
+	# print(real_path)
+
+	return JsonResponse(c)
+
+def check_and_convert(request,p):
+	path = request.session['path']
+	page = int(p)
+	check_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+	if not os.path.exists(check_path):
+		print('not exists')
+		img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
+		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+		print(cmd)
+		os.system(cmd)
+	while not os.path.exists(check_path):
+		time.sleep(0.05)
+	img = Image.open(check_path)
+	return img.size
 
 
 # @csrf_exempt
 # def add_box(request):
 # 	page = request.session['page']
 # 	file_guid = request.session['file_guid']
-	
+
 
 
 

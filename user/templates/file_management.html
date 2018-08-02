@@ -29,7 +29,7 @@
 
 </head>
 
-<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;" onclick="reset()">
+<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;" >
 
 
 <div id="loading" style = "width:0%; height: 0%; display: block"  >
@@ -168,7 +168,7 @@
             </thead>
 
           {% for file in files %}
-            <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)">
+            <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)" onclick ="edit(event), select_file(this)" >
               <td>{{ file.filename }}</td>
               <td>{{ file.owner.username}}</td>
 <!--               <td>{{ file.groups}}</td> -->
@@ -199,7 +199,7 @@
             </thead>
 
           {% for s in shares %}
-            <tr id = {{s.shared_file.file_guid}} oncontextmenu="edit(event), select_file(this)" onclick="select_file(this)">
+            <tr id = {{s.shared_file.file_guid}} oncontextmenu="edit(event), select_file(this)" onclick ="edit(event), select_file(this)">
               <td>{{ s.shared_file.filename }}</td>
               <td>{{ s.shared_file.owner.username}}</td>
               <!-- <td>{{ s.shared_file.groups}}</td> -->
@@ -367,9 +367,9 @@
       <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
       <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
-      <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
+   <!--    <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
-      <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script> -->
 
 
 
@@ -481,6 +481,7 @@
 
     function edit_file(){
       console.log('edit');
+      alert(current_file_guid)
       var post_data = {
         'file_guid': current_file_guid,
         'action':'edit_file'
@@ -502,6 +503,25 @@
 
     }
 
+    function FileUpload() {
+      var file = $('#file_upload')[0].files[0]
+      var form_data = new FormData()
+      form_data.append('file', file)
+        $.ajax({
+            url:'/user/upload/',
+            type:'POST',
+            data: form_data,
+            processData: false,  // tell jquery not to process the data
+            contentType: false, // tell jquery not to set contentType
+            success: function(res) {
+                alert(res['message']);
+                console.log('ojbk');
+            },
+            error: function(err){
+              alert(err['message']);
+            }
+        });
+      }
 
 
 

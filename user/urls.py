@@ -37,6 +37,8 @@ urlpatterns = [
     url(r'^prev_page/$', views.prev_page, name ='prev_page'),
     url(r'^first_page/$', views.first_page, name ='first_page'),
     url(r'^last_page/$', views.last_page, name ='last_page'),
+    url(r'^select_page/$', views.select_page, name ='select_page'),
+
 
 
 
