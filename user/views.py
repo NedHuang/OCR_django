@@ -309,7 +309,7 @@ def edit_file(request):
 	request.session['owner_guid'] = str(file.owner.user_guid)
 	request.session['filename'] = file.filename
 	# request.session['username'] = 
-
+	c['owner_guid'] = request.session['owner_guid']
 	c['message'] = file.filename
 	c['filename'] = request.session['filename']
 	c['last_modified'] = str(file.last_modified)
@@ -360,14 +360,8 @@ def next_page(request):
 		c['page'] = page
 		request.session['page'] = page
 		path = request.session['path']
-		# next_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
-		# if not os.path.exists(next_path):
-		# 	print('not exists')
-		# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-		# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
-		# 	os.system(cmd)
-		# 	sleep(0.5)
-		size = check_and_convert(request,page)
+		check_and_convert(request,page)
+		size = request.session['size'] = get_image_size(request,page)
 		c['image_width'] =size[0]
 		c['image_height'] =size[1]
 		# 	# 在此处添加调用POD的cmd,并且执行
@@ -376,6 +370,7 @@ def next_page(request):
 		c['page'] = page
 		c['total_page'] = request.session['total_page']
 		c['username'] = request.session.get('username')
+		c['owner_guid'] = request.session['owner_guid']
 		return JsonResponse(c)
 	else:
 		c['page'] = page
@@ -395,15 +390,8 @@ def prev_page(request):
 		c['page'] = page
 		request.session['page'] = page
 		path = request.session['path']
-		# prev_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
-		# if not os.path.exists(prev_path):
-		# 	print('not exists')
-		# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-		# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
-		# 	os.system(cmd)
-		# while not os.path.exists(prev_path):
-		# 	time.sleep(0.05)
-		size = check_and_convert(request,page)
+		check_and_convert(request,page)
+		size = request.session['size'] = get_image_size(request,page)
 		c['image_width'] =size[0]
 		c['image_height'] =size[1]
 			# 在此处添加调用POD的cmd,并且执行
@@ -412,6 +400,7 @@ def prev_page(request):
 		c['total_page'] = request.session['total_page']
 		c['username'] = request.session.get('username')
 		c['page'] = page
+		c['owner_guid'] = request.session['owner_guid']
 		return JsonResponse(c)
 	else:
 		c['page'] = page
@@ -428,15 +417,8 @@ def last_page(request):
 	request.session['page'] = page = request.session['total_page']
 	path = request.session['path']
 	last_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
-	# print(real_path)
-	# if not os.path.exists(last_path):
-	# 	print('not exists')
-	# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-	# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
-	# 	os.system(cmd)
-	# while not os.path.exists(last_path):
-	# 	time.sleep(0.05)
-	size = check_and_convert(request,page)
+	check_and_convert(request,page)
+	size = request.session['size'] = get_image_size(request,page)
 	c['image_width'] =size[0]
 	c['image_height'] =size[1]
 	c['status'] = 'success'
@@ -444,6 +426,7 @@ def last_page(request):
 	c['total_page'] = request.session['total_page']
 	c['username'] = request.session.get('username')
 	c['page'] = page
+	c['owner_guid'] = request.session['owner_guid']
 	return JsonResponse(c)
 	
 
@@ -453,16 +436,8 @@ def first_page(request):
 	c={}
 	request.session['page'] = page = 1
 	path = request.session['path']
-	# first_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
-	# # print(real_path)
-	# if not os.path.exists(first_path):
-	# 	print('not exists')
-	# 	img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-	# 	cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
-	# 	os.system(cmd)
-	# while not os.path.exists(first_path):
-	# 	time.sleep(0.05)
-	size = check_and_convert(request,page)
+	check_and_convert(request,page)
+	size = request.session['size'] = get_image_size(request,page)
 	c['image_width'] =size[0]
 	c['image_height'] =size[1]
 	c['status'] = 'success'
@@ -470,6 +445,7 @@ def first_page(request):
 	c['total_page'] = request.session['total_page']
 	c['username'] = request.session.get('username')
 	c['page'] = page
+	c['owner_guid'] = request.session['owner_guid']
 	return JsonResponse(c)
 
 @ensure_csrf_cookie
@@ -481,7 +457,8 @@ def select_page(request):
 	if not 1 <= page <= request.session.get('total_page'):
 		c['status'] = 'fail'
 	else:
-		size = check_and_convert(request,page)
+		check_and_convert(request,page)
+		size = request.session['size'] = get_image_size(request,page)
 		c['image_width'] =size[0]
 		c['image_height'] =size[1]
 		c['status'] = 'success'
@@ -489,9 +466,9 @@ def select_page(request):
 		request.session['page'] = page
 		c['total_page'] = request.session['total_page']
 		c['username'] = request.session.get('username')
+		c['owner_guid'] = request.session['owner_guid']
 	print(c)
-		
-	# print(real_path)
+
 
 	return JsonResponse(c)
 
@@ -507,7 +484,15 @@ def check_and_convert(request,p):
 		os.system(cmd)
 	while not os.path.exists(check_path):
 		time.sleep(0.05)
+	return 'mission complete'
+	
+
+def get_image_size(request,p):
+	path = request.session['path']
+	page = int(p)
+	check_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
 	img = Image.open(check_path)
+	print(check_path.split('/')[-1] +' size ' +str(img.size[0]) +' , '+ str(img.size[1]))
 	return img.size
 
 

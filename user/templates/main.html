@@ -244,7 +244,8 @@
 
           </div>
           <div id = 'editor-container' class="container editor" style="background-color: #eeeeee; border :1px solid" >
-            <canvas id='editor_canvas' style = "position: absolute;  z-index: 1;" width = 0; height = 0></canvas>
+            <canvas id='editor_canvas' style = "position: absolute;  z-index: 2;" width = 0; height = 0></canvas>
+            <canvas id='animation_canvas' style = "position: absolute;  z-index: 1;" width = 0; height = 0></canvas>
             <!-- <canvas id='dummy_canvas' style = "position: absolute; margin-top: 50px; z-index: 2" ></canvas> -->
              {% load staticfiles %}
             <img id='input_img' src="{% static img_url %}" style = "position: absolute;  z-index: 0">
@@ -312,9 +313,9 @@
   </div>
 
     <footer class="app-footer">
-      <div class="wrapper">
+<!--       <div class="wrapper">
         <span class="pull-right">2.1 <a href="#"><i class="fa fa-long-arrow-up"></i></a></span> © 2018 Copyright. </a>
-      </div>
+      </div> -->
     </footer>
     
       <!-- Javascript Libs -->
@@ -341,21 +342,28 @@
 
 
   <script type="text/javascript">
+    //canvas: 显示标注结果的canvas
+    // ani_canvas: 显示标注动画的canvas
     var canvas = document.getElementById('editor_canvas');
     var context = canvas.getContext('2d');
-    var returned_backups = [];
-    var added_backups = [];
-    var deleted_backups = [];
-    var returned = [];
-    var added = [];
-    var deleted = [];
-    var action_array = [];
-    var box_category = 'table';
-    var index = - 1;
-    var point_pair = [];
-    var page;
-    var total_page;
+    var ani_canvas = document.getElementById('animation_canvas');
+    var ani_context = ani_canvas.getContext('2d');
+    var returned_backups = [];  // 识别结果返回的box,备份， 没有点保存的话不会更改它
+    var added_backups = [];     // 手动添加的box,备份， 没有点保存的话不会更改它
+    var deleted_backups = [];   // 手动删除的box,备份， 没有点保存的话不会更改它
+    var returned = [];          // 识别结果返回的box
+    var added = [];             // 手动添加的box
+    var deleted = [];           // 手动删除的 box
+    var action_array = [];      // 执行操作的 array.undo redo在此移动指针并且反向操作
+    var box_category = 'table'; // 标注数据的类型
+    var index = - 1;            // action_array的指针,undo往前，redo往后
+    var point_pair = [];        // 标注时点击鼠标的坐标与松开鼠标的坐标
+    var page;                   // 当前页码
+    var total_page;             // 文档总页数
+    var original_width;         // 当前页面（图片）的原始宽度（像素）
+    var original_height;        // 当前页面（图片）的原始宽度（像素）
 
+    //根据 editor-menu-container (div)的宽度来调整 editor-menu-container的宽度
     window.onload = resize_editor_region();
     function resize_editor_region(){
       var w = document.getElementById('editor-menu-container').clientWidth;
@@ -365,11 +373,12 @@
       $(window).resize(function () {          //当浏览器大小变化时
        resize_editor_region();
     });
-    //改变侧边栏button的颜色
+    //改变侧边栏按钮的颜色ps, as是tag的p 和 a, s表示复数。。
     function change_button(b){
       var buttons = ['image_button','table_button','formula_button','erase_button'];
       var ps =['image_p','table_p','formula_p','erase_p'];
       var as =['image_a','table_a','formula_a','erase_a'];
+      // j是 as,ps的index
       var j = -1;
       
       for(var i = 0; i < 4; i++){
@@ -401,7 +410,7 @@
         }
       }
     }
-    //上传
+    //读取 file_uplod input中的file, 上传
     function FileUpload() {
       var file = $('#file_upload')[0].files[0]
       var form_data = new FormData()
@@ -422,7 +431,7 @@
         });
       }
  
-    //下一页
+    //翻页，下一页
     function showNextPage(){
       var post_data = {'action':'next_page'}
       $.ajax({
@@ -447,14 +456,16 @@
             alert('已到达尾页');
           }
           // window.location.reload();
-          update_page_number(res['page'])
+          console.log(res)
+          update_page_number(res['page']);
+          resize_canvas_img();
         },
         error: function(err){
           alert(err);
         }
       });
     }
-    //前一页
+    //翻页，前一页
     function showPrevPage(){
       var post_data = {'action':'prev_page'}
       $.ajax({
@@ -478,6 +489,8 @@
           if(res['status'] == 'first_page'){
             alert('已到达第一页');
           }
+
+          console.log(c)
           update_page_number(res['page'])
           //window.location.reload();
         },
@@ -486,7 +499,7 @@
         }
       });
     }
-    //第一页
+    //翻页，第一页
     function showFirstPage(){
       var post_data = {'action':'first_page'}
       $.ajax({
@@ -510,6 +523,8 @@
           if(res['status'] == 'first_page'){
             // alert('已到达第一页');
           }
+
+          console.log(c)
           update_page_number(res['page'])
           // window.location.reload();
         },
@@ -518,7 +533,7 @@
         }
       });
     }
-
+    // 翻页，末页
     function showLastPage(){
       var post_data = {'action':'first_page'}
       $.ajax({
@@ -542,6 +557,8 @@
           if(res['status'] == 'last_page'){
             // alert('已到达最后一页');
           }
+
+          console.log(c)
           update_page_number(res['page'])
           // window.location.reload();
         },
@@ -571,8 +588,8 @@
           f = c + res['page'].toString()+'.'+e
           $('#input_img').attr('src',f)
           update_page_number(res['page'])
-          alert('success')
-          console.log(f)
+          original_width,original_height = res['image_width'],res['image_height'];
+          console.log(c)
         }
         else{
           alert(res)
@@ -584,26 +601,24 @@
     })
   }
 
-    function update_page_number(page){
-      $('#myNumber').val(page)
-    }
+  function update_page_number(page){
+    $('#myNumber').val(page);
+  }
 
-  function resize_canvas_img(w,h){
-    console.log('w2: ' +w2);
-    var w1 = w;
-    var h1 = h;
-    var w2 = parseInt($('#editor-container').width());
-    var h2 = w2/w1*h1;
-    $('#input_img').css('width',w2+'px').css('height',h2+'px');
-    var c = document.getElementById('editor_canvas');
-    c.setAttribute('width',w2+'');
-    c.setAttribute('height',h2+'');
-
-
-    console.log('resize to ' + w2 + 'px by ' + h2 +'px');
-
- }
-
+  //调整input_img
+  function resize_canvas_img(){
+    var client_width = document.body.clientWidth;
+    var client_height =document.body.clientHeight;
+    // console.log(client_width + ' ' + client_height)
+    $('#input_img').attr('height', client_height-130);
+    $('#editor_canvas').attr('height', $(input_img).height());
+    $('#editor_canvas').attr('width', $(input_img).width());
+    $('#animation_canvas').attr('height', $(input_img).height());
+    $('#animation_canvas').attr('width', $(input_img).width());
+    
+  }
+  // 自动调整图像以及画布的大小
+  window.onload=resize_canvas_img();
 
 
     ////////////////////////////////////////////
@@ -630,104 +645,135 @@ functions
 // }
 
 
-// /*********************************************************
-// 监听事件.
-// **********************************************************/
-// // mousedown behavior while in edit mode，编辑模式下的mousedown事件
-// edit_mousedown = function(e) {
-//   //保存鼠标点击的坐标，并且画辅助线（定位十字）
-//   // a point is a array with two element, x-coordinate and y-coordinate,
-//   // add the point where user start to draw the box to point pair
-//   draw_auxiliary_line(e.offsetX,e.offsetY);
-//   var point_start = [e.offsetX,e.offsetY];
-//   point_pair.push(point_start);
-// }
+/*********************************************************
+监听事件.
+**********************************************************/
+// mousedown behavior while in edit mode，编辑模式下的mousedown事件
+edit_mousedown = function(e) {
+  //保存鼠标点击的坐标，并且画辅助线（定位十字）
+  // a point is a array with two element, x-coordinate and y-coordinate,
+  // add the point where user start to draw the box to point pair
+  // draw_auxiliary_line(e.offsetX,e.offsetY);
+  canvas.addEventListener('mousemove',edit_mousemove);
+  point_start = [e.offsetX,e.offsetY];
+  point_pair.push(point_start);
+  console.log('point_start: '+point_start);
+}
 
-// edit_mouseup = function(e){
-//   // make add the point where user release the left button of mouse to point pair
-//   var point_end = [e.offsetX,e.offsetY];
-//   point_pair.push(point_end);
-//   // the four coordinates for drawing a bounding box
-//   var upper_left = new Array();
-//   var upper_right = new Array();
-//   var lower_left = new Array();
-//   var lower_right = new Array();
+//编辑状态下mouseup动作
+edit_mouseup = function(e){
+  canvas.removeEventListener('mousemove',edit_mousemove);
+  var point_end = [e.offsetX,e.offsetY];
+  point_pair.push(point_end);
+  var upper_left = new Array();
+  var upper_right = new Array();
+  var lower_left = new Array();
+  var lower_right = new Array();
 
-//   var left = Math.min(point_pair[0][0],point_pair[1][0]);
-//   var right = Math.max(point_pair[0][0],point_pair[1][0]);
-//   var top = Math.min(point_pair[0][1],point_pair[1][1]);
-//   var bot = Math.max(point_pair[0][1],point_pair[1][1]);
-//   var coor = [left, top, right, bot]
-//   console.log(coor);
+  var left = Math.min(point_pair[0][0],point_pair[1][0]);
+  var right = Math.max(point_pair[0][0],point_pair[1][0]);
+  var top = Math.min(point_pair[0][1],point_pair[1][1]);
+  var bot = Math.max(point_pair[0][1],point_pair[1][1]);
+  // coordinate是左右上下
+  var coor = [left, right, top, bot]
+  console.log(coor);
 
-//   var new_box = {'category':box_category,'coordinates':coor};
-//   var new_action ={'act':'add_new_box', 'obj':new_box};
+  var new_box = {'category':box_category,'coordinates':coor};
+  var new_action ={'act':'add_new_box', 'obj':new_box};
 
-//   added.push(new_box);
-//   // check if we need to abandon the modification(the rest of the action_array)
-//   if(index == action_array.length - 1){
-//     draw(new_box);
-//     action_array.push(new_action);
-//     index = index + 1;
-//   }
-//   else{
-//     // replace everything in the action_array after the index by this new_action
-//     draw(new_box);
-//     action_array.splice(index + 1,action_array.length - index , new_action);
-//     // action_array.push(new_action);
-//     // no need to update index, because splice replaces the everything starts from the index
-//     index = index + 1;
-//     console.log('abandon');
+  added.push(new_box);
+  // check if we need to abandon the modification(the rest of the action_array)
+  if(index == action_array.length - 1){
+    draw(new_box);
+    action_array.push(new_action);
+    index = index + 1;
+  }
+  else{
+    // replace everything in the action_array after the index by this new_action
+    draw(new_box);
+    action_array.splice(index + 1,action_array.length - index , new_action);
+    // action_array.push(new_action);
+    // no need to update index, because splice replaces the everything starts from the index
+    index = index + 1;
+    console.log('abandon');
 
-//   }
-//   point_pair = [];
-//   draw_all();
-//   // console.log('added length: ' + added.length + ', returned length: ' + returned.length + ', deleted.length: ' + deleted.length);
-// }
+  }
+  point_pair = [];
+  //  =========draw_all();
+  // console.log('added length: ' + added.length + ', returned length: ' + returned.length + ', deleted.length: ' + deleted.length);
+  clear_animation();
+  console.log(added);
+  console.log(action_array);
+}
 
-// //鼠标按下显示定位十字,向上下左右各画15像素
-// function draw_auxiliary_line(x,y){
-//   console.log('draw_auxiliary_line');
-//   context.strokeStyle = '#000000';
-//   context.beginPath();
-//   context.moveTo(x,y);
-//   context.lineTo(x+15,y);
-//   context.stroke();
-//   context.moveTo(x,y);
-//   context.lineTo(x,y+15);
-//   context.stroke();
-//   context.moveTo(x,y);
-//   context.lineTo(x-15,y);
-//   context.stroke();
-//   context.moveTo(x,y);
-//   context.lineTo(x,y-15);
-//   context.stroke();
-//   context.closePath();
-// }
+function edit_mousemove(e){
+  var x = e.offsetX, y =e.offsetY;
+  console.log('point_move: '+x +', ' + y);
+  animation(point_start[0],point_start[1],x,y)
+}
+function animation(x1,y1,x2,y2){
+  ani_context.clearRect(0, 0, ani_canvas.width, ani_canvas.height);
+  ani_context.fillStyle = 'rgba(100,149,237,0.5)';
+  var left = Math.min(x1,x2);
+  var right = Math.max(x1,x2);
+  var top = Math.min(y1,y2);
+  var bottom = Math.max(y1,y2);
+  ani_context.fillRect(left,top,right-left,bottom-top);
+}
+function clear_animation(){
+  ani_canvas = document.getElementById('animation_canvas');
+  ani_context = ani_canvas.getContext('2d');
+  ani_context.clearRect(0, 0, ani_canvas.width, ani_canvas.height);
+}
+
+//鼠标按下显示定位十字,向上下左右各画15像素
+function draw_auxiliary_line(x,y){
+  console.log('draw_auxiliary_line');
+  context.strokeStyle = '#000000';
+  context.beginPath();
+  context.moveTo(x,y);
+  context.lineTo(x+15,y);
+  context.stroke();
+  context.moveTo(x,y);
+  context.lineTo(x,y+15);
+  context.stroke();
+  context.moveTo(x,y);
+  context.lineTo(x-15,y);
+  context.stroke();
+  context.moveTo(x,y);
+  context.lineTo(x,y-15);
+  context.stroke();
+  context.closePath();
+}
 
 
 // /*********************************************************
 // 添加/删除 box
 // **********************************************************/
-// // this function generates an array of points and for each points, it calls delete_box()
-// //删除模式的事件，点击记录位置，删除box,鼠标抬起则重新绘制
-// erase_mousedown = function(e){
-//   eraser_path = [];
-//   x_start = e.offsetX;
-//   y_start = e.offsetY;
-//   console.log('click at: '+ x_start + ',' + y_start);
-//   delete_box(x_start,y_start);
+// this function generates an array of points and for each points, it calls delete_box()
+//删除模式的事件，点击记录位置，删除box,鼠标抬起则重新绘制
+erase_mousedown = function(e){
+  eraser_path = [];
+  x_start = e.offsetX;
+  y_start = e.offsetY;
+  console.log('click at: '+ x_start + ',' + y_start);
+  delete_box(x_start,y_start);
 
-// }
-// // 哈密顿距离 大于 20像素，则点的坐标array(不用了)
-// erase_onmousemove = function (e) {}
 
-// erase_mouseup = function () {
-//   console.log('erase_mouseup');
-//   //delete_box(eraser_path);
-//   draw_all();
-//   canvas.onmousemove = null;
-// }
+}
+// 哈密顿距离 大于 20像素，则点的坐标array(不用了)
+erase_onmousemove = function (e) {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+erase_mouseup = function () {
+  console.log('erase_mouseup');
+  //delete_box(eraser_path);
+  draw_all();
+  canvas.onmousemove = null;
+}
+
+
 
 // // call calculate_distance for each box and it returns true if the distance <= 10 pixel。
 // // if the box is in added array, just delete, otherwise, delete and append it into deleted array
@@ -795,56 +841,55 @@ functions
 // 画图
 // **********************************************************/
 
-// function draw(input_box){
-//   //根据 box的category属性选择不同的颜色
-//   var coordinates = input_box['coordinates'];
-//       context.strokeStyle = '#3232CD';
-//   if(input_box.category == 'image'){
-//     console.log('draw image');
-//     context.lineWidth = 2;
-//     context.strokeStyle = '#3232CD';
-//   }
+function draw(input_box){
+  //根据 box的category属性选择不同的颜色
+  var coordinates = input_box['coordinates'];
+      context.strokeStyle = '#3232CD';
+  if(input_box.category == 'image'){
+    console.log('draw image');
+    context.lineWidth = 2;
+    context.strokeStyle = '#3232CD';
+  }
 
-//   if(input_box.category == 'formula'){
-//     context.lineWidth = 2;
-//     context.strokeStyle = '#F5270B';
-//   }
-//   if(input_box.category == 'table'){
-//     context.lineWidth = 2;
-//     context.strokeStyle = '#32CD32';
-//   }
-//   // draw the box
-//   context.beginPath();
-//   //左，上，右，下
-//   context.moveTo(coordinates[0],coordinates[1]);//左上
-//   context.lineTo(coordinates[2],coordinates[1]); //右上
-//   context.stroke();
-//   context.moveTo(coordinates[2],coordinates[1]);//右上
-//   context.lineTo(coordinates[2],coordinates[3]); //右下
-//   context.stroke();
-//   context.moveTo(coordinates[2],coordinates[3]);//右下
-//   context.lineTo(coordinates[0],coordinates[3]);//左下
-//   context.stroke();
-//   context.moveTo(coordinates[0],coordinates[3]);//左下
-//   context.lineTo(coordinates[0],coordinates[1]);//左上
-//   context.stroke();
+  if(input_box.category == 'formula'){
+    context.lineWidth = 2;
+    context.strokeStyle = '#F5270B';
+  }
+  if(input_box.category == 'table'){
+    context.lineWidth = 2;
+    context.strokeStyle = '#32CD32';
+  }
+  // draw the box
+  context.beginPath();
+  //左，右，上，下
+  context.moveTo(coordinates[0],coordinates[2]);//左上
+  context.lineTo(coordinates[1],coordinates[2]); //右上
+  context.stroke();
+  context.moveTo(coordinates[1],coordinates[2]);//右上
+  context.lineTo(coordinates[1],coordinates[3]); //右下
+  context.stroke();
+  context.moveTo(coordinates[1],coordinates[3]);//右下
+  context.lineTo(coordinates[0],coordinates[3]);//左下
+  context.stroke();
+  context.moveTo(coordinates[0],coordinates[3]);//左下
+  context.lineTo(coordinates[0],coordinates[2]);//左上
+  context.stroke();
+  context.closePath();
 
-//   //console.log('draw rectangle: ' + input_box);
-//   context.closePath();
-// }
+}
 
-// //绘制所有的识别结果(added 和 returned中的 box对象)
-// function draw_all(){
-//   console.log('re-draw ' + added.length +'items in added and ' + returned.length + ' items in returned, in index ' + index);
-//   context.clearRect(0, 0, canvas.width, canvas.height);
-//   for (var i = 0; i < added.length; i++) {
-//     //console.log('added.length '+added.length);
-//     draw(added[i]);
-//   }
-//   for (var i = 0; i < returned.length; i++) {
-//     draw(returned[i]);
-//   }
-// }
+//绘制所有的识别结果(added 和 returned中的 box对象)
+function draw_all(){
+  console.log('re-draw ' + added.length +'items in added and ' + returned.length + ' items in returned, in index ' + index);
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  for (var i = 0; i < added.length; i++) {
+    //console.log('added.length '+added.length);
+    draw(added[i]);
+  }
+  for (var i = 0; i < returned.length; i++) {
+    draw(returned[i]);
+  }
+}
 
 // // 清除画布
 // function reset_canvas(){
@@ -854,110 +899,123 @@ functions
 // 操作+实现逻辑
 // **********************************************************/
 // // enter the edit mode and change the eventlistner
-// //进入编辑（添加标注)模式，改变画布的事件监听
-// function edit_mode(){
-//   console.log('enter edit_mode');
-//   canvas = document.getElementById('editor_canvas');
-//   context = canvas.getContext('2d');
-//   canvas.removeEventListener('mousedown',erase_mousedown);
-//   canvas.removeEventListener('onmousemove', erase_onmousemove);
-//   canvas.removeEventListener('mouseup',erase_mouseup);
-//   canvas.addEventListener('mousedown', edit_mousedown);
-//   canvas.addEventListener('mouseup',edit_mouseup);
-// }
+//进入编辑（添加标注)模式，改变画布的事件监听
+function edit_mode(){
+  console.log('enter edit_mode');
+  canvas = document.getElementById('editor_canvas');
+  context = canvas.getContext('2d');
+  canvas.removeEventListener('mousedown',erase_mousedown);
+  canvas.removeEventListener('onmousemove', erase_onmousemove);
+  canvas.removeEventListener('mouseup',erase_mouseup);
+  canvas.addEventListener('mousedown', edit_mousedown);
+  canvas.addEventListener('mouseup',edit_mouseup);
+  
+//   $('#editor_c').mousemove(function(e){
+//   if(paint){//是不是按下了鼠标
+//     addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+//     redraw();
+//   }
+// });
+}
 
 
 // // change the eventlistener
 // //进入删除模式，改变画布的事件监听
-// function erase_mode(){
-//   var canvas = document.getElementById('editor_canvas');
-//   var context = canvas.getContext('2d');
-//   canvas.removeEventListener('mousedown', edit_mousedown);
-//   canvas.removeEventListener('mouseup',edit_mouseup);
-//   context.lineWidth = 2;
-//   context.strokeStyle = '#000000';
-//   canvas.addEventListener('mousedown',erase_mousedown);
-//   canvas.addEventListener('onmousemove', erase_onmousemove);
-//   canvas.addEventListener('mouseup',erase_mouseup);
-// }
+function erase_mode(){
+  var canvas = document.getElementById('editor_canvas');
+  var context = canvas.getContext('2d');
+  canvas.removeEventListener('mousedown', edit_mousedown);
+  canvas.removeEventListener('mouseup',edit_mouseup);
+  // canvas.addEventListener('onmousemove', edit_mousemove);
+  context.lineWidth = 2;
+  context.strokeStyle = '#000000';
+  canvas.addEventListener('mousedown',erase_mousedown);
+  canvas.addEventListener('onmousemove', erase_onmousemove);
+  canvas.addEventListener('mouseup',erase_mouseup);
+}
 
 
 // // 撤销操作。根据移动action_array中的指针。并且执行相反的操作（不记录在action_array中，但是修改画布，更新 added, returned,和 deleted中的对象）
 // // 其实用两个stack来做就好了: 3 这边一点也不elegant
-// function undo(){
-//   //console.log('before undo, index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
-//   if(index == -1){
-//     // nothing can be undone, disable the button
-//     alert('nothing can be undone');
-//   }
-//   else{
-//     var last_action = action_array[index];
-//     console.log(last_action.act);
-//     index = index - 1;
-//     if(last_action.act == 'add_new_box'){
-//       added.splice(added.length-1,1);
-//       console.log('2');
-//       draw_all();
-//       //console.log('undo adding box, after undo, index is: ' + index +', action length is: ' + action_array.length + ', added length is ' + added.length);
-//     }
-//     if(last_action.act == 'delete_added_box'){
-//       // alert('undo delete_added_box');
-//       added.push(last_action.obj);
-//       console.log('3');
-//       draw_all();
-//       //console.log('undo deleting added box, after undo, index is: ' + index +', action length is: ' + action_array.length + ', added length is ' + added.length);
-//     }
-//     if(last_action.act == 'delete_returned_box'){
-//       returned.push(last_action.obj);
-//       deleted.pop();
-//       console.log('4');
-//       // returned.push(deleted.pop());
-//       draw_all();
-//     }
-//   }
-// }
+function undo(){
+  //console.log('before undo, index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
+  if(index == -1){
+    // nothing can be undone, disable the button
+    alert('nothing can be undone');
+  }
+  else{
+    var last_action = action_array[index];
+    console.log(last_action.act);
+    index = index - 1;
+    if(last_action.act == 'add_new_box'){
+      added.splice(added.length-1,1);
+      console.log('2');
+      draw_all();
+      //console.log('undo adding box, after undo, index is: ' + index +', action length is: ' + action_array.length + ', added length is ' + added.length);
+    }
+    if(last_action.act == 'delete_added_box'){
+      // alert('undo delete_added_box');
+      added.push(last_action.obj);
+      console.log('3');
+      draw_all();
+      //console.log('undo deleting added box, after undo, index is: ' + index +', action length is: ' + action_array.length + ', added length is ' + added.length);
+    }
+    if(last_action.act == 'delete_returned_box'){
+      returned.push(last_action.obj);
+      deleted.pop();
+      console.log('4');
+      // returned.push(deleted.pop());
+      draw_all();
+    }
+  }
+}
 
-// // 同上。更新指针位置，并且做新的操作。
-// function redo(){
-//   console.log('before redo index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
-//   if(index >= action_array.length-1){
-//     alert('nothing can be redone');
-//   }else{
-//     index = index + 1;
-//     var action_to_be_revoked = action_array[index];
-//     if(action_to_be_revoked.act == 'add_new_box'){
-//       added.push(action_to_be_revoked.obj);
-//       console.log('5');
-//       draw_all();
-//       console.log('after redo index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
-//     }
-//     if(action_to_be_revoked.act == 'delete_added_box'){
-//       added.pop(action_to_be_revoked.obj);
-//       console.log('6');
-//       draw_all();
-//     }
-//     if(action_to_be_revoked.act == 'delete_returned_box'){
-//       returned.pop();
-//       deleted.push(action_to_be_revoked.obj);
-//       // deleted.push(returned.pop());
-//       console.log('7');
-//       draw_all();
-//     }
-//   }
-// }
+// 同上。更新指针位置，并且做新的操作。
+function redo(){
+  console.log('before redo index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
+  if(index >= action_array.length-1){
+    alert('nothing can be redone');
+  }else{
+    index = index + 1;
+    var action_to_be_revoked = action_array[index];
+    if(action_to_be_revoked.act == 'add_new_box'){
+      added.push(action_to_be_revoked.obj);
+      console.log('5');
+      draw_all();
+      console.log('after redo index is: ' + index +', length is: ' + action_array.length + ', added length is ' + added.length);
+    }
+    if(action_to_be_revoked.act == 'delete_added_box'){
+      added.pop(action_to_be_revoked.obj);
+      console.log('6');
+      draw_all();
+    }
+    if(action_to_be_revoked.act == 'delete_returned_box'){
+      returned.pop();
+      deleted.push(action_to_be_revoked.obj);
+      // deleted.push(returned.pop());
+      console.log('7');
+      draw_all();
+    }
+    show_info();
+  }
+}
 
-// //改变添加的box的category属性，
-// function change_category_to_formula(){
-//   box_category = 'formula';
-// }
+function show_info(){
+  console.log('added: ' + JSON.stringify())
+}
 
-// function change_category_to_image(){
-//   box_category = 'image';
-// }
+//改变添加的box的category属性，
+function change_category_to_formula(){
+  box_category = 'formula';
+}
 
-// function change_category_to_table(){
-//   box_category = 'table';
-// }
+function change_category_to_image(){
+  box_category = 'image';
+}
+
+function change_category_to_table(){
+  box_category = 'table';
+}
 
 // //保存修改，将参数存入 backups
 // //backups数组允许用户保存修改但是暂时不上传到服务器(被枪毙的功能)
