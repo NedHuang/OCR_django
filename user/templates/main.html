@@ -360,11 +360,18 @@
     var point_pair = [];        // 标注时点击鼠标的坐标与松开鼠标的坐标
     var page;                   // 当前页码
     var total_page;             // 文档总页数
-    var original_width;         // 当前页面（图片）的原始宽度（像素）
-    var original_height;        // 当前页面（图片）的原始宽度（像素）
-
+    var original_width=0;         // 当前页面（图片）的原始宽度（像素）
+    var original_height=0;        // 当前页面（图片）的原始宽度（像素）
+    var canvas_width = $(input_img).width(); // 显示在页面上的图片宽度
+    var canvas_height = $(input_img).height(); //显示在页面上的图片的高度
+    var ratio;
     //根据 editor-menu-container (div)的宽度来调整 editor-menu-container的宽度
     window.onload = resize_editor_region();
+    // window.onload = get_image_original_size();
+    // function get_image_original_size(){
+
+    // }
+
     function resize_editor_region(){
       var w = document.getElementById('editor-menu-container').clientWidth;
       $('#editor-container').css('width',parseInt(w)-10);
@@ -445,12 +452,14 @@
             console.log('success, next_page')
             //把 图片的src 从 a/b/c/d/123.png 改成 a/b/c/d/122.png
             a = $('#input_img').attr('src');
-            b = a.split('/')
-            c = b.slice(0,-1).join('/') + '/'
-            d = parseInt(b[b.length-1].split('.')[0])
-            e = b[b.length-1].split('.')[1]
-            f = c + (d+1).toString()+'.'+e
-            $('#input_img').attr('src',f)
+            b = a.split('/');
+            c = b.slice(0,-1).join('/') + '/';
+            d = parseInt(b[b.length-1].split('.')[0]);
+            e = b[b.length-1].split('.')[1];
+            f = c + (d+1).toString()+'.'+e;
+            $('#input_img').attr('src',f);
+            original_width = res['image_width'];
+            original_height = res['image_height'];
           }
           if(res['status'] == 'last_page'){
             alert('已到达尾页');
@@ -479,12 +488,14 @@
             console.log('success, prev_page');
             //把 图片的src 从 a/b/c/d/123.png 改成 a/b/c/d/124.png
             a = $('#input_img').attr('src');
-            b = a.split('/')
-            c = b.slice(0,-1).join('/') + '/'
-            d = parseInt(b[b.length-1].split('.')[0])
-            e = b[b.length-1].split('.')[1]
-            f = c + (d-1).toString()+'.'+e
-            $('#input_img').attr('src',f)
+            b = a.split('/');
+            c = b.slice(0,-1).join('/') + '/';
+            d = parseInt(b[b.length-1].split('.')[0]);
+            e = b[b.length-1].split('.')[1];
+            f = c + (d-1).toString()+'.'+e;
+            $('#input_img').attr('src',f);
+            original_width = res['image_width'];
+            original_height = res['image_height'];
           }
           if(res['status'] == 'first_page'){
             alert('已到达第一页');
@@ -512,13 +523,14 @@
           if(res['status'] =='success'){
             //把 图片的src 从 a/b/c/d/123.png 改成 a/b/c/d/124.pnga/b/c/d/1.png
             a = $('#input_img').attr('src');
-            b = a.split('/')
-            c = b.slice(0,-1).join('/') + '/'
-            d = parseInt(b[b.length-1].split('.')[0])
-            e = b[b.length-1].split('.')[1]
-            f = c + '1'+'.'+e
-            $('#input_img').attr('src',f)
-            // alert('已到达第一页');
+            b = a.split('/');
+            c = b.slice(0,-1).join('/') + '/';
+            d = parseInt(b[b.length-1].split('.')[0]);
+            e = b[b.length-1].split('.')[1];
+            f = c + '1'+'.'+e;
+            $('#input_img').attr('src',f);
+            original_width = res['image_width'];
+            original_height = res['image_height'];
           }
           if(res['status'] == 'first_page'){
             // alert('已到达第一页');
@@ -545,14 +557,15 @@
         success:function(res){
           if(res['status'] =='success'){
             a = $('#input_img').attr('src');
-            b = a.split('/')
-            c = b.slice(0,-1).join('/') + '/'
-            d = parseInt(b[b.length-1].split('.')[0])
-            e = b[b.length-1].split('.')[1]
-            f = c + res['total_page'].toString()+'.'+e
-            $('#input_img').attr('src',f)
-            // alert('已到达最后一页');
-            console.log(total_page)
+            b = a.split('/');
+            c = b.slice(0,-1).join('/') + '/';
+            d = parseInt(b[b.length-1].split('.')[0]);
+            e = b[b.length-1].split('.')[1];
+            f = c + res['total_page'].toString()+'.'+e;
+            $('#input_img').attr('src',f);
+            original_width = res['image_width'];
+            original_height = res['image_height'];
+            console.log(total_page);
           }
           if(res['status'] == 'last_page'){
             // alert('已到达最后一页');
@@ -581,14 +594,15 @@
         if(res['status'] == 'success'){
           console.log('select_page: '+ selected_page);
           a = $('#input_img').attr('src');
-          b = a.split('/')
-          c = b.slice(0,-1).join('/') + '/'
-          d = parseInt(b[b.length-1].split('.')[0])
-          e = b[b.length-1].split('.')[1]
-          f = c + res['page'].toString()+'.'+e
-          $('#input_img').attr('src',f)
-          update_page_number(res['page'])
-          original_width,original_height = res['image_width'],res['image_height'];
+          b = a.split('/');
+          c = b.slice(0,-1).join('/') + '/';
+          d = parseInt(b[b.length-1].split('.')[0]);
+          e = b[b.length-1].split('.')[1];
+          f = c + res['page'].toString()+'.'+e;
+          $('#input_img').attr('src',f);
+          update_page_number(res['page']);
+          original_width = res['image_width'];
+          original_height = res['image_height'];
           console.log(c)
         }
         else{
@@ -601,8 +615,9 @@
     })
   }
 
-  function update_page_number(page){
-    $('#myNumber').val(page);
+  function update_page_number(the_page){
+    $('#myNumber').val(the_page);
+    page = the_page;
   }
 
   //调整input_img
@@ -610,11 +625,15 @@
     var client_width = document.body.clientWidth;
     var client_height =document.body.clientHeight;
     // console.log(client_width + ' ' + client_height)
+    original_height = $(input_img).height();
+    original_width = $(input_img).width();
     $('#input_img').attr('height', client_height-130);
     $('#editor_canvas').attr('height', $(input_img).height());
     $('#editor_canvas').attr('width', $(input_img).width());
     $('#animation_canvas').attr('height', $(input_img).height());
     $('#animation_canvas').attr('width', $(input_img).width());
+    canvas_width = $(input_img).width();
+    canvas_height = $(input_img).height();
     
   }
   // 自动调整图像以及画布的大小
@@ -675,9 +694,11 @@ edit_mouseup = function(e){
   var top = Math.min(point_pair[0][1],point_pair[1][1]);
   var bot = Math.max(point_pair[0][1],point_pair[1][1]);
   // coordinate是左右上下
-  var coor = [left, right, top, bot]
+  // var coor = [left, right, top, bot]
+  canvas_width = $(input_img).width();
+  ratio =  original_width / canvas_width;
+  var coor = [left*ratio, right*ratio, top*ratio, bot*ratio];
   console.log(coor);
-
   var new_box = {'category':box_category,'coordinates':coor};
   var new_action ={'act':'add_new_box', 'obj':new_box};
 
@@ -862,17 +883,17 @@ function draw(input_box){
   // draw the box
   context.beginPath();
   //左，右，上，下
-  context.moveTo(coordinates[0],coordinates[2]);//左上
-  context.lineTo(coordinates[1],coordinates[2]); //右上
+  context.moveTo(coordinates[0]/ratio,coordinates[2]/ratio);//左上
+  context.lineTo(coordinates[1]/ratio,coordinates[2]/ratio); //右上
   context.stroke();
-  context.moveTo(coordinates[1],coordinates[2]);//右上
-  context.lineTo(coordinates[1],coordinates[3]); //右下
+  context.moveTo(coordinates[1]/ratio,coordinates[2]/ratio);//右上
+  context.lineTo(coordinates[1]/ratio,coordinates[3]/ratio); //右下
   context.stroke();
-  context.moveTo(coordinates[1],coordinates[3]);//右下
-  context.lineTo(coordinates[0],coordinates[3]);//左下
+  context.moveTo(coordinates[1]/ratio,coordinates[3]/ratio);//右下
+  context.lineTo(coordinates[0]/ratio,coordinates[3]/ratio);//左下
   context.stroke();
-  context.moveTo(coordinates[0],coordinates[3]);//左下
-  context.lineTo(coordinates[0],coordinates[2]);//左上
+  context.moveTo(coordinates[0]/ratio,coordinates[3]/ratio);//左下
+  context.lineTo(coordinates[0]/ratio,coordinates[2]/ratio);//左上
   context.stroke();
   context.closePath();
 
@@ -1019,72 +1040,67 @@ function change_category_to_table(){
 
 // //保存修改，将参数存入 backups
 // //backups数组允许用户保存修改但是暂时不上传到服务器(被枪毙的功能)
-// function save_change(){
-//   console.log('save_change');
-//   returned_backups = new Array();
-//   returned_backups = returned.concat();
-//   added_backups = new Array();
-//   added_backups = added.concat();
-//   deleted_backups = new Array();
-//   deleted_backups = deleted.concat();
-// }
+function save_change(){
+  console.log('save_change');
+  returned_backups = new Array();
+  returned_backups = returned.concat();
+  added_backups = new Array();
+  added_backups = added.concat();
+  deleted_backups = new Array();
+  deleted_backups = deleted.concat();
+}
 
-// //重置所有改动, abandon all changes， 所有数组设置为backups
-// function reset() {
-//   returned = new Array();
-//   returned = returned_backups.concat();
-//   added = new Array();
-//   added = added_backups.concat();
-//   deleted = new Array();
-//   deleted = deleted_backups.concat();
-// }
-
-
+//重置所有改动, abandon all changes， 所有数组设置为backups
+function reset() {
+  returned = new Array();
+  returned = returned_backups.concat();
+  added = new Array();
+  added = added_backups.concat();
+  deleted = new Array();
+  deleted = deleted_backups.concat();
+}
 
 
 
-// //将保存后的结果传回 server
-// function save_change_to_server(){
-//   // in case of error raised by PHP 5 to enpty array
-//   if(returned_backups.length == 0){returned_backups.push('');}
-//   if(added_backups.length == 0){added_backups.push('');}
-//   if(deleted_backups.length == 0){deleted_backups.push('');}
-//   save_change();
-//   var obj =
-//   {
-//     'operation': 'save_change',
-//     'filename': localStorage.getItem('filename'),
-//     'username': localStorage.getItem('username'),
-//     'page' : localStorage.getItem('page'),
-//     'extension': localStorage.getItem('extension'),
-//     'file_directory':localStorage.getItem('file_directory'),
-//     'returned_boxes': returned_backups,
-//     'added_boxes': added_backups,
-//     'deleted_boxes': deleted_backups,
-//     'canvas_width' : localStorage.getItem('canvas_width'),
-//     'original_width': localStorage.getItem('original_width'),
-//   }
-//   console.log('save_change_to_server');
-//   console.log(JSON.stringify(obj));
-//   // alert("operation: " + obj['operation']);
-//   $.ajax(
-//   {
-//     url: '../php/convert.php',
-//     type:'post',
-//     data: obj,
-//     // processData:false,
-//     // contentType:false,
 
-//     success:function(res){
-//       console.log(res);
-//       // alert(res);
-//       alert('您所做的修改已保存到服务器');
-//     },
-//     error:function(err){
-//       alert('网络链接失败');
-//     }
-//   })
-// }
+
+//将保存后的结果传回 server
+function save_change_to_server(){
+  // in case of error raised by PHP 5 to enpty array
+  // if(returned_backups.length == 0){returned_backups.push('');}
+  // if(added_backups.length == 0){added_backups.push('');}
+  // if(deleted_backups.length == 0){deleted_backups.push('');}
+  save_change();
+  var obj =
+  {
+    'canvas_height':canvas_height,
+    'canvas_width':canvas_width,
+    'original_height':original_height,
+    'original_width':original_width,
+    'added_backups':JSON.stringify(added_backups),
+    'returned_backups':JSON.stringify(returned_backups),
+    'deleted_backups':JSON.stringify(deleted_backups),
+  }
+  console.log('save_change_to_server');
+  console.log(JSON.stringify(obj));
+  $.ajax(
+  {
+    url: '/user/save_change_to_server/',
+    type:'post',
+    data: obj,
+    // processData:false,
+    // contentType:false,
+
+    success:function(res){
+      console.log(res);
+    
+      alert('您所做的修改已保存到服务器');
+    },
+    error:function(err){
+      alert('网络链接失败');
+    }
+  })
+}
 
 
 

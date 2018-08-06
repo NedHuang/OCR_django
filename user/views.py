@@ -308,7 +308,10 @@ def edit_file(request):
 	request.session['path'] = file.path
 	request.session['owner_guid'] = str(file.owner.user_guid)
 	request.session['filename'] = file.filename
-	# request.session['username'] = 
+	check_and_convert(request,page)
+	size = request.session['size'] = get_image_size(request,page)
+	c['image_width'] =size[0]
+	c['image_height'] =size[1]
 	c['owner_guid'] = request.session['owner_guid']
 	c['message'] = file.filename
 	c['filename'] = request.session['filename']
@@ -335,6 +338,10 @@ def load_file(request):
 	check_and_convert(request,page)
 	print('---------------------')
 	c = {}
+	check_and_convert(request,page)
+	size = request.session['size'] = get_image_size(request,page)
+	c['image_width'] =size[0]
+	c['image_height'] =size[1]
 	c['page'] = page
 	c['total_page'] = request.session.get('total_page')
 	c['filename'] = request.session['filename']
@@ -501,9 +508,91 @@ def get_image_size(request,p):
 # 	page = request.session['page']
 # 	file_guid = request.session['file_guid']
 
+@csrf_exempt
+# 将传回的string解析成 object 然后写入数据库
+def save_change_to_server(request):
+	# print(request.POST)
+	canvas_height = request.POST.get('canvas_height')
+	canvas_width = request.POST.get('canvas_width')
+	original_height = request.POST.get('original_height')
+	original_width =request.POST.get('original_width')
+	added_backups = request.POST.get('added_backups','')
+	returned_backups = request.POST.get('returned_backups','')
+	deleted_backups = request.POST.get('deleted_backups','')
+
+	# print('canvas_height: ' + canvas_height)
+	# print('canvas_width: '+canvas_width)
+	# print('original_height: '+original_height)
+	# print('original_width: '+original_width)
+	# print('added_backups: '+added_backups)
+	# print('returned_backups: '+returned_backups)
+	# print('deleted_backups: '+deleted_backups)
+	# print(added_backups[1:][:-1].split('}'))
+	added = to_json_object(added_backups)
+	deleted = to_json_object(deleted_backups)
+	returned = to_json_object(returned_backups)
+	add_to_sql(request,added,original_width,original_height,canvas_width,canvas_height)
+	# delete_from_sql(request,deleted)
+	# to_sql(returned) # 没必要 
+	# print('added: '+json.loads(added_backups[0]))
+	# print(request.session['file_guid'])
+	# print(request.session['username'])
+	# print(request.session['path'])
+	save_path = '/'.join(request.session['path'].split('/')[:-1])+'/'+request.session['username']+'/'
+	txt_path =save_path+str(request.session['page'])+'.txt'
+	print(save_path)
+	return JsonResponse({'save_path':save_path})
 
 
+# string转换成 JSON object的list
+def to_json_object(string):
+	ans = []
+	for i in string[1:][:-1].split('},'):
+		if i == None or i == '':
+			continue
+		ans.append(json.loads(i+'}')) if i[-1] != '}' else ans.append(json.loads(i))
+	return ans
 
+# class Object(models.Model):
+# 	object_guid = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)
+# 	file = models.ForeignKey(File, on_delete=models.CASCADE)
+# 	category = models.PositiveIntegerField() #figure
+# 	coordinate = models.CharField(max_length=256,default='') # "shang,xia,zuo,you"
+# 	status = models.CharField(max_length=256,default='')
+# 	editor = models.ForeignKey(User, on_delete=models.CASCADE,default = None)
+# 	page = models.PositiveIntegerField(default = 1)
+#把object加入数据库
+@csrf_exempt
 
+def add_to_sql(request,added,ow,oh,cw,ch):
+	print(request.session['file_guid'])
+	print(request.session['username'])
+	print(request.session['path'])
+	print(added)
+
+	this_user = User.objects.filter(username = request.session['username'])[0]
+	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	for i in added:
+		obj = Object()
+		obj.coordinate = str(i['coordinates'])
+		obj.category = i['category']
+		obj.file = this_file
+		obj.editor = this_user
+		obj.page = int(request.session['page'])
+		# obj.status = 'added'
+		# obj.save()
+		print('--------')
+		print(obj.coordinate)
+		print(obj.page)
+		print(obj.file.filename)
+		print(obj.editor.username)
+		print(obj.category)
+		print('++++++++')
+		obj.save()
+		# print(request.session['page'])
+		# print(this_file.filename)
+		# print(this_user.username)
+	return 'yes'
+# def delete_from_sql(request,deleted):
 
 

@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^first_page/$', views.first_page, name ='first_page'),
     url(r'^last_page/$', views.last_page, name ='last_page'),
     url(r'^select_page/$', views.select_page, name ='select_page'),
+    url(r'^save_change_to_server/$', views.save_change_to_server, name ='save_change_to_server'),
 
 
 
