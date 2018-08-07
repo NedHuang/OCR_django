@@ -304,7 +304,7 @@ def edit_file(request):
 	
 	request.session['file_guid'] = str(file_guid)
 	request.session['total_page'] = file.total_page
-	request.session['page'] = 1
+	request.session['page'] = page =1
 	request.session['path'] = file.path
 	request.session['owner_guid'] = str(file.owner.user_guid)
 	request.session['filename'] = file.filename
@@ -573,9 +573,10 @@ def add_to_sql(request,added,ow,oh,cw,ch):
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	for i in added:
+		print(box_category)
 		obj = Object()
 		obj.coordinate = str(i['coordinates'])
-		obj.category = i['category']
+		obj.category = box_category[i['category']]
 		obj.file = this_file
 		obj.editor = this_user
 		obj.page = int(request.session['page'])
@@ -589,10 +590,14 @@ def add_to_sql(request,added,ow,oh,cw,ch):
 		print(obj.category)
 		print('++++++++')
 		obj.save()
-		# print(request.session['page'])
-		# print(this_file.filename)
-		# print(this_user.username)
+		print(request.session['page'])
+		print(this_file.filename)
+		print(this_user.username)
 	return 'yes'
 # def delete_from_sql(request,deleted):
 
-
+box_category={
+	'formula':1,
+	'table':2,
+	'figure':3,
+}

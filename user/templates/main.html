@@ -25,6 +25,7 @@
   <!-- Animation CSS-->
   <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/animate.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/main.css' %}">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
 
 </head>
@@ -123,6 +124,13 @@
           </ul>
         </div>
       </nav>
+
+
+
+
+
+
+
       <div class="side-menu sidebar-inverse">
         <nav class="navbar navbar-default" role="navigation">
           <div class="side-menu-container">
@@ -136,14 +144,15 @@
                 <i class="fa fa-times icon"></i>
               </button>
             </div>
-            <ul class="nav navbar-nav" >
-
-              
+          <div>
+            <ul class="nav navbar-nav " >
               <li>
                 <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
                   <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
                 </a>
+
               </li>
+
               <li>
                 <a id='table_a' onclick = 'change_category_to_table();edit_mode();'>
                   <span class="icon fa fa-pen "></span><span id="table_button" class="title" onclick = "change_button('table_button')"><p id ="table_p">标注表格</p></span>
@@ -186,32 +195,25 @@
                 </a>
               </li>
               <li>
-                <a onclick = 'hahaha()'>
-                  <span class="icon fa fa-trash"></span><span class="title">hahaah</span>
+                <a onclick = 'zoom_in()'>
+                  <span class="icon fa fa-search-plus"></span><span class="title">放大</span>
                 </a>
               </li>
-
-
+              <li>
+                <a onclick = 'zoom_out()'>
+                  <span class="icon fa fa-search-minus"></span><span class="title">缩小</span>
+                </a>
+              </li>
             </ul>
           </div>
-          <!-- /.navbar-collapse -->
         </nav>
       </div>
       <!-- Main Content -->
       <div class="container-fluid">
         <div class="side-body" >
-          <div id = "editor-menu-container" class="row " style="background-color: rgb(232, 236, 230);margin: 0px;padding: 0px;">
+          <div id = "editor-menu-container" class="row " style="background-color: rgb(232, 236, 230);margin: 0px;padding: 0px; margin-top:20px">
               <div class="row-fluid" >
                 <div class="  col-sm-2 col-md-3  col-lg-3 span3" >
-
-<!-- 
-                    <form method="post" action="/user/upload/" enctype="multipart/form-data">
-                    {% csrf_token %}
-                       <label> 上传文件 </label>
-                       <input type="file" name="myfile" />
-                       <br/>
-                       <input type="submit" value="upload"/>
-                    </form> -->
                     
 
                   <form id='upload' enctype="multipart/form-data" method ='post'>
@@ -620,7 +622,7 @@
     page = the_page;
   }
 
-  //调整input_img
+  //调整input_img,不可以在放大缩小的时候调用
   function resize_canvas_img(){
     var client_width = document.body.clientWidth;
     var client_height =document.body.clientHeight;
@@ -696,7 +698,8 @@ edit_mouseup = function(e){
   // coordinate是左右上下
   // var coor = [left, right, top, bot]
   canvas_width = $(input_img).width();
-  ratio =  original_width / canvas_width;
+  // ratio = original_width / canvas_width;
+  ratio = getratio();
   var coor = [left*ratio, right*ratio, top*ratio, bot*ratio];
   console.log(coor);
   var new_box = {'category':box_category,'coordinates':coor};
@@ -724,7 +727,7 @@ edit_mouseup = function(e){
   // console.log('added length: ' + added.length + ', returned length: ' + returned.length + ', deleted.length: ' + deleted.length);
   clear_animation();
   console.log(added);
-  console.log(action_array);
+  // console.log(action_array);
 }
 
 function edit_mousemove(e){
@@ -866,7 +869,7 @@ function draw(input_box){
   //根据 box的category属性选择不同的颜色
   var coordinates = input_box['coordinates'];
       context.strokeStyle = '#3232CD';
-  if(input_box.category == 'image'){
+  if(input_box.category == 'figure'){
     console.log('draw image');
     context.lineWidth = 2;
     context.strokeStyle = '#3232CD';
@@ -901,8 +904,8 @@ function draw(input_box){
 
 //绘制所有的识别结果(added 和 returned中的 box对象)
 function draw_all(){
-  console.log('re-draw ' + added.length +'items in added and ' + returned.length + ' items in returned, in index ' + index);
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  clear_all_canvas();
+  console.log('draw_all')
   for (var i = 0; i < added.length; i++) {
     //console.log('added.length '+added.length);
     draw(added[i]);
@@ -1031,12 +1034,14 @@ function change_category_to_formula(){
 }
 
 function change_category_to_image(){
-  box_category = 'image';
+  box_category = 'figure';
 }
 
 function change_category_to_table(){
   box_category = 'table';
 }
+
+
 
 // //保存修改，将参数存入 backups
 // //backups数组允许用户保存修改但是暂时不上传到服务器(被枪毙的功能)
@@ -1227,6 +1232,64 @@ function save_change_to_server(){
 // function print_box(box){
 //   console.log('category: '+box.category+'; coordinates: '+parseInt(box.coordinates[0])+', '+parseInt(box.coordinates[1])+', '+parseInt(box.coordinates[2])+', '+parseInt(box.coordinates[3]));
 // }
+function getratio(){
+  var canvas_width = $(input_img).width();
+  ratio = original_width / canvas_width;
+   var canvas_height = $(input_img).height();
+  console.log('ratio: ' +ratio);
+  return ratio;
+}
+function zoom_in(){
+    w = $('#input_img').width();
+    h = $('#input_img').height();
+    new_h = h + 100;
+    new_w = w *(new_h/h);
+    h = new_h;
+    w = new_w;
+    $('#input_img').width(new_w);
+    $('#input_img').height(new_h);
+    $('#editor_canvas').attr('height', $(input_img).height());
+    $('#editor_canvas').attr('width', $(input_img).width());
+    $('#animation_canvas').attr('height', $(input_img).height());
+    $('#animation_canvas').attr('width', $(input_img).width());
+    // q清空画布，重新计算缩放比例，重新绘制
+    clear_all_canvas();
+    ratio = getratio();
+    draw_all();
+    
+}
+
+
+
+function zoom_out(){
+  // for(var i = 0; i < 10; i++){
+    w = $('#input_img').width();
+    h = $('#input_img').height();
+    new_h = h - 100;
+    new_w = w *(new_h/h);
+    h = new_h;
+    w = new_w;
+    $('#input_img').width(new_w);
+    $('#input_img').height(new_h);
+    // 
+    $('#editor_canvas').attr('height', $(input_img).height());
+    $('#editor_canvas').attr('width', $(input_img).width());
+    $('#animation_canvas').attr('height', $(input_img).height());
+    $('#animation_canvas').attr('width', $(input_img).width());
+    clear_all_canvas();
+    ratio = getratio();
+    draw_all();
+}
+
+// 清空画布并且重置
+function clear_all_canvas(){
+  console.log('clear_all_canvas')
+  ani_context.clearRect(0, 0, ani_canvas.width, ani_canvas.height);
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+ 
+}
+
   </script>
 
 </body>
