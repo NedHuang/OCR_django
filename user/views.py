@@ -378,6 +378,7 @@ def next_page(request):
 		c['total_page'] = request.session['total_page']
 		c['username'] = request.session.get('username')
 		c['owner_guid'] = request.session['owner_guid']
+		print('page: '+str(request.session['page']))
 		return JsonResponse(c)
 	else:
 		c['page'] = page
@@ -408,6 +409,7 @@ def prev_page(request):
 		c['username'] = request.session.get('username')
 		c['page'] = page
 		c['owner_guid'] = request.session['owner_guid']
+		print('page: '+str(request.session['page']))
 		return JsonResponse(c)
 	else:
 		c['page'] = page
@@ -434,6 +436,7 @@ def last_page(request):
 	c['username'] = request.session.get('username')
 	c['page'] = page
 	c['owner_guid'] = request.session['owner_guid']
+	print('page: '+str(request.session['page']))
 	return JsonResponse(c)
 	
 
@@ -453,6 +456,7 @@ def first_page(request):
 	c['username'] = request.session.get('username')
 	c['page'] = page
 	c['owner_guid'] = request.session['owner_guid']
+	print('page: '+str(request.session['page']))
 	return JsonResponse(c)
 
 @ensure_csrf_cookie
@@ -474,6 +478,7 @@ def select_page(request):
 		c['total_page'] = request.session['total_page']
 		c['username'] = request.session.get('username')
 		c['owner_guid'] = request.session['owner_guid']
+		print('page: '+str(request.session['page']))
 	print(c)
 
 
@@ -573,31 +578,102 @@ def add_to_sql(request,added,ow,oh,cw,ch):
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	for i in added:
-		print(box_category)
+		# print(box_category)
 		obj = Object()
+		# 左右上下
+		obj.left = int(i['coordinates'][0])
+		obj.right = int(i['coordinates'][1])
+		obj.top = int(i['coordinates'][2])
+		obj.bot = int(i['coordinates'][3])
 		obj.coordinate = str(i['coordinates'])
 		obj.category = box_category[i['category']]
 		obj.file = this_file
 		obj.editor = this_user
 		obj.page = int(request.session['page'])
+		obj.save()
 		# obj.status = 'added'
 		# obj.save()
-		print('--------')
-		print(obj.coordinate)
-		print(obj.page)
-		print(obj.file.filename)
-		print(obj.editor.username)
-		print(obj.category)
-		print('++++++++')
-		obj.save()
-		print(request.session['page'])
-		print(this_file.filename)
-		print(this_user.username)
+		# print('--------')
+		# print(obj.coordinate)
+		# print(obj.page)
+		# print(obj.file.filename)
+		# print(obj.editor.username)
+		# print(obj.category)
+		# print('++++++++')
+		# 
+		# print(request.session['page'])
+		# print(this_file.filename)
+		# print(this_user.username)
 	return 'yes'
-# def delete_from_sql(request,deleted):
+
+def get_boxes(request):
+	ans = []
+	this_user = User.objects.filter(username = request.session['username'])[0]
+	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	page = request.session['page']
+	boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page=page)
+	for i in boxes:
+		print(i)
+
+	return
+
+def return_OCR_results(request):
+	ans = []
+	this_user = User.objects.filter(username = request.session['username'])[0]
+	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	page = request.session['page']
+	boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page=page)
+	for i in boxes:
+		# 左右上下
+		box = {'category':rev_box_category[i.category],'coordinates':[(i.left), (i.right), (i.top), (i.bot)]}
+		# print(box)
+		ans.append(box)
+	return JsonResponse(ans,safe=False)
+
+
+# 导出所有我的标注，生成txt文件，提供下载
+def get_my_data(request):
+	this_user = User.objects.filter(username = request.session['username'])[0]
+	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/txt_files/'
+	print(txt_path)
+	if not os.path.exists(txt_path):
+		os.makedirs(txt_path)
+	total_page = this_file.total_page
+	for i in range(1,total_page+1):
+		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i)
+		if boxes.count():
+			write_into_txt(request,txt_path,boxes,i)
+
+	# for i in boxes:
+	# 	# 左右上下
+	# 	box = {'category':rev_box_category[i.category],'coordinates':[(i.left), (i.right), (i.top), (i.bot)]}
+	# 	# print(box)
+	# 	ans.append(box)
+
+	return JsonResponse({'a':'a','b':'b'})
+
+# 将数据库条目写入txt文件， 格式为 左,右,上,下 \t category \r\n
+def write_into_txt(request,path,boxes,page):
+	content = ''
+	for box in boxes:
+		content += str(box.left)+','+str(box.right)+str(box.top)+','+str(box.bot)+'\t'+rev_box_category[box.category]+'\r\n'
+	print(page)
+	print(content)
+	f = open(path +request.session['username']+'-'+str(page)+'.txt','wb')
+	f.write(content.encode())
+	f.close()
+
+
 
 box_category={
 	'formula':1,
 	'table':2,
 	'figure':3,
+}
+
+rev_box_category={
+	1:'formula',
+	2:'table',
+	3:'figure',
 }

@@ -40,7 +40,11 @@ class Object(models.Model):
 	object_guid = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)
 	file = models.ForeignKey(File, on_delete=models.CASCADE)
 	category = models.PositiveIntegerField() #figure
-	coordinate = models.CharField(max_length=256,default='') # "shang,xia,zuo,you"
+	#coordinate = models.CharField(max_length=256,default='') # "shang,xia,zuo,you"
+	top = models.IntegerField(default = -1)
+	bot = models.IntegerField(default = -1)
+	left = models.IntegerField(default = -1)
+	right = models.IntegerField(default = -1)
 	status = models.CharField(max_length=256,default='')
 	editor = models.ForeignKey(User, on_delete=models.CASCADE,default = None)
 	page = models.PositiveIntegerField(default = 1)

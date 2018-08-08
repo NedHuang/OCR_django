@@ -185,9 +185,10 @@
                 </a>
               </li>
               <li>
-                <a onclick = ''>
+                <a data-toggle="modal" data-target="#getResultModel">
                   <span class="icon fa fa-download"></span><span class="title">导出结果</span>
                 </a>
+                <!-- <button type="button" class="btn btn-default" data-toggle="modal" data-target="#getResultModel">导出</button> -->
               </li>
               <li>
                 <a onclick = 'get_data()'>
@@ -204,6 +205,14 @@
                   <span class="icon fa fa-search-minus"></span><span class="title">缩小</span>
                 </a>
               </li>
+
+              <li>
+                <a onclick = 'get_boxes()'>
+                  <span class="icon fa fa-search-minus"></span><span class="title">缩小</span>
+                </a>
+              </li>
+
+
             </ul>
           </div>
         </nav>
@@ -314,6 +323,35 @@
     </div>
   </div>
 
+
+  <!-- 导出结果 -->
+    <!-- 账户管理 -->
+  <div class="modal fade" id="getResultModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+           导出选项
+          </h4>
+        </div>
+        <div class="modal-body">
+          <p> 请选择需要导出的标注 </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='get_my_data()'>
+            导出我的标注
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick='get_all_data()'>
+            导出所有标注
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <footer class="app-footer">
 <!--       <div class="wrapper">
         <span class="pull-right">2.1 <a href="#"><i class="fa fa-long-arrow-up"></i></a></span> © 2018 Copyright. </a>
@@ -367,12 +405,7 @@
     var canvas_width = $(input_img).width(); // 显示在页面上的图片宽度
     var canvas_height = $(input_img).height(); //显示在页面上的图片的高度
     var ratio;
-    //根据 editor-menu-container (div)的宽度来调整 editor-menu-container的宽度
-    window.onload = resize_editor_region();
-    // window.onload = get_image_original_size();
-    // function get_image_original_size(){
 
-    // }
 
     function resize_editor_region(){
       var w = document.getElementById('editor-menu-container').clientWidth;
@@ -424,21 +457,21 @@
       var file = $('#file_upload')[0].files[0]
       var form_data = new FormData()
       form_data.append('file', file)
-        $.ajax({
-            url:'/user/upload/',
-            type:'POST',
-            data: form_data,
-            processData: false,  // tell jquery not to process the data
-            contentType: false, // tell jquery not to set contentType
-            success: function(res) {
-                alert(res['message']);
-                console.log('ojbk');
-            },
-            error: function(err){
-              alert(err['message']);
-            }
-        });
-      }
+      $.ajax({
+        url:'/user/upload/',
+        type:'POST',
+        data: form_data,
+        processData: false,  // tell jquery not to process the data
+        contentType: false, // tell jquery not to set contentType
+        success: function(res) {
+            alert(res['message']);
+            console.log('ojbk');
+        },
+        error: function(err){
+          alert(err['message']);
+        }
+      });
+    }
  
     //翻页，下一页
     function showNextPage(){
@@ -467,9 +500,10 @@
             alert('已到达尾页');
           }
           // window.location.reload();
-          console.log(res)
+          console.log(res);
           update_page_number(res['page']);
           resize_canvas_img();
+          get_boxes();
         },
         error: function(err){
           alert(err);
@@ -502,10 +536,12 @@
           if(res['status'] == 'first_page'){
             alert('已到达第一页');
           }
-
-          console.log(c)
-          update_page_number(res['page'])
-          //window.location.reload();
+          console.log('prevpage');
+          console.log(original_width);
+          console.log(res);
+          update_page_number(res['page']);
+          resize_canvas_img();
+          get_boxes();
         },
         error: function(err){
           alert(err);
@@ -538,9 +574,12 @@
             // alert('已到达第一页');
           }
 
-          console.log(c)
-          update_page_number(res['page'])
-          // window.location.reload();
+          console.log('fitstPage');
+          console.log(original_width);
+          console.log(res);
+          update_page_number(res['page']);
+          resize_canvas_img();
+          get_boxes();
         },
         error: function(err){
           alert('err');
@@ -573,9 +612,12 @@
             // alert('已到达最后一页');
           }
 
-          console.log(c)
-          update_page_number(res['page'])
-          // window.location.reload();
+          console.log('Lastpage');
+          console.log(original_width);
+          console.log(res);
+          update_page_number(res['page']);
+          resize_canvas_img();
+          get_boxes();
         },
         error: function(err){
           alert('err');
@@ -610,6 +652,12 @@
         else{
           alert(res)
         }
+        console.log('select_page: ' + res['page']);
+        console.log(original_width);
+        console.log(res);
+        update_page_number(res['page']);
+        resize_canvas_img();
+        get_boxes();
       },
       error:function(err){
         alert(JSON.stringify(err))
@@ -627,8 +675,10 @@
     var client_width = document.body.clientWidth;
     var client_height =document.body.clientHeight;
     // console.log(client_width + ' ' + client_height)
-    original_height = $(input_img).height();
-    original_width = $(input_img).width();
+    // original_height = $(input_img).height();
+    // original_width = $(input_img).width();
+    console.log('aaaa');
+    console.log(original_width);
     $('#input_img').attr('height', client_height-130);
     $('#editor_canvas').attr('height', $(input_img).height());
     $('#editor_canvas').attr('width', $(input_img).width());
@@ -781,7 +831,7 @@ erase_mousedown = function(e){
   x_start = e.offsetX;
   y_start = e.offsetY;
   console.log('click at: '+ x_start + ',' + y_start);
-  delete_box(x_start,y_start);
+  delete_box(x_start*ratio,y_start*ratio);
 
 
 }
@@ -802,63 +852,66 @@ erase_mouseup = function () {
 // // call calculate_distance for each box and it returns true if the distance <= 10 pixel。
 // // if the box is in added array, just delete, otherwise, delete and append it into deleted array
 // // 遍历 returned以及added中的box, 计算x,y是否在矩形中，是则删除，并且记录操作
-// function delete_box(x,y){
-//   for(var j =0; j < added.length;j++){
-//     var left = added[j].coordinates[0];
-//     var top = added[j].coordinates[1];
-//     var right = added[j].coordinates[2];
-//     var bot = added[j].coordinates[3];
-//     if(calculate_diatance(x,y,left,top,right,bot)){
-//       var deleted_box = added[j];
-//       added.splice(j,1);
-//       var new_action = {'act':'delete_added_box', 'obj':deleted_box};
-//       // update the index when delete a box
-//       j = j - 1;
-//       if(index == action_array.length - 1){
-//         action_array.push(new_action);
-//         index = index + 1;
-//       }
-//       else{
-//         action_array.splice(index, action_array.length - index);
-//         action_array.push(new_action);
-//       }
-//     }
-//   }
+function delete_box(x,y){
+  console.log()
+  for(var j =0; j < added.length;j++){
+    var left = added[j].coordinates[0];
+    var right = added[j].coordinates[1];
+    var top = added[j].coordinates[2];
+    var bot = added[j].coordinates[3];
+    if(calculate_diatance(x,y,left,top,right,bot)){
+      var deleted_box = added[j];
+      console.log('deletedbox: ');
+      console.log(deleted_box);
+      added.splice(j,1);
+      var new_action = {'act':'delete_added_box', 'obj':deleted_box};
+      // update the index when delete a box
+      j = j - 1;
+      if(index == action_array.length - 1){
+        action_array.push(new_action);
+        index = index + 1;
+      }
+      else{
+        action_array.splice(index, action_array.length - index);
+        action_array.push(new_action);
+      }
+    }
+  }
 
-//   for(var j =0; j < returned.length;j++){
-//     var left = returned[j].coordinates[0];
-//     var top = returned[j].coordinates[1];
-//     var right = returned[j].coordinates[2];
-//     var bot = returned[j].coordinates[3];
-//     if(calculate_diatance(x,y,left,top,right,bot)){
-//       var deleted_box = returned[j];
-//       returned.splice(j,1);
-//       // record this false positive instance by pushing the box into 'deleted'array
-//       deleted.push(deleted_box);
-//       var new_action = {'act':'delete_returned_box', 'obj':deleted_box};
-//       // update the index
-//       j = j - 1;
-//       if(index == action_array.length - 1){
-//         action_array.push(new_action);
-//         index = index + 1;
-//       }
-//       else{
-//         action_array.splice(index, action_array.length - index);
-//         action_array.push(new_action);
-//       }
-//     }
-//   }
-// }
+  for(var j =0; j < returned.length;j++){
+    var left = returned[j].coordinates[0];
+    var right = returned[j].coordinates[1];
+    var top = returned[j].coordinates[2];
+    var bot = returned[j].coordinates[3];
+    if(calculate_diatance(x,y,left,top,right,bot)){
+      var deleted_box = returned[j];
+      returned.splice(j,1);
+      // record this false positive instance by pushing the box into 'deleted'array
+      deleted.push(deleted_box);
+      var new_action = {'act':'delete_returned_box', 'obj':deleted_box};
+      // update the index
+      j = j - 1;
+      if(index == action_array.length - 1){
+        action_array.push(new_action);
+        index = index + 1;
+      }
+      else{
+        action_array.splice(index, action_array.length - index);
+        action_array.push(new_action);
+      }
+    }
+  }
+}
 
-// // if the sum of distance from the point to a pair of edges is smaller than the height/width + 20 pixel, return true;
-// // 计算。。点到到两边的坐标查一正一副，则在此范围内
-// function calculate_diatance(x,y,x_1,y_1,x_2,y_2){
-//   if ((x-x_1)*(x-x_2) <= 0  && (y-y_1)*(y-y_2) <= 0){
-//     console.log("delete box: " + parseInt(x_1) + ", " + parseInt(y_1) + ", " + parseInt(x_2) +', '+parseInt(y_2));
-//     return true;
-//   }
-//   return false;
-// }
+// if the sum of distance from the point to a pair of edges is smaller than the height/width + 20 pixel, return true;
+// 计算。。点到到两边的坐标查一正一副，则在此范围内
+function calculate_diatance(x,y,x_1,y_1,x_2,y_2){
+  if ((x-x_1)*(x-x_2) <= 0  && (y-y_1)*(y-y_2) <= 0){
+    console.log("delete box: " + parseInt(x_1) + ", " + parseInt(y_1) + ", " + parseInt(x_2) +', '+parseInt(y_2));
+    return true;
+  }
+  return false;
+}
 
 
 // /*********************************************************
@@ -871,6 +924,7 @@ function draw(input_box){
       context.strokeStyle = '#3232CD';
   if(input_box.category == 'figure'){
     console.log('draw image');
+    console.log(coordinates);
     context.lineWidth = 2;
     context.strokeStyle = '#3232CD';
   }
@@ -895,6 +949,7 @@ function draw(input_box){
   context.moveTo(coordinates[1]/ratio,coordinates[3]/ratio);//右下
   context.lineTo(coordinates[0]/ratio,coordinates[3]/ratio);//左下
   context.stroke();
+  console.log(ratio)
   context.moveTo(coordinates[0]/ratio,coordinates[3]/ratio);//左下
   context.lineTo(coordinates[0]/ratio,coordinates[2]/ratio);//左上
   context.stroke();
@@ -1235,7 +1290,8 @@ function save_change_to_server(){
 function getratio(){
   var canvas_width = $(input_img).width();
   ratio = original_width / canvas_width;
-   var canvas_height = $(input_img).height();
+  console.log('original_width'+original_width)
+  var canvas_height = $(input_img).height();
   console.log('ratio: ' +ratio);
   return ratio;
 }
@@ -1283,12 +1339,70 @@ function zoom_out(){
 
 // 清空画布并且重置
 function clear_all_canvas(){
-  console.log('clear_all_canvas')
+  console.log('clear_all_canvas');
   ani_context.clearRect(0, 0, ani_canvas.width, ani_canvas.height);
   context.clearRect(0, 0, canvas.width, canvas.height);
-
- 
 }
+
+  // 请求别别结果并且绘制
+  function get_boxes(){
+    var post_data = {
+      'action':'get_boxes'
+    }
+    $.ajax({
+      url:'/user/return_OCR_results/',
+      type:'GET',
+      data: post_data,
+      processData: false,  // tell jquery not to process the data
+      contentType: false, // tell jquery not to set contentType
+      success: function(res) {
+        // console.log(res);
+        //清空所有的array(因为到了新的一页)
+        returned_backups = new Array();
+        returned = new Array();
+        added_backups = new Array();
+        added = new Array();
+        deleted_backups = new Array();
+        deleted = new Array();
+        ratio = getratio();
+        returned = res;
+        console.log('get_boxes')
+        console.log(returned);
+        console.log(added);
+        draw_all();
+      },
+      error: function(err){
+        alert(err['message']);
+      }
+    });
+  }
+
+  //导出我的标注
+  function get_my_data(){
+    alert('get_my_data')
+    var post_data = {
+      'action':'get_my_data'
+    }
+    $.ajax({
+      url:'/user/get_my_data/',
+      type:'GET',
+      data: post_data,
+      processData: false,  // tell jquery not to process the data
+      contentType: false, // tell jquery not to set contentType
+      success: function(res) {
+        console.log('success');
+      },
+      error: function(err){
+        alert(err['message']);
+      }
+    });
+  }
+
+
+  //根据 editor-menu-container (div)的宽度来调整 editor-menu-container的宽度
+  window.onload = resize_editor_region();
+  // window.onload = get_boxes();
+  window.onload = select_page();
 
   </script>
 

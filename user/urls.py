@@ -38,8 +38,9 @@ urlpatterns = [
     url(r'^first_page/$', views.first_page, name ='first_page'),
     url(r'^last_page/$', views.last_page, name ='last_page'),
     url(r'^select_page/$', views.select_page, name ='select_page'),
-    url(r'^save_change_to_server/$', views.save_change_to_server, name ='save_change_to_server'),
-
+    url(r'^save_change_to_server/$', views.save_change_to_server, name ='save_change_to_serversave_changesave_change'),
+    url(r'^return_OCR_results/$', views.return_OCR_results, name ='return_OCR_results'),
+    url(r'^get_my_data/$', views.get_my_data, name ='get_my_data'),
 
 
 
