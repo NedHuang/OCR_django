@@ -41,7 +41,7 @@ urlpatterns = [
     url(r'^save_change_to_server/$', views.save_change_to_server, name ='save_change_to_serversave_changesave_change'),
     url(r'^return_OCR_results/$', views.return_OCR_results, name ='return_OCR_results'),
     url(r'^get_my_data/$', views.get_my_data, name ='get_my_data'),
-
+    url(r'^get_group_data/$', views.get_group_data, name ='get_group_data'),
 
 
     # url(r'^static/(?P<path>.*)', 'django.views.static.serve', {'document_root':'/Users/mingzhehuang/Desktop/OCR_django/user/static'}),

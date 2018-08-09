@@ -344,7 +344,7 @@
           <button type="button" class="btn btn-default" data-dismiss="modal" onclick='get_my_data()'>
             导出我的标注
           </button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick='get_all_data()'>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick='get_group_data()'>
             导出所有标注
           </button>
         </div>
@@ -381,7 +381,7 @@
 
 
 
-  <script type="text/javascript">
+  <script type="text/javascript" charset="GB2312">
     //canvas: 显示标注结果的canvas
     // ani_canvas: 显示标注动画的canvas
     var canvas = document.getElementById('editor_canvas');
@@ -1378,25 +1378,45 @@ function clear_all_canvas(){
   }
 
   //导出我的标注
-  function get_my_data(){
-    alert('get_my_data')
-    var post_data = {
-      'action':'get_my_data'
+  // function get_my_data(){
+  //   alert('get_my_data')
+  //   var post_data = {
+  //     'action':'get_my_data'
+  //   }
+  //   $.ajax({
+  //     url:'/user/get_my_data/',
+  //     type:'GET',
+  //     data: post_data,
+  //     processData: false,  // tell jquery not to process the data
+  //     contentType: false, // tell jquery not to set contentType
+  //     success: function(res) {
+  //       console.log('success');
+  //     },
+  //     error: function(err){
+  //       alert(err['message']);
+  //     }
+  //   });
+  // }
+    // 导出我的标注
+    function get_my_data() {
+        console.log('get_my_data');
+        var url = '/user/get_my_data/';
+        var fileName = "testAjaxDownload.txt";
+        var form = $("<form></form>").attr("action", url).attr("method", "post");
+        form.append($("<input></input>").attr("type", "hidden").attr("name", "fileName").attr("value", fileName));
+        form.appendTo('body').submit().remove();
     }
-    $.ajax({
-      url:'/user/get_my_data/',
-      type:'GET',
-      data: post_data,
-      processData: false,  // tell jquery not to process the data
-      contentType: false, // tell jquery not to set contentType
-      success: function(res) {
-        console.log('success');
-      },
-      error: function(err){
-        alert(err['message']);
-      }
-    });
-  }
+
+    // 导出所有人的标注
+    function get_group_data() {
+        console.log('get_group_data');
+        var url = '/user/get_group_data/';
+        var fileName = "testAjaxDownload.txt";
+        var form = $("<form></form>").attr("action", url).attr("method", "post");
+        form.append($("<input></input>").attr("type", "hidden").attr("name", "fileName").attr("value", fileName));
+        form.appendTo('body').submit().remove();
+    }
+
 
 
   //根据 editor-menu-container (div)的宽度来调整 editor-menu-container的宽度

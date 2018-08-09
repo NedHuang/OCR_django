@@ -1,6 +1,6 @@
  # -*- coding: utf-8 -*-
 from django.template import loader
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse,StreamingHttpResponse
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import fields
@@ -20,6 +20,7 @@ from django.db.models import Q
 import os, shutil
 import time
 from PIL import Image
+from django.utils.encoding import escape_uri_path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 登录,DONE
@@ -632,37 +633,76 @@ def return_OCR_results(request):
 
 
 # 导出所有我的标注，生成txt文件，提供下载
+@csrf_exempt
 def get_my_data(request):
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/txt_files/'
+	zip_content_path = '/'.join(this_file.path.split('/')[:-1])
+	zip_path = '/'.join(this_file.path.split('/')[:-2])+this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
 	print(txt_path)
+	print(zip_content_path)
+	print(zip_path)
+	# 文件夹是否存在
 	if not os.path.exists(txt_path):
 		os.makedirs(txt_path)
 	total_page = this_file.total_page
 	for i in range(1,total_page+1):
 		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i)
 		if boxes.count():
-			write_into_txt(request,txt_path,boxes,i)
+			write_into_txt(request,txt_path,boxes,i,request.session['username'])
+	shutil.make_archive(zip_path, 'zip', zip_content_path)
+	download_name = (this_file.filename +'_my_data_' + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))+'.zip'
+	print(download_name)
+	file=open(zip_path+'.zip','rb')  
+	response =StreamingHttpResponse(file)  
+	response['Content-Type']='application/octet-stream' 
+	response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(download_name))
+	return response
 
-	# for i in boxes:
-	# 	# 左右上下
-	# 	box = {'category':rev_box_category[i.category],'coordinates':[(i.left), (i.right), (i.top), (i.bot)]}
-	# 	# print(box)
-	# 	ans.append(box)
+# 导出整个组标记的data
+@csrf_exempt
+def get_group_data(request):
+	this_user = User.objects.filter(username = request.session['username'])[0]
+	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	total_page = this_file.total_page
+	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/txt_files/'
+	zip_content_path = '/'.join(this_file.path.split('/')[:-1])
+	zip_path = '/'.join(this_file.path.split('/')[:-2])+this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	# 首先查询文件都分享给谁过。。。（别玩了owner自己）
+	shares = Share.objects.filter(shared_file=this_file)
+	for i in shares:
+		this_editor = i.share_user
+		if this_editor == this_user:
+		 # 如果登录的用户是被分享的,跳过此循环
+		 	continue
+		for j in range(1,total_page+1):
+			boxes =Object.objects.filter(editor = this_editor).filter(file = this_file).filter(page = j)
+			if boxes.count():
+				write_into_txt(request,txt_path,boxes,j,this_editor.username)
 
-	return JsonResponse({'a':'a','b':'b'})
+	shutil.make_archive(zip_path, 'zip', zip_content_path)
+	download_name = (this_file.filename +'_all_data_' + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))+'.zip'
+	print(download_name)
+	file=open(zip_path+'.zip','rb')  
+	response =StreamingHttpResponse(file)  
+	response['Content-Type']='application/octet-stream' 
+	response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(download_name))
+	return response
 
-# 将数据库条目写入txt文件， 格式为 左,右,上,下 \t category \r\n
-def write_into_txt(request,path,boxes,page):
+
+
+# 将数据库条目写入txt文件， 格式为 左,右,上,下 \t category \r\n,boxes为对editor,file_guid, page 的queryset
+def write_into_txt(request,path,boxes,page,editor_name):
 	content = ''
 	for box in boxes:
-		content += str(box.left)+','+str(box.right)+str(box.top)+','+str(box.bot)+'\t'+rev_box_category[box.category]+'\r\n'
+		content += str(box.left)+','+str(box.right)+','+str(box.top)+','+str(box.bot)+'\t'+rev_box_category[box.category]+'\r\n'
 	print(page)
 	print(content)
-	f = open(path +request.session['username']+'-'+str(page)+'.txt','wb')
+	f = open(path +editor_name+'-'+str(page)+'.txt','wb')
 	f.write(content.encode())
 	f.close()
+	return True
 
 
 
@@ -677,3 +717,4 @@ rev_box_category={
 	2:'table',
 	3:'figure',
 }
+
