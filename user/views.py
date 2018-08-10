@@ -3,10 +3,10 @@ from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse,StreamingHttpResponse
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import fields
-from django.forms import widgets
+from django.forms import fields, widgets
 from django.core.validators import RegexValidator
 from django.shortcuts import render,redirect,HttpResponse
+from django.utils.encoding import escape_uri_path
 from io import BytesIO
 from .models import User,File,Object,Share,Group,UserGroup
 from .forms import RegisterForm,LoginForm,ResetByUsernameForm
@@ -17,10 +17,10 @@ import PyPDF2
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import json
 from django.db.models import Q
-import os, shutil
+import os, shutil, tarfile, zipfile
 import time
 from PIL import Image
-from django.utils.encoding import escape_uri_path
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 登录,DONE
@@ -144,7 +144,7 @@ def ajax(request):
 
 
 
-
+#删除某个文件, request 发送文件的guid。然后找出file,删除数据库记录以及文件夹下所有文件
 @ensure_csrf_cookie
 @csrf_exempt
 def delete_file(request):
@@ -159,10 +159,12 @@ def delete_file(request):
 			login_user = User.objects.filter(username=request.session.get('username'))[0]	
 			delete_file_guid = request.POST.get('file_guid')
 			delete_file = File.objects.filter(file_guid = delete_file_guid)[0]
+			#不是文件的所有者，弹出错误提示
 			if delete_file.owner != login_user:
 				c['message'] = 'あなたはわたしのマスタか？'
 				return JsonResponse(c)
 			delete_file_path = delete_file.path
+			# 文件所在的文件夹，连通png文件以及txt文件一并删除
 			delete_dir_path = '/'.join(delete_file_path.split('/')[:-1])
 			print('path:'+delete_dir_path)
 			if os.path.exists(delete_dir_path):  
@@ -285,7 +287,7 @@ def convert_next_10(file_path,start_page,total_page):
 	for i in range(start_page,min(start_page+10,total_page+1)):
 		# <filename> <page> <zoom> <degree> <output filename> <needle>
 		img_path = '/'.join(file_path.split('/')[:-1]) +'/'+str(i)+'.png'
-		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',file_path, str(i), '400','0',img_path,'1')
+		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',file_path, str(i), request.session['resolution'],'0',img_path,'1')
 		print(cmd)
 		os.popen(cmd,'w')
 
@@ -329,9 +331,7 @@ def edit_file(request):
 @csrf_exempt
 def load_file(request):
 	user = User.objects.filter(username = request.session['username'])[0] if User.objects.filter(username = request.session['username']).count() else None
-	# if request.session.get('page'):
-	# 	page = request.session['page']
-	# else:
+	request.session['resolution'] = str(400)
 	page = request.session['page'] = 1;
 	file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	path = file.path
@@ -492,7 +492,7 @@ def check_and_convert(request,p):
 	if not os.path.exists(check_path):
 		print('not exists')
 		img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
-		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), '400','0',img_path,'1')
+		cmd = 'python3 %s %s %s %s %s %s %s' %(BASE_DIR+'/user/static/scripts/convert_to_img.py',path, str(page), request.session['resolution'],'0',img_path,'1')
 		print(cmd)
 		os.system(cmd)
 	while not os.path.exists(check_path):
@@ -637,24 +637,34 @@ def return_OCR_results(request):
 def get_my_data(request):
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
-	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/txt_files/'
+	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/my_txt_files/'
 	zip_content_path = '/'.join(this_file.path.split('/')[:-1])
-	zip_path = '/'.join(this_file.path.split('/')[:-2])+this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	# zip_path = '/'.join(this_file.path.split('/')[:-2])+this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	zip_path = this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	# 如果有某页的记录，则加入到zip_page
+	zip_pages = set()
+	total_page = this_file.total_page
 	print(txt_path)
 	print(zip_content_path)
 	print(zip_path)
 	# 文件夹是否存在
 	if not os.path.exists(txt_path):
 		os.makedirs(txt_path)
-	total_page = this_file.total_page
 	for i in range(1,total_page+1):
 		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i)
 		if boxes.count():
 			write_into_txt(request,txt_path,boxes,i,request.session['username'])
-	shutil.make_archive(zip_path, 'zip', zip_content_path)
+			zip_pages.add(i)
+
+	user_dir = '/'.join(this_file.path.split('/')[:-2]) # 用户的文件夹所在的目录，换到那个目录下去创建zipfile
+	this_dir= os.getcwd() 								# 再换回来
+	# 创建 zip文件
+	zip(this_file.filename, zip_path+'.zip',zip_pages,this_dir,user_dir)
+	# 被用户下载的文件的名称
 	download_name = (this_file.filename +'_my_data_' + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))+'.zip'
 	print(download_name)
-	file=open(zip_path+'.zip','rb')  
+	file=open(user_dir +'/'+zip_path+'.zip','rb')  
+	# file=open(zip_path+'.tar.gz','rb') 
 	response =StreamingHttpResponse(file)  
 	response['Content-Type']='application/octet-stream' 
 	response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(download_name))
@@ -665,30 +675,57 @@ def get_my_data(request):
 def get_group_data(request):
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
-	total_page = this_file.total_page
-	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/txt_files/'
+	txt_path = '/'.join(this_file.path.split('/')[:-1])+'/my_txt_files/'
 	zip_content_path = '/'.join(this_file.path.split('/')[:-1])
-	zip_path = '/'.join(this_file.path.split('/')[:-2])+this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-	# 首先查询文件都分享给谁过。。。（别玩了owner自己）
+	# zip_path = '/'.join(this_file.path.split('/')[:-2])+this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	zip_path = this_file.filename+'_'+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	# 如果有某页的记录，则加入到zip_page
+	zip_pages = set()
+	total_page = this_file.total_page
+	print(txt_path)
+	print(zip_content_path)
+	print(zip_path)
+	# 文件夹是否存在
+	if not os.path.exists(txt_path):
+		os.makedirs(txt_path)
+
+	# 首先查询文件都分享给谁过。。。（别忘了owner自己）
+	print(this_user.username)
 	shares = Share.objects.filter(shared_file=this_file)
 	for i in shares:
 		this_editor = i.share_user
+		print('editor_name: ' + this_editor.username)
 		if this_editor == this_user:
 		 # 如果登录的用户是被分享的,跳过此循环
+		 	print('it is me')
 		 	continue
 		for j in range(1,total_page+1):
 			boxes =Object.objects.filter(editor = this_editor).filter(file = this_file).filter(page = j)
 			if boxes.count():
 				write_into_txt(request,txt_path,boxes,j,this_editor.username)
+				zip_pages.add(j)
+	#自己的标注
+	for i in range(1,total_page+1):
+		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i)
+		if boxes.count():
+			write_into_txt(request,txt_path,boxes,i,request.session['username'])
+			zip_pages.add(i)
 
-	shutil.make_archive(zip_path, 'zip', zip_content_path)
-	download_name = (this_file.filename +'_all_data_' + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))+'.zip'
+	# shutil.make_archive(zip_path, 'zip', zip_content_path)
+	user_dir = '/'.join(this_file.path.split('/')[:-2]) # 用户的文件夹所在的目录，换到那个目录下去创建zipfile
+	this_dir= os.getcwd() 								# 再换回来
+	# 创建 zip文件
+	zip(this_file.filename, zip_path+'.zip',zip_pages,this_dir,user_dir)
+	# 被用户下载的文件的名称
+	download_name = (this_file.filename +'_my_data_' + datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))+'.zip'
 	print(download_name)
-	file=open(zip_path+'.zip','rb')  
+	file=open(user_dir +'/'+zip_path+'.zip','rb')  
+	# file=open(zip_path+'.tar.gz','rb') 
 	response =StreamingHttpResponse(file)  
 	response['Content-Type']='application/octet-stream' 
 	response['Content-Disposition'] = "attachment; filename*=utf-8''{}".format(escape_uri_path(download_name))
 	return response
+
 
 
 
@@ -699,12 +736,60 @@ def write_into_txt(request,path,boxes,page,editor_name):
 		content += str(box.left)+','+str(box.right)+','+str(box.top)+','+str(box.bot)+'\t'+rev_box_category[box.category]+'\r\n'
 	print(page)
 	print(content)
-	f = open(path +editor_name+'-'+str(page)+'.txt','wb')
+	f = open(path +str(page)+'-'+editor_name+'.txt','wb')
 	f.write(content.encode())
 	f.close()
-	return True
+	return
 
+ 
+# 一次性打包整个根目录。空子目录会被打包。
+# 如果只打包不压缩，将"w:gz"参数改为"w:"或"w"即可。
+# output_filename:完整的文件名， source_dir: 源文件夹
+def make_targz(output_filename, source_dir):
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
+    return 
 
+# 用这个
+# src 是要打包的文件夹, des 是输出文件'xxx.zip', arr是页码的array
+# 如果某一页没有标注数据的话，就不用包括对应的图片了
+def zip(src,des,arr,original_dir,new_dir):
+	# 是否压缩
+	try:
+		import zlib
+		compression = zipfile.ZIP_DEFLATED
+	except:
+		compression = zipfile.ZIP_STORED
+	os.chdir(new_dir)
+	print('change to dir: ' + os.getcwd())
+	modes = {zipfile.ZIP_DEFLATED: 'deflated', zipfile.ZIP_STORED: 'stored'}
+	print('creating archive')
+	z = zipfile.ZipFile(des, 'w')
+	for (root,dirs,files) in os.walk(src):
+		for file in files:
+			print(os.path.join(root, file))
+			# z.write(os.path.join(root, file),compress_type=compression)
+			filename, ext = os.path.splitext(file)
+			if ext == '.png' and int(filename) in arr:
+				# fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), src), mode)
+				z.write(os.path.join(root, file).split('/static/')[-1],compress_type=compression)
+			if ext == '.txt' and int(filename.split('-')[-2]) in arr:
+				# fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), src), mode)
+				z.write(os.path.join(root, file).split('/static/')[-1],compress_type=compression)	
+	z.close()
+	os.chdir(original_dir)
+	print('back to dir: ' + os.getcwd())
+
+# 改变 PDF转 iamge时候的resolution， 默认是400
+@csrf_exempt
+@ensure_csrf_cookie
+def change_resolution(request):
+	print('change_resolution')
+	resolution = request.session['resolution'] = str(request.POST.get('resolution'))
+	print(resolution)
+	c = {}
+	c['message'] = 'success: ' +resolution
+	return JsonResponse(c)
 
 box_category={
 	'formula':1,

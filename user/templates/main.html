@@ -191,8 +191,9 @@
                 <!-- <button type="button" class="btn btn-default" data-toggle="modal" data-target="#getResultModel">导出</button> -->
               </li>
               <li>
-                <a onclick = 'get_data()'>
-                  <span class="icon fa fa-sync"></span><span class="title">重新识别</span>
+                <a data-toggle="modal" data-target="#changeResolutionModel">
+                  <span class="icon fa fa-sync"></span><span class="title">调整分辨率</span>
+                  <!-- <span class="icon fa fa-sync"></span><span class="title">重新识别</span> -->
                 </a>
               </li>
               <li>
@@ -206,11 +207,11 @@
                 </a>
               </li>
 
-              <li>
+<!--               <li>
                 <a onclick = 'get_boxes()'>
                   <span class="icon fa fa-search-minus"></span><span class="title">缩小</span>
                 </a>
-              </li>
+              </li> -->
 
 
             </ul>
@@ -225,11 +226,17 @@
                 <div class="  col-sm-2 col-md-3  col-lg-3 span3" >
                     
 
-                  <form id='upload' enctype="multipart/form-data" method ='post'>
+                  <form id='upload' enctype='multipart/form-data' method ='post'>
+                    <label for='file_upload' class ='btn btn-info'>导入文件</label>
+                    <input type='file' name='file_upload' id='file_upload' onchange = 'loadFile(this.files[0])' style='display: none'>
+                    <button type='button' class='btn btn-primary'>文件类型</button>
+                    <button type='button' class='btn btn-success' value='上传' onclick='FileUpload()'>开始识别</button>
+                  </form>
+      <!--             <form id='upload' enctype="multipart/form-data" method ='post'>        
                     <input type="file" name="file_upload" id="file_upload">
                     <input type="button" value="上传" onclick="FileUpload()">
                   </form>
-
+ -->
                 </div>
                 <div class=" col-sm-7 col-md-7 col-lg-6 span5 ">
                   <button type="button" class="btn btn-default" onclick='showFirstPage()'>首页</button>
@@ -286,10 +293,10 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">
-            确认注销
+            取消
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">
-            取消
+            确认注销
           </button>
         </div>
       </div>
@@ -313,10 +320,10 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">
-            确认注销
+            取消
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">
-            取消
+            确认注销
           </button>
         </div>
       </div>
@@ -325,7 +332,6 @@
 
 
   <!-- 导出结果 -->
-    <!-- 账户管理 -->
   <div class="modal fade" id="getResultModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -341,7 +347,10 @@
           <p> 请选择需要导出的标注 </p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='get_my_data()'>
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            取消
+          </button>
+          <button type="button" class="btn btn-success" data-dismiss="modal" onclick='get_my_data()'>
             导出我的标注
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal" onclick='get_group_data()'>
@@ -351,6 +360,40 @@
       </div>
     </div>
   </div>
+
+
+    <!-- 修改分辨率 -->
+  <div class="modal fade" id="changeResolutionModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+           导出选项
+          </h4>
+        </div>
+        <div class="modal-body">
+          <p> 分辨率默认为400%,可选范围: 100% -1000%</p>
+        </div>
+        <div class="modal-footer">
+   <!--        <form action='/user/change_resolution/' method='post' target='the_iframe'>
+             <input type='number' id='resolution' class='form-control' value='400' min='100' max='1000' style='width:70px;'>
+             <input type='submit' value='提交' class='btn btn-primary' data-dismiss='modal'>
+          </form>   -->
+          <input type='number' id='resolution' class='form-control' value='400' min='100' max='1000' style='width:70px'>
+          <button type='button' class='btn btn-default' data-dismiss='modal'>
+            取消
+          </button>
+          <button type='button' class='btn btn-primary' data-dismiss='modal' onclick='change_resolution()'>
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
     <footer class="app-footer">
 <!--       <div class="wrapper">
@@ -1409,15 +1452,40 @@ function clear_all_canvas(){
 
     // 导出所有人的标注
     function get_group_data() {
-        console.log('get_group_data');
-        var url = '/user/get_group_data/';
-        var fileName = "testAjaxDownload.txt";
-        var form = $("<form></form>").attr("action", url).attr("method", "post");
-        form.append($("<input></input>").attr("type", "hidden").attr("name", "fileName").attr("value", fileName));
-        form.appendTo('body').submit().remove();
+      console.log('get_group_data');
+      var url = '/user/get_group_data/';
+      var fileName = "testAjaxDownload.txt";
+      var form = $("<form></form>").attr("action", url).attr("method", "post");
+      form.append($("<input></input>").attr("type", "hidden").attr("name", "fileName").attr("value", fileName));
+      form.appendTo('body').submit().remove();
     }
 
-
+    // 修改分辨率
+    function change_resolution(){
+      var resolution = parseInt($('#resolution').val());
+      post_data = {'resolution' : resolution};
+      console.log(post_data);
+      $.ajax({
+        url:'/user/change_resolution/',
+        type:'POST',
+        data: post_data,
+        // processData: false,  // tell jquery not to process the data
+        // contentType: false, // tell jquery not to set contentType
+        success: function(res) {
+          console.log(res)
+          console.log('success')
+        },
+        error: function(err){
+          alert(err['message']);
+        }
+      });
+    }
+    
+// console.log('change_resolution');
+      // var url = '/user/change_resolution/';
+      // var form = $('<form></form>').attr('action', url).attr('method', 'post');
+      // form.append($("<input></input>").attr('type', 'hidden').attr('name', 'resolution').attr('value', my_resolution));
+      // form.appendTo('body').submit().remove();
 
   //根据 editor-menu-container (div)的宽度来调整 editor-menu-container的宽度
   window.onload = resize_editor_region();

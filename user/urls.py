@@ -32,7 +32,7 @@ urlpatterns = [
     url(r'^share_file/', views.share_file, name = 'share_file'),
     url(r'^resetByUsernameForm/', views.resetByUsernameForm, name = 'resetByUsernameForm'),
     url(r'^edit_file/$',views.edit_file, name = 'edit_file'),
-    url(r'^load_file/', views.load_file, name ='load_file'),
+    url(r'^load_file/$', views.load_file, name ='load_file'),
     url(r'^next_page/$', views.next_page, name ='next_page'),
     url(r'^prev_page/$', views.prev_page, name ='prev_page'),
     url(r'^first_page/$', views.first_page, name ='first_page'),
@@ -42,7 +42,7 @@ urlpatterns = [
     url(r'^return_OCR_results/$', views.return_OCR_results, name ='return_OCR_results'),
     url(r'^get_my_data/$', views.get_my_data, name ='get_my_data'),
     url(r'^get_group_data/$', views.get_group_data, name ='get_group_data'),
-
+    url(r'^change_resolution/$', views.change_resolution, name ='change_resolution'),
 
     # url(r'^static/(?P<path>.*)', 'django.views.static.serve', {'document_root':'/Users/mingzhehuang/Desktop/OCR_django/user/static'}),
 ]
