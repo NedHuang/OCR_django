@@ -711,8 +711,8 @@ def get_group_data(request):
 		print('editor_name: ' + this_editor.username)
 		if this_editor == this_user:
 		 # 如果登录的用户是被分享的,跳过此循环
-		 	print('it is me')
-		 	continue
+			print('it is me')
+			continue
 		for j in range(1,total_page+1):
 			boxes =Object.objects.filter(editor = this_editor).filter(file = this_file).filter(page = j)
 			if boxes.count():
@@ -760,9 +760,9 @@ def write_into_txt(request,path,boxes,page,editor_name):
 # 如果只打包不压缩，将"w:gz"参数改为"w:"或"w"即可。
 # output_filename:完整的文件名， source_dir: 源文件夹
 def make_targz(output_filename, source_dir):
-    with tarfile.open(output_filename, "w:gz") as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
-    return 
+	with tarfile.open(output_filename, "w:gz") as tar:
+		tar.add(source_dir, arcname=os.path.basename(source_dir))
+	return 
 
 # 用这个
 # src 是要打包的文件夹, des 是输出文件'xxx.zip', arr是页码的array
@@ -828,164 +828,168 @@ rev_box_category={
 #
 @ensure_csrf_cookie
 @csrf_exempt
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def create_group(request):
-    c = {}
-    correct_members = []
-    wrong_input = []
+	c = {}
+	correct_members = []
+	wrong_input = []
 
-    if request.method == 'POST':
-        owner = request.user
-        id_input = request.POST.get('members').split('\n')
-        name_input = request.POST.get('name')
+	if request.method == 'POST':
+		owner = request.user
+		id_input = request.POST.get('members').split('\n')
+		name_input = request.POST.get('name')
 
-        if Group.objects.filter(group_name=name_input).exists():   # check if group with same name exists
-            c = {'error': 'duplicate', }
-            return JsonResponse(c)
-        else:
-            group = Group(owner=owner, group_name=name_input)
-            group.save()
+		if Group.objects.filter(group_name=name_input).exists():   # check if group with same name exists
+			c = {'error': 'duplicate', }
+			return JsonResponse(c)
+		else:
+			group = Group(owner=owner, group_name=name_input)
+			group.save()
 
-        for p in id_input:
-            if User.objects.filter(Q(username=p) | Q(email=p)).exists():
-                matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
-                member_record = GroupMember(share_group=group, shared_user=matched_user)
-                member_record.save()
-                correct_members.append(p)
-            else:
-                wrong_input.append(p)
+		for p in id_input:
+			if User.objects.filter(Q(username=p) | Q(email=p)).exists():
+				matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
+				member_record = GroupMember(share_group=group, shared_user=matched_user)
+				member_record.save()
+				correct_members.append(p)
+			else:
+				wrong_input.append(p)
 
-        # if no valid group member is found, delete the generated group
-        if len(correct_members) == 0:
-            group.delete()
+		# if no valid group member is found, delete the generated group
+		if len(correct_members) == 0:
+			group.delete()
 
-        member_record = GroupMember(share_group=group, shared_user=owner);
-        member_record.save()
+		member_record = GroupMember(share_group=group, shared_user=owner);
+		member_record.save()
 
-    c['correct_members'] = correct_members
-    c['wrong_input'] = wrong_input
-    return JsonResponse(c)
+	c['correct_members'] = correct_members
+	c['wrong_input'] = wrong_input
+	return JsonResponse(c)
 
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def group_management(request):
-    user = request.user
-    groups = Group.objects.filter(owner=user)
+	if User.objects.filter(user_guid = request.session['user_guid']).count():
+		user = User.objects.filter(user_guid = request.session['user_guid'])[0]
+		# print(user) 
+	groups = Group.objects.filter(owner=user)
 
-    print(user)
-    print(groups)
+	print(user)
+	print(groups)
 
-    # for group in groups:   # find the members in each group and store username in array (as string?)
-    #     members = GroupMember.objects.filter(share_group=group)
+	# for group in groups:   # find the members in each group and store username in array (as string?)
+	#     members = GroupMember.objects.filter(share_group=group)
 
-    context = {
-        'groups': groups,
-        'user': user,
-    }
-    return render(request, 'user/group_management.html', context)
+	c = {
+		'groups': groups,
+		'user': user,
+	}
+	t = loader.get_template('group_management.html')
+	return HttpResponse(t.render(c,request))
+	# return render(request, 'group_management.html', context)
+	# return HttpResponse('asd')
 
-
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def shared_group_management(request):
-    user = request.user
-    records = GroupMember.objects.select_related('share_group').filter(shared_user=user)  # includes groups user owned, handle in html
-    context = {
-        'records': records,
-        'user': user,
-    }
-    return render(request, 'user/shared_group_management.html', context)
+	user = request.user
+	records = GroupMember.objects.select_related('share_group').filter(shared_user=user)  # includes groups user owned, handle in html
+	context = {
+		'records': records,
+		'user': user,
+	}
+	return render(request, 'user/shared_group_management.html', context)
 
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def edit_group(request, group_id):
-    user = request.user
-    thegroup = Group.objects.select_related().filter(group_id=group_id)[0]
-    members = GroupMember.objects.filter(share_group=thegroup)
+	user = request.user
+	thegroup = Group.objects.select_related().filter(group_id=group_id)[0]
+	members = GroupMember.objects.filter(share_group=thegroup)
 
-    context = {
-        'group': thegroup,
-        'members': members,
-        'user': user,
-    }
-    return render(request, 'user/edit-group.html', context)
+	context = {
+		'group': thegroup,
+		'members': members,
+		'user': user,
+	}
+	return render(request, 'user/edit-group.html', context)
 
 @ensure_csrf_cookie
 @csrf_exempt
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def delete_member(request):
-    group_id = request.POST.get('group')
-    thegroup = Group.objects.select_related().filter(group_id=group_id)[0]
-    print(thegroup)
-    user = request.user
+	group_id = request.POST.get('group')
+	thegroup = Group.objects.select_related().filter(group_id=group_id)[0]
+	print(thegroup)
+	user = request.user
 
-    c = {}
-    correct_members = []
-    wrong_input = []
-    if request.method == 'POST':
-        to_delete = request.POST.getlist('to_delete[]')
-        # to_delete = request.POST['to_delete']
-        print(to_delete)
-        for p in to_delete:
-            if User.objects.filter(username=p).exists(): # if matched_user is valid, do the deletion
-                matched_user = User.objects.filter(username=p)[0]
-                if matched_user == user:
-                    c['message'] = '无法删除群主'
-                    return JsonResponse(c)
-                else:
-                    GroupMember.objects.filter(share_group=thegroup, shared_user=matched_user).delete()
-                    correct_members.append(p)
-            else:
-                wrong_input.append(p)
+	c = {}
+	correct_members = []
+	wrong_input = []
+	if request.method == 'POST':
+		to_delete = request.POST.getlist('to_delete[]')
+		# to_delete = request.POST['to_delete']
+		print(to_delete)
+		for p in to_delete:
+			if User.objects.filter(username=p).exists(): # if matched_user is valid, do the deletion
+				matched_user = User.objects.filter(username=p)[0]
+				if matched_user == user:
+					c['message'] = '无法删除群主'
+					return JsonResponse(c)
+				else:
+					GroupMember.objects.filter(share_group=thegroup, shared_user=matched_user).delete()
+					correct_members.append(p)
+			else:
+				wrong_input.append(p)
 
-    c['correct_members'] = correct_members
-    c['wrong_input'] = wrong_input
-    return JsonResponse(c)
+	c['correct_members'] = correct_members
+	c['wrong_input'] = wrong_input
+	return JsonResponse(c)
 
 @ensure_csrf_cookie
 @csrf_exempt
 def add_member(request):
-    c = {}
-    correct_members = []
-    wrong_input = []
+	c = {}
+	correct_members = []
+	wrong_input = []
 
-    if request.method == 'POST':
-        owner = request.user
-        group_id = request.POST.get('group')
-        group = Group.objects.select_related().filter(group_id=group_id)[0]
-        id_input = request.POST.get('members').split('\n')
+	if request.method == 'POST':
+		owner = request.user
+		group_id = request.POST.get('group')
+		group = Group.objects.select_related().filter(group_id=group_id)[0]
+		id_input = request.POST.get('members').split('\n')
 
-        for p in id_input:
-            if User.objects.filter(Q(username=p) | Q(email=p)).exists():
-                matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
-                member_record = GroupMember(share_group=group, shared_user=matched_user)
-                member_record.save()
-                correct_members.append(p)
-            else:
-                wrong_input.append(p)
+		for p in id_input:
+			if User.objects.filter(Q(username=p) | Q(email=p)).exists():
+				matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
+				member_record = GroupMember(share_group=group, shared_user=matched_user)
+				member_record.save()
+				correct_members.append(p)
+			else:
+				wrong_input.append(p)
 
-    c['correct_members'] = correct_members
-    c['wrong_input'] = wrong_input
-    return JsonResponse(c)
+	c['correct_members'] = correct_members
+	c['wrong_input'] = wrong_input
+	return JsonResponse(c)
 
 @ensure_csrf_cookie
 @csrf_exempt
 def delete_group(request):
-    c = {}
-    if request.method == 'POST':
-        if request.POST.get('group') != None:
-            user = request.user
-            target_group_id = request.POST.get('group')
-            target_group = Group.objects.filter(group_id=target_group_id)[0]
-            if target_group.owner != user:
-                c['message'] = '非群创建者，没有操作权限'
-                return JsonResponse(c)
-            else:
-                # Delete related record from GroupMember table by CASCADE
-                Group.objects.filter(group_id=target_group_id).delete()
-                c['message'] = '删除成功'
-                return JsonResponse(c)
-    # else:
-    #     return render(request, '')
+	c = {}
+	if request.method == 'POST':
+		if request.POST.get('group') != None:
+			user = request.user
+			target_group_id = request.POST.get('group')
+			target_group = Group.objects.filter(group_id=target_group_id)[0]
+			if target_group.owner != user:
+				c['message'] = '非群创建者，没有操作权限'
+				return JsonResponse(c)
+			else:
+				# Delete related record from GroupMember table by CASCADE
+				Group.objects.filter(group_id=target_group_id).delete()
+				c['message'] = '删除成功'
+				return JsonResponse(c)
+	# else:
+	#     return render(request, '')
 
 
 #  -----------------------------------------------------------------------------------------------------------------
@@ -994,56 +998,56 @@ def delete_group(request):
 #
 # 文件管理系统
 #
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def index(request):
-    # return redirect('/user/file_upload')
-    return redirect(reverse('user:file_upload'))
+	# return redirect('/user/file_upload')
+	return redirect(reverse('user:file_upload'))
 
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def homepage(request):
-    return render(request, 'user/user_homepage.html')
+	return render(request, 'user/user_homepage.html')
 
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def file_upload(request):
-    form = FileUploadForm(request.POST or None, request.FILES or None)
-    if form.is_valid():
-        file = form.save(commit=False)
-        file.owner = request.user
-        file.path = request.FILES['path']
-        file.filename = request.FILES['path'].name
+	form = FileUploadForm(request.POST or None, request.FILES or None)
+	if form.is_valid():
+		file = form.save(commit=False)
+		file.owner = request.user
+		file.path = request.FILES['path']
+		file.filename = request.FILES['path'].name
 
-        if File.objects.filter(filename=file.filename).filter(owner=file.owner):
-            context = {
-                'file': file,
-                'form': form,
-                'error_message': '同名文件已存在',
-                'show': 1,
-            }
-            return render(request, 'file/upload.html', context)
-        else:
-            # 检查文件后缀名
-            file_type = file.path.url.split('.')[-1]
-            file_type.lower()
-            if file_type not in UPLOAD_FILE_TYPES:
-                context = {
-                    'file': file,
-                    'form': form,
-                    'show': 2,
-                }
-                return render(request, 'file/upload.html', context)
-            file.save()
-            context = {
-                'form': form,
-                'show': 0,
-            }
-            return render(request, 'file/upload.html', context)
-    context = {
-        'form': form,
-        # 'show': 2,  # do nothing - no alert
-    }
-    return render(request, 'file/upload.html', context)
+		if File.objects.filter(filename=file.filename).filter(owner=file.owner):
+			context = {
+				'file': file,
+				'form': form,
+				'error_message': '同名文件已存在',
+				'show': 1,
+			}
+			return render(request, 'file/upload.html', context)
+		else:
+			# 检查文件后缀名
+			file_type = file.path.url.split('.')[-1]
+			file_type.lower()
+			if file_type not in UPLOAD_FILE_TYPES:
+				context = {
+					'file': file,
+					'form': form,
+					'show': 2,
+				}
+				return render(request, 'file/upload.html', context)
+			file.save()
+			context = {
+				'form': form,
+				'show': 0,
+			}
+			return render(request, 'file/upload.html', context)
+	context = {
+		'form': form,
+		# 'show': 2,  # do nothing - no alert
+	}
+	return render(request, 'file/upload.html', context)
 
 # @csrf_exempt
 # def file_upload(request):
@@ -1058,118 +1062,113 @@ def file_upload(request):
 #             return JsonResponse(c)
 
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def file_management(request):
-    user = request.user
-    files = File.objects.filter(owner=user)
-    if files.exists():
-        msg_code = 0
-    else:
-        msg_code = 1
-    context = {
-        'user': user,
-        'files': files,
-        'msg': msg_code,
-    }
-    return render(request, 'file/file_management.html', context)
+	user = request.user
+	files = File.objects.filter(owner=user)
+	if files.exists():
+		msg_code = 0
+	else:
+		msg_code = 1
+	context = {
+		'user': user,
+		'files': files,
+		'msg': msg_code,
+	}
+	return render(request, 'file/file_management.html', context)
 
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def share_file_view(request):
-    user = request.user
-    shared_files = FileShare.objects.filter(sharer=user)
-    if shared_files.exists():
-        msg_code = 0
-    else:
-        msg_code = 1
-    context = {
-        'user': user,
-        'shared_files': shared_files,
-        'msg': msg_code,
-    }
-    return render(request, 'file/shared_with_me.html', context)
+	user = request.user
+	shared_files = FileShare.objects.filter(sharer=user)
+	if shared_files.exists():
+		msg_code = 0
+	else:
+		msg_code = 1
+	context = {
+		'user': user,
+		'shared_files': shared_files,
+		'msg': msg_code,
+	}
+	return render(request, 'file/shared_with_me.html', context)
 
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def group_file_view(request):   # TODO: complete function
-    return render(request, 'check_success.html')
+	return render(request, 'check_success.html')
 
 
 @ensure_csrf_cookie
 @csrf_exempt
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def delete_file(request):
-    c = {}
-    if request.method == 'POST':
-        if request.POST.get('file_guid') != None:
-            user = request.user
-            target_file_id = request.POST.get('file_guid')
-            target_file = File.objects.filter(gu_id=target_file_id)[0]
-            if target_file.owner != user:
-                c['message'] = '非文件上传者，无法删除'
-                return JsonResponse(c)
-            else:
-                # delete from File table, other table auto-delete by CASCADE
-                File.objects.filter(gu_id=target_file_id).delete()
-                c['message'] = '删除成功'  # TODO: delete from file storage
-    return JsonResponse(c)
+	c = {}
+	if request.method == 'POST':
+		if request.POST.get('file_guid') != None:
+			user = request.user
+			target_file_id = request.POST.get('file_guid')
+			target_file = File.objects.filter(gu_id=target_file_id)[0]
+			if target_file.owner != user:
+				c['message'] = '非文件上传者，无法删除'
+				return JsonResponse(c)
+			else:
+				# delete from File table, other table auto-delete by CASCADE
+				File.objects.filter(gu_id=target_file_id).delete()
+				c['message'] = '删除成功'  # TODO: delete from file storage
+	return JsonResponse(c)
 
 
 @ensure_csrf_cookie
 @csrf_exempt
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def share_file(request):
-    c = {}
-    correct_co_editors = []
-    wrong_input = []
+	c = {}
+	correct_co_editors = []
+	wrong_input = []
 
-    if request.method == 'POST':
-        owner = request.user
-        file_guid = request.POST.get('file_guid')
-        share_input = request.POST.get('co_editors').split('\n')
+	if request.method == 'POST':
+		owner = request.user
+		file_guid = request.POST.get('file_guid')
+		share_input = request.POST.get('co_editors').split('\n')
 
-        shared_file = File.objects.filter(gu_id=file_guid)[0]
-        for p in share_input:
-            if User.objects.filter(Q(username=p) | Q(email=p)).exists():  # input has a match
-                matched_editor = User.objects.filter(Q(username=p) | Q(email=p))[0]
-                correct_co_editors.append(p)
-                share = FileShare(owner=owner, sharer=matched_editor, shared_file=shared_file)
-                share.save()
-            else:
-                wrong_input.append(p)
+		shared_file = File.objects.filter(gu_id=file_guid)[0]
+		for p in share_input:
+			if User.objects.filter(Q(username=p) | Q(email=p)).exists():  # input has a match
+				matched_editor = User.objects.filter(Q(username=p) | Q(email=p))[0]
+				correct_co_editors.append(p)
+				share = FileShare(owner=owner, sharer=matched_editor, shared_file=shared_file)
+				share.save()
+			else:
+				wrong_input.append(p)
 
-    c['correct_co_editors'] = correct_co_editors
-    c['wrong_input'] = wrong_input
-    return JsonResponse(c)
+	c['correct_co_editors'] = correct_co_editors
+	c['wrong_input'] = wrong_input
+	return JsonResponse(c)
 
 
 @ensure_csrf_cookie
 @csrf_exempt
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def share_file_to_group(request):
-    c = {}
-    correct_group = []
-    wrong_input = []
+	c = {}
+	correct_group = []
+	wrong_input = []
 
-    if request.method == 'POST':
-        owner = request.user
-        file_guid = request.POST.get('file_guid')
-        share_input = request.POST.get('co_groupID').split('\n')
+	if request.method == 'POST':
+		owner = request.user
+		file_guid = request.POST.get('file_guid')
+		share_input = request.POST.get('co_groupID').split('\n')
 
-        shared_file = File.objects.filter(gu_id=file_guid)[0]
-        for p in share_input:
-            if Group.objects.filter(group_id=p).exists():   # found match
-                matched_group = Group.objects.select_related().filter(group_id=p)[0]
-
-
-
-
-
-    return render(request, 'check_success.html')
+		shared_file = File.objects.filter(gu_id=file_guid)[0]
+		for p in share_input:
+			if Group.objects.filter(group_id=p).exists():   # found match
+				matched_group = Group.objects.select_related().filter(group_id=p)[0]
+	return render(request, 'check_success.html')
 
 
 
 @ensure_csrf_cookie
 @csrf_exempt
-@login_required(login_url='/user/login/')
+#@login_required(login_url='/user/login/')
 def edit_file(request):  # TODO: complete function
-    return render(request, 'check_success.html')
+	return render(request, 'check_success.html')

@@ -55,8 +55,8 @@
 
   <div class="app-container">
     <div class="row content-container">
-      <nav class="navbar navbar-default navbar-fixed-top navbar-top">
-        <div class="container-fluid">
+      <nav class="navbar navbar-default navbar-fixed-top navbar-top" style='height: 60px'>
+        <div class="container-fluid" style='height: 60px'>
           <div class="navbar-header">
             <button type="button" class="navbar-expand-toggle">
               <i class="fa fa-bars icon"></i>
@@ -84,7 +84,7 @@
                 <li>
                   <ul class="list-group notifications">
                     <a href="#">
-                      <li class="list-group-item" onclick ="window.location.href = '{% static 'knowledge_service/page.html'">
+                      <li class="list-group-item" onclick="window.location.href = '{% static 'knowledge_service/page.html'">
                          <i class="fa fa-mortar-board"></i> 知识服务
                       </li>
                     </a>
@@ -105,13 +105,13 @@
             <li class="dropdown profile">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
               <ul class="dropdown-menu animated fadeInDown">
-              <!--   <li class="profile-img">
+                <li class="profile-img">
                   <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
-                </li> -->
+                </li>
                 <li>
                   <div class="profile-info">
-                    <h4 class="username">{{username}}</h4>
-                    <p>{{user_email}}</p>
+                    <h4 class="username">Emily Hart</h4>
+                    <p>emily_hart@email.com</p>
                     <div class="btn-group margin-bottom-2x" role="group">
                       <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
                       <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
@@ -124,7 +124,6 @@
           </ul>
         </div>
       </nav>
-
 
 
 

@@ -45,6 +45,21 @@ urlpatterns = [
     url(r'^change_resolution/$', views.change_resolution, name ='change_resolution'),
 
     # url(r'^static/(?P<path>.*)', 'django.views.static.serve', {'document_root':'/Users/mingzhehuang/Desktop/OCR_django/user/static'}),
+    # group
+    url(r'^group_management/$', views.group_management, name='group_management'),
+
+    url(r'^shared_group_management/$', views.shared_group_management, name='shared_group_management'),
+
+    url(r'^create_group/$', views.create_group, name='create_group'),
+
+    url(r'^(?P<group_id>[0-9a-f-]+)$', views.edit_group, name='edit_group'),
+
+    url(r'^delete_member/$', views.delete_member, name='delete_member'),
+    # url(r'^(?P<group_id>[0-9a-f-]+)/delete_member/$', views.delete_member, name='delete_member'),
+
+    url(r'^add_member/$', views.add_member, name='add_member'),
+
+    url(r'^delete_group/$', views.delete_group, name='delete_group'),
 ]
 
 
