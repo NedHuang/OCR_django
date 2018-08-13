@@ -180,8 +180,13 @@
         </div>
 
         <div id= 'upload_file_div' class="side-body">
-          <form id='upload' enctype="multipart/form-data" method ='post'>
-            <input type="file" name="file_upload" id="file_upload"><input type="button" value="上传" onclick="FileUpload()">
+          <form id='upload' enctype='multipart/form-data' method ='post'>
+            <label for='file_upload' class ='btn btn-info'>导入文件</label>
+            <input type='file' name='file_upload' id='file_upload' onchange = 'loadFile(this.files[0])' style='display: none'>
+            <button type='button' class='btn btn-primary'>文件类型</button>
+            <button type='button' class='btn btn-success' value='上传' onclick='FileUpload()'>上传</button>
+            <button type="button" class="btn btn-default"> <i class=" fas fa-file"></i> </button>
+                  <span id="filename" style="vertical-align:middle" >{{filename}}</span>
           </form>
         </div>
 
@@ -323,9 +328,9 @@
     </div>
   </div>
 
-<!--   对文件的右键菜单 -->
-  <div id="edit_menu" class="menus" style="display:none">
-    <table border="1"  bgcolor="#cccccc" style="border:thin;z-index: 1;width: 200px;background-color: #AAAAAA; opacity: 1;" cellspacing="0" >
+<!--   对文件进行操作的右键菜单 -->
+  <div id="edit_menu" class="menus" style="display:none" >
+    <table border="1"  bgcolor="#cccccc" style="border:thin;z-index: 1;width: 200px;background-color: #AAAAAA; opacity: 1;" cellspacing="0" onmouseover='function(){this}'>
       <tr>
         <td  style="cursor:default;border:outset 1;" align="center" >
           <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
@@ -449,10 +454,13 @@
         success:function(res){
           console.log('已发送');
           if(res['correct_co_editors'].length !=0){
-            alert('已经分析给下列用户'+ res['correct_co_editors']);
+            alert('分享给下列用户: '+ res['correct_co_editors']);
           }
           if(res['wrong_input'].length != 0){
-            alert('未找到下列用户'+res['wrong_input']);
+            alert('未找到下列用户: '+res['wrong_input']);
+          }
+          if(res['already_shared'].length != 0){
+            alert('重复分享: '+res['already_shared'])
           }
         },
         error:function(err){
@@ -523,6 +531,10 @@
         });
       }
 
+
+$("#edit_menu").mouseleave(function(){
+    $(this).hide();
+});
 
 
 

@@ -1,0 +1,6 @@
+# ignore these files
+*.pdf
+*.jpg
+*.zip
+*.tar.gz
+*.txt
