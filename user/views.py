@@ -77,7 +77,7 @@ def register(request):
 			user.email = form.cleaned_data.get('email')
 			user.account_type = 'plastic'
 			user.save()
-			print(user.instr())
+			print(user)
 			t = loader.get_template('login.html')
 			loginform = LoginForm()
 			c ={'message' :'注册成功，请重新登录','form':loginform}
@@ -270,7 +270,7 @@ def upload(request):
 			file.save()
 			if not request.session['resolution']:
 				request.session['resolution'] = '400' 
-			convert_next_10(request,file.path,1,total_page)
+			# convert_next_10(request,file.path,1,total_page)
 		else:
 			c['message']='上传失败'
 			return JsonResponse(c)
@@ -503,6 +503,8 @@ def check_and_convert(request,p):
 	path = request.session['path']
 	page = int(p)
 	check_path= '/'.join(path.split('/')[:-1])+'/'+str(page)+'.png'
+	if not request.session.get('resolution'):
+		request.session['resolution'] = '400'
 	if not os.path.exists(check_path):
 		print('not exists')
 		img_path = '/'.join(path.split('/')[:-1]) +'/'+str(page)+'.png'
@@ -1193,9 +1195,7 @@ def share_file_to_group(request):
 	return render(request, 'check_success.html')
 
 
-
-@ensure_csrf_cookie
-@csrf_exempt
+# edit_fileedit_file
 #@login_required(login_url='/user/login/')
-def edit_file(request):  # TODO: complete function
-	return render(request, 'check_success.html')
+# def edit_file(request):  # TODO: complete function
+# 	return render(request, 'check_success.html')
