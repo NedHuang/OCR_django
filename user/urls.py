@@ -52,7 +52,7 @@ urlpatterns = [
 
     url(r'^create_group/$', views.create_group, name='create_group'),
 
-    url(r'^(?P<group_id>[0-9a-f-]+)$', views.edit_group, name='edit_group'),
+    url(r'^(?P<group_guid>[0-9a-f-]+)$', views.edit_group, name='edit_group'),
 
     url(r'^delete_member/$', views.delete_member, name='delete_member'),
     # url(r'^(?P<group_id>[0-9a-f-]+)/delete_member/$', views.delete_member, name='delete_member'),

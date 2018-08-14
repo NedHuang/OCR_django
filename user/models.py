@@ -72,7 +72,7 @@ class Group(models.Model):
 	group_name = models.CharField(max_length=255, default='', unique=True)
 
 	def __str__(self):
-		return 'ownser: '+ self.owner.username + '; group_name' + str(self.group_name) + '; group_id' + str(self.group_id) 
+		return 'ownser: '+ self.owner.username + '; group_name' + str(self.group_name) + '; group_id' + str(self.group_guid) 
 
 # relationship between file and group 
 class FileGroup(models.Model):
@@ -84,9 +84,9 @@ class FileGroup(models.Model):
 
 
 # relationship between user and group 
-class UserGroup(models.Model):
-	group = models.ForeignKey(Group,on_delete=models.CASCADE,default=None, primary_key=True)
-	user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
+class GroupMember(models.Model):
+	share_group = models.ForeignKey(Group,on_delete=models.CASCADE,default=None, primary_key=True)
+	shared_user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
 	def __str__(self):
 		return 'ownser: '+ self.owner.username + '; group_name' + str(self.group_name) + '; group_id' + str(self.group_id) 
 

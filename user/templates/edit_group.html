@@ -30,6 +30,12 @@
 </head>
 
 <body class="flat-green" style =" overflow-y: auto; overflow-x: auto;" >
+    <script type="text/javascript">
+    function select_group(element) {
+        groupID = element.id;
+        console.log('groupID set to', groupID);
+      }
+    </script>
 
 
 <div id="loading" style = "width:0%; height: 0%; display: block"  >
@@ -154,71 +160,117 @@
         </nav>
       </div>
       <!-- Main Content -->
-      <div class="container-fluid" id = 'file_management_main_container'>
-        <!-- 组 -->
-        <div class="side-body">
-          <ul class="nav nav-pills" style="margin-bottom: 10px;">
-              <li role="presentation" class="active"><a href='/user/group_management/'>我创建的群组</a></li>
-              <li role="presentation"><a href='/user/shared_group_management/'>我加入的群组</a ></li>
-          </ul>
+     
+             <div class="side-body">
+
+        <h5>Group ID: {{ group.group_guid }}</h5>
 
 
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_group_modal">
-              新建
-          </button>
+        <div>
+            <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col"> 群成员 </th>
 
-          {# 添加群组 Modal#}
-          <div class="modal fade" id="create_group_modal" tabindex="-1" role="dialog" aria-labelledby="create_group_Modal" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="create_group_ModalTitle">新建群组</h5>
-                  <button type="button" data-dismiss="modal" class="close" aria-hidden="true">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body" id="create_group_modal_body">
-                  <textarea typeof="text" id="group_name" placeholder="请输入群组名"></textarea>
-                  <textarea typeof="text" id="group_userID" placeholder="请输入用户名或邮箱，以回车分隔"></textarea>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" onclick="create_group()">确认</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                </div>
-              </div>
-            </div>
-          </div>
-    <br>
-    <br>
-    <br>
-    <br>
-        {# 群组列表 #}
-          <div>
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col"> 创建人 </th>
-                    <th scope="col"> 群组id </th>
-                    <th scope="col"> 群组名 </th>
-                  </tr>
-                </thead>
-              {% for group in groups %}
-                  <tr id={{  group.group_id }}>
-                    <td>{{ group.owner.username }}</td>
-                    <td>{{ group.group_guid }}</td>
-                    <td>{{ group.group_name }}</td>
-                    <td>
-                      <button type="button" class="btn btn-default">
-                        <a href="{% url 'user:edit_group' group.group_guid %}"> 管理群组 </a>
-                      </button>
-                    </td>
-                  </tr>
-              {% endfor %}
-                </table>
-              </div>
-            </div>
-          </div>
+                        {# Buttons - delete members #}
+                        <th>
+                            <button type="button" class="btn btn-default" onclick="delete_member()">
+                                删除成员
+                            </button>
+                        </th>
+
+{#  ---------------------------------------------------------------------------------------------------------------- #}
+
+                        {# Buttons - add members #}
+                        <th>
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#add_member_modal"
+                            id={{ group.group_guid }} onclick="select_group(this)">
+                                添加成员
+                            </button>
+                        </th>
+
+                        {# 添加成员 Modal#}
+                        <div class="modal fade" id="add_member_modal" tabindex="-1" role="dialog" aria-labelledby="add_member_Modal"
+                             aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="add_member_ModalTitle">添加成员</h5>
+                                        <button type="button" data-dismiss="modal" class="close" aria-hidden="true">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" id="add_member_modal_body">
+                                        <textarea typeof="text" id="group_userID" placeholder="请输入用户名或邮箱，以回车分隔"></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" onclick="add_member()">确认添加</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+{#  ---------------------------------------------------------------------------------------------------------------- #}
+
+                        {# Buttons - delete group #}
+                        <th>
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_group_modal"
+                            id={{ group.group_guid }} onclick="select_group(this)">
+                                删除群组
+                            </button>
+                        </th>
+
+                        {# 添加成员 Modal#}
+                        <div class="modal fade" id="delete_group_modal" tabindex="-1" role="dialog" aria-labelledby="delete_group_Modal"
+                             aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="delete_group_ModalTitle">删除群组</h5>
+                                        <button type="button" data-dismiss="modal" class="close" aria-hidden="true">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" id="delete_group_modal_body">
+                                        <h5>确认删除群组？本操作不可撤销。</h5>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" onclick="delete_group()">确认删除</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </tr>
+                    </thead>
+
+                    {% for member in members %}
+                        <tr id={{  member.shared_user.user_uuid }}>
+                            {% if member.shared_user.username != user.username %}
+                                <td>
+                                    {# store username as its id, thus pass username for deletion as well #}
+                                    <input type="checkbox" name="to_delete" value="{{ member.shared_user.username }}"
+                                        id={{ group.group_guid }} onclick="select_group(this)">
+                                    {{ member.shared_user.username }}
+                                </td>
+                            {% else %}
+                                <td> (owner) {{ member.shared_user.username }}</td>
+                            {% endif %}
+
+                        </tr>
+                    {% endfor %}
+            </table>
         </div>
+
+
+
+
+     </div>
+    </div>
+  </div>
 
 
 
@@ -375,7 +427,7 @@
       <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
       <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
-      <script type="text/javascript" src ="{% static 'javascript/group_management.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/edit_group.js' %}"></script>
    <!--    <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script> -->
@@ -383,7 +435,90 @@
 
 
   <script type="text/javascript">
+      var groupID = '';
+  function select_group(element) {
+    groupID = element.id;
+    console.log('groupID set to', groupID);
+  }
+  function delete_member() {
+    var post_data = {
+      'action': 'delete_member',
+      'group': groupID,
+      'to_delete': $('input[name=to_delete]:checked').map(function ()
+      {
+        return $(this).val();
+      }).get(),
+    };
+    console.log(post_data);
+    $.ajax({
+      
+      url: '/user/delete_member/',
+      type: 'POST',
+      data: post_data,
+      success: function (res) {
+        if (res['correct_members'].length != 0) {
+          alert('已删除' + res['correct_members']);
+          location.reload();
+        }
+        if (res['wrong_input'].length != 0) {
+          alert('wrong input ' + res['wrong_input']);
+        }
+      },
+      error: function (err) {
+        alert('网络连接失败，请稍后重试', err);
+      }
+    })
+  }
 
+  function add_member() {
+    var members = $('#group_userID').val();
+    var post_data= {
+      'action': 'add_member',
+      'group': groupID,
+      'members': members,
+    };
+    console.log(post_data);
+    $.ajax({
+      url: '/user/add_member/',
+      type: 'POST',
+      data: post_data,
+      success: function (res) {
+        if (res['correct_members'].length != 0) {
+          alert('已添加' + res['correct_members']);
+          location.reload();
+        }
+        if (res['wrong_input'].length != 0) {
+          alert('wrong input' + res['wrong_input']);
+        }
+      },
+      error: function (err) {
+        alert('网络连接失败，请稍后重试', err);
+      }
+    })
+  }
+  function delete_group() {
+    var post_data= {
+      'action': 'delete_group',
+      'group': groupID,
+    };
+    console.log(post_data);
+    $.ajax({
+      url: '/user/delete_group/',
+      type: 'POST',
+      data: post_data,
+      success: function (res) {
+        if (res['message'] != 'success') {
+          alert(res['message']);
+          {#window.location.href = '{% url 'user:group_management' %}';#}
+          window.location.href = '/user/group_management/';
+        }
+
+      },
+      error: function (err) {
+        alert('网络连接失败，请稍后重试', err);
+      }
+    })
+  }
   </script>
 
 </body>
