@@ -160,12 +160,13 @@
           <ul class="nav nav-pills" style="margin-bottom: 10px;">
               <li role="presentation" class="active"><a href='/user/group_management/'>我创建的群组</a></li>
               <li role="presentation"><a href='/user/shared_group_management/'>我加入的群组</a ></li>
+              <li>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_group_modal">新建</button>
+              </li>
           </ul>
 
 
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_group_modal">
-              新建
-          </button>
+          
 
           {# 添加群组 Modal#}
           <div class="modal fade" id="create_group_modal" tabindex="-1" role="dialog" aria-labelledby="create_group_Modal" aria-hidden="true">

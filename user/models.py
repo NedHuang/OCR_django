@@ -47,7 +47,7 @@ class Object(models.Model):
 	page = models.PositiveIntegerField(default = 1)
 
 	def __str__(self):
-		return 'left: %d , right: %d , top: %d , bot: %d, cat: %s, file: %s , page: %d, editor: %s ,' %(self.left, self.right, self.top, self.bot, self.cat ,self.file.filename, self.page, self.editor.username)
+		return 'left: %d , right: %d , top: %d , bot: %d, cat: %s, file: %s , page: %d, editor: %s ,' %(self.left, self.right, self.top, self.bot, self.category ,self.file.filename, self.page, self.editor.username)
 
 
 

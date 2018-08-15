@@ -173,8 +173,8 @@
                       {% for record in records %}
                           {% if record.share_group.owner != user %} 
                               <tr id= {{  record.share_group.group_guid }}>
-                                  <td>{{ record.share_group.owner }}</td>
-                                  <td>{{ record.share_group.group_guid }}</td>
+                                  <td>{{ record.share_group.owner.username }}</td>
+                                  <td>{{ record.share_group.group_name }}</td>
                               </tr>
                           {% endif %}
                       {% endfor %}

@@ -9,7 +9,7 @@ from django.shortcuts import render,redirect,HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import escape_uri_path
 from io import BytesIO
-from .models import User,File,Object,Share,Group,GroupMember
+from .models import User,File,Object,Share,Group,GroupMember,GroupFiles
 from .forms import RegisterForm,LoginForm,ResetByUsernameForm
 import datetime
 import uuid
@@ -268,7 +268,7 @@ def upload(request):
 			total_page = file.total_page = get_total_page(file_dir+filename)
 
 			file.save()
-			if not request.session['resolution']:
+			if not request.session.get('resolution'):
 				request.session['resolution'] = '400' 
 			# convert_next_10(request,file.path,1,total_page)
 		else:
@@ -553,7 +553,7 @@ def save_change_to_server(request):
 	added = to_json_object(added_backups)
 	deleted = to_json_object(deleted_backups)
 	returned = to_json_object(returned_backups)
-	add_to_sql(request,added,original_width,original_height,canvas_width,canvas_height)
+	add_to_sql(request,added,deleted,original_width,original_height,canvas_width,canvas_height)
 	# delete_from_sql(request,deleted)
 	# to_sql(returned) # 没必要 
 	# print('added: '+json.loads(added_backups[0]))
@@ -586,41 +586,40 @@ def to_json_object(string):
 #把object加入数据库
 @csrf_exempt
 
-def add_to_sql(request,added,ow,oh,cw,ch):
+def add_to_sql(request,added,deleted,ow,oh,cw,ch):
 	print(request.session['file_guid'])
 	print(request.session['username'])
 	print(request.session['path'])
 	print(added)
+	print('deleted: ')
+	print(deleted)
 
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
+	# 重复的就继续添加记录了
 	for i in added:
-		# print(box_category)
-		obj = Object()
-		# 左右上下
-		obj.left = int(i['coordinates'][0])
-		obj.right = int(i['coordinates'][1])
-		obj.top = int(i['coordinates'][2])
-		obj.bot = int(i['coordinates'][3])
-		obj.coordinate = str(i['coordinates'])
-		obj.category = box_category[i['category']]
-		obj.file = this_file
-		obj.editor = this_user
-		obj.page = int(request.session['page'])
+		if not (Object.objects.filter(editor = this_user).filter(file = this_file).filter(page=int(request.session['page']))\
+			.filter(left = int(i['coordinates'][0])).filter(right = int(i['coordinates'][1])).filter(top = int(i['coordinates'][2]))\
+			.filter(bot = int(i['coordinates'][3])).filter(category = box_category[i['category']])):
+			obj = Object()
+			obj.editor = this_user
+			obj.file = this_file
+			obj.page = int(request.session['page'])
+			obj.category = box_category[i['category']]
+			# 左右上下
+			obj.left = int(i['coordinates'][0])
+			obj.right = int(i['coordinates'][1])
+			obj.top = int(i['coordinates'][2])
+			obj.bot = int(i['coordinates'][3])
+			# obj.coordinate = str(i['coordinates'])
+			obj.save()
+	for i in deleted:
+		obj = (Object.objects.filter(editor = this_user).filter(file = this_file).filter(page=int(request.session['page']))\
+			.filter(left = int(i['coordinates'][0])).filter(right = int(i['coordinates'][1])).filter(top = int(i['coordinates'][2]))\
+			.filter(bot = int(i['coordinates'][3])).filter(category = box_category[i['category']]))[0]
+		obj.status = 'deleted'
 		obj.save()
-		# obj.status = 'added'
-		# obj.save()
-		# print('--------')
-		# print(obj.coordinate)
-		# print(obj.page)
-		# print(obj.file.filename)
-		# print(obj.editor.username)
-		# print(obj.category)
-		# print('++++++++')
-		# 
-		# print(request.session['page'])
-		# print(this_file.filename)
-		# print(this_user.username)
+		print(obj)
 	return 'yes'
 
 def get_boxes(request):
@@ -639,7 +638,7 @@ def return_OCR_results(request):
 	this_user = User.objects.filter(username = request.session['username'])[0]
 	this_file = File.objects.filter(file_guid = request.session['file_guid'])[0]
 	page = request.session['page']
-	boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page=page)
+	boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page=page).exclude(status= 'deleted')
 	for i in boxes:
 		# 左右上下
 		box = {'category':rev_box_category[i.category],'coordinates':[(i.left), (i.right), (i.top), (i.bot)]}
@@ -667,7 +666,7 @@ def get_my_data(request):
 	if not os.path.exists(txt_path):
 		os.makedirs(txt_path)
 	for i in range(1,total_page+1):
-		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i)
+		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i).exclude(status='deleted')
 		if boxes.count():
 			write_into_txt(request,txt_path,boxes,i,request.session['username'])
 			zip_pages.add(i)
@@ -716,13 +715,13 @@ def get_group_data(request):
 			print('it is me')
 			continue
 		for j in range(1,total_page+1):
-			boxes =Object.objects.filter(editor = this_editor).filter(file = this_file).filter(page = j)
+			boxes =Object.objects.filter(editor = this_editor).filter(file = this_file).filter(page = j).exclude(status='deleted')
 			if boxes.count():
 				write_into_txt(request,txt_path,boxes,j,this_editor.username)
 				zip_pages.add(j)
 	#自己的标注
 	for i in range(1,total_page+1):
-		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i)
+		boxes =Object.objects.filter(editor = this_user).filter(file = this_file).filter(page = i).exclude(status='deleted')
 		if boxes.count():
 			write_into_txt(request,txt_path,boxes,i,request.session['username'])
 			zip_pages.add(i)
@@ -991,62 +990,7 @@ def add_member(request):
 
 
 
-# @ensure_csrf_cookie
-# @csrf_exempt
-# def add_member(request):
-# 	c = {}
-# 	correct_members = []
-# 	wrong_input = []
-# 	group=None
-# 	user = None
-# 	# print(request.POST['group'])
-# 	# print(request.POST['members'])
-# 	# c = 0
-# 	# if Group.objects.filter(group_guid = request.POST['group']).count():
-# 	# 	group = Group.objects.filter(group_guid = request.POST['group'])[0]
-# 	# 	print('group_name: ' + group.group_name)
-# 	# for i in request.POST['members'].split('\n'):
-# 	# 	if User.objects.filter(username = i).count():
-# 	# 		user = User.objects.filter(username = i)[0]
-# 	# 		print('user: ' + user.username)
-# 	# 		gm=GroupMember()
-# 	# 		gm.shared_user = user
-# 	# 		gm.share_group = group
-# 	# 		gm.save()
-# 	# 		c +=1
-# 	# 		print(c)
-# 	# 		print(gm)
-# 	# return JsonResponse({'a':'b'})
 
-
-
-
-# 	if request.method == 'POST':
-# 		if User.objects.filter(user_guid = request.session['user_guid']).count():
-# 			user = User.objects.filter(user_guid = request.session['user_guid'])[0]
-# 		group_guid = request.POST.get('group')
-# 		group = Group.objects.select_related().filter(group_guid=group_guid)[0]
-# 		id_input = request.POST.get('members').split('\n')
-
-# 		for p in id_input:
-# 			# print(p)
-# 			if User.objects.filter(Q(username=p) | Q(email=p)).exists():
-# 				matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
-# 				print(matched_user.username)
-# 				gm = GroupMember()
-# 				gm.share_group=group
-# 				gm.shared_user=matched_user
-# 				gm.save()
-# 				correct_members.append(p)
-# 			else:
-# 				wrong_input.append(p)
-
-# 	c['correct_members'] = correct_members
-# 	c['wrong_input'] = wrong_input
-# 	print('aaaaaa')
-# 	for i in GroupMember.objects.filter(share_group=group):
-# 		print(i.shared_user.username)
-# 	return JsonResponse(c)
 
 @ensure_csrf_cookie
 @csrf_exempt
@@ -1088,73 +1032,6 @@ def homepage(request):
 	return render(request, 'user/user_homepage.html')
 
 
-# #@login_required(login_url='/user/login/')
-# def file_upload(request):
-# 	form = FileUploadForm(request.POST or None, request.FILES or None)
-# 	if form.is_valid():
-# 		file = form.save(commit=False)
-# 		file.owner = request.user
-# 		file.path = request.FILES['path']
-# 		file.filename = request.FILES['path'].name
-
-# 		if File.objects.filter(filename=file.filename).filter(owner=file.owner):
-# 			context = {
-# 				'file': file,
-# 				'form': form,
-# 				'error_message': '同名文件已存在',
-# 				'show': 1,
-# 			}
-# 			return render(request, 'file/upload.html', context)
-# 		else:
-# 			# 检查文件后缀名
-# 			file_type = file.path.url.split('.')[-1]
-# 			file_type.lower()
-# 			if file_type not in UPLOAD_FILE_TYPES:
-# 				context = {
-# 					'file': file,
-# 					'form': form,
-# 					'show': 2,
-# 				}
-# 				return render(request, 'file/upload.html', context)
-# 			file.save()
-# 			context = {
-# 				'form': form,
-# 				'show': 0,
-# 			}
-# 			return render(request, 'file/upload.html', context)
-# 	context = {
-# 		'form': form,
-# 		# 'show': 2,  # do nothing - no alert
-# 	}
-# 	return render(request, 'file/upload.html', context)
-
-# @csrf_exempt
-# def file_upload(request):
-#     c = {}
-#     if request.method == 'POST':
-#         obj = request.FILES.get('file')
-#         filename = obj.name
-#         owner = request.user
-#
-#         if File.objects.filter(filename=filename).filter(owner=owner).count():
-#             c['message'] = '已存在同名文件'
-#             return JsonResponse(c)
-
-
-#@login_required(login_url='/user/login/')
-# def file_management(request):
-# 	user = request.user
-# 	files = File.objects.filter(owner=user)
-# 	if files.exists():
-# 		msg_code = 0
-# 	else:
-# 		msg_code = 1
-# 	context = {
-# 		'user': user,
-# 		'files': files,
-# 		'msg': msg_code,
-# 	}
-# 	return render(request, 'file/file_management.html', context)
 
 
 #@login_required(login_url='/user/login/')
@@ -1179,74 +1056,38 @@ def group_file_view(request):   # TODO: complete function
 	return render(request, 'check_success.html')
 
 
-# @ensure_csrf_cookie
-# @csrf_exempt
-# #@login_required(login_url='/user/login/')
-# def delete_file(request):
-# 	c = {}
-# 	if request.method == 'POST':
-# 		if request.POST.get('file_guid') != None:
-# 			user = request.user
-# 			target_file_id = request.POST.get('file_guid')
-# 			target_file = File.objects.filter(gu_id=target_file_id)[0]
-# 			if target_file.owner != user:
-# 				c['message'] = '非文件上传者，无法删除'
-# 				return JsonResponse(c)
-# 			else:
-# 				# delete from File table, other table auto-delete by CASCADE
-# 				File.objects.filter(gu_id=target_file_id).delete()
-# 				c['message'] = '删除成功'  # TODO: delete from file storage
-# 	return JsonResponse(c)
-
-
-# @ensure_csrf_cookie
-# @csrf_exempt
-# #@login_required(login_url='/user/login/')
-# def share_file(request):
-# 	c = {}
-# 	correct_co_editors = []
-# 	wrong_input = []
-
-# 	if request.method == 'POST':
-# 		owner = request.user
-# 		file_guid = request.POST.get('file_guid')
-# 		share_input = request.POST.get('co_editors').split('\n')
-
-# 		shared_file = File.objects.filter(gu_id=file_guid)[0]
-# 		for p in share_input:
-# 			if User.objects.filter(Q(username=p) | Q(email=p)).exists():  # input has a match
-# 				matched_editor = User.objects.filter(Q(username=p) | Q(email=p))[0]
-# 				correct_co_editors.append(p)
-# 				share = FileShare(owner=owner, sharer=matched_editor, shared_file=shared_file)
-# 				share.save()
-# 				prin
-# 			else:
-# 				wrong_input.append(p)
-
-# 	c['correct_co_editors'] = correct_co_editors
-# 	c['wrong_input'] = wrong_input
-# 	return JsonResponse(c)
-
 
 @ensure_csrf_cookie
 @csrf_exempt
-#@login_required(login_url='/user/login/')
-def share_file_to_group(request):
-	c = {}
-	correct_group = []
-	wrong_input = []
-	user = None
-	if request.method == 'POST':
-		if User.objects.filter(user_guid = request.session['user_guid']).count():
-			user = User.objects.filter(user_guid = request.session['user_guid'])[0]
-		file_guid = request.POST.get('file_guid')
-		share_input = request.POST.get('co_groupID').split('\n')
 
-		shared_file = File.objects.filter(gu_id=file_guid)[0]
-		for p in share_input:
-			if Group.objects.filter(group_guid=p).exists():   # found match
-				matched_group = Group.objects.select_related().filter(group_guid=p)[0]
-	return render(request, 'check_success.html')
+def share_file_to_group(request):
+    c = {}
+    correct_group = []
+    wrong_input = []
+    duplicate = []
+
+    if request.method == 'POST':
+        # owner = request.user
+        file_guid = request.POST.get('file_guid')
+        share_input = request.POST.get('groupID').split('\n')
+
+        shared_file = File.objects.filter(file_guid=file_guid)[0]
+        for p in share_input:
+            if Group.objects.filter(group_name=p).exists():   # if matched group exists
+                matched_group = Group.objects.select_related().filter(group_name=p)[0]
+                if GroupFiles.objects.filter(share_group=matched_group, shared_file=shared_file).exists():
+                    duplicate.append(p)
+                else:
+                    group_record = GroupFiles(share_group=matched_group, shared_file=shared_file)
+                    group_record.save()
+                    correct_group.append(p)
+            else:
+                wrong_input.append(p)
+
+    c['correct_group'] = correct_group
+    c['wrong_input'] = wrong_input
+    c['duplicate'] = duplicate
+    return JsonResponse(c)
 
 
 # edit_fileedit_file

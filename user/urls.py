@@ -60,6 +60,7 @@ urlpatterns = [
     url(r'^add_member/$', views.add_member, name='add_member'),
 
     url(r'^delete_group/$', views.delete_group, name='delete_group'),
+    url(r'^share_file_to_group/$', views.share_file_to_group, name='share_file_to_group'),
 ]
 
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户分享文件</title>
+</head>
+<body>
+   
+
+        <div class="side-body">
+            <ul class="nav nav-pills" style="margin-bottom: 10px;">
+                 <li role="presentation" class="active"><a href="{% url 'user:share_files_view' %}">个人分享文件</a></li>
+                 <li role="presentation"><a href="{% url 'user:group_files_view' %}">群分享文件</a ></li>
+            </ul>
+
+            {% if msg == 0 %}
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col"> 文件名 </th>
+                        <th scope="col"> 上传者 </th>
+                        <th scope="col"> UUID </th>
+                    </tr>
+                    </thead>
+
+                    {% for file in shared_files %}
+                        <tr id={{  file.shared_file.guid }} oncontextmenu="select_file(this)">
+                            <td>{{ file.shared_file.filename }}</td>
+                            <td>{{ file.owner.username }}</td>
+                            <td>{{ file.shared_file.guid }}</td>
+
+
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+
+            {% if msg == 1 %}
+                <h5> 还没有人与您分享文件 </h5>
+            {% endif %}
+
+        </div>
+
+
+    <script type="text/javascript">
+        var current_file_guid = '';
+        function select_file(element){
+            current_file_guid = element.id;
+            console.log(current_file_guid);
+        }
+    </script>
+
+</body>
+</html>

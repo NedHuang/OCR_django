@@ -175,7 +175,6 @@
               <tr>
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
-<!--                 <th scope="col">分组</th> -->
                 <th scope="col">编辑</th>
               </tr>
             </thead>
@@ -184,8 +183,6 @@
             <tr id = {{file.file_guid}}  oncontextmenu="edit(event), select_file(this)" onclick ="edit(event), select_file(this)" >
               <td>{{ file.filename }}</td>
               <td>{{ file.owner.username}}</td>
-<!--               <td>{{ file.groups}}</td> -->
-             <!--  <td>{{ file.co_editor}}</td> -->
               <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
             </tr>
           {% endfor %}
@@ -198,8 +195,6 @@
               <tr>
                 <th scope="col">文件名</th>
                 <th scope="col">上传者</th>
-                <!-- <th scope="col">分组</th> -->
-                <!-- <th scope="col"></th> -->
                 <th scope="col" >编辑</th>
               </tr>
             </thead>
@@ -208,8 +203,6 @@
             <tr id = {{s.shared_file.file_guid}} oncontextmenu="edit(event), select_file(this)" onclick ="edit(event), select_file(this)">
               <td>{{ s.shared_file.filename }}</td>
               <td>{{ s.shared_file.owner.username}}</td>
-              <!-- <td>{{ s.shared_file.groups}}</td> -->
-              <!-- <td>{{ s.shared_file.file_guid}}</td> -->
               <td><button id = {{s.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
             </tr>
           {% endfor %}
@@ -331,7 +324,7 @@
 
 <!--   对文件进行操作的右键菜单 -->
   <div id="edit_menu" class="menus" style="display:none" >
-    <table border="1"  style="border:thin;z-index: 1;width: 100px;background-color: #c3ccd5; opacity: 1; border-radius: 1rem" cellspacing="0" onmouseover='function(){this}'>
+    <table border="1"  style="border:thin;z-index: 1;width: 120px;background-color: #c3ccd5; opacity: 1; border-radius: 1rem" cellspacing="0" onmouseover='function(){this}'>
       <tr>
         <td  style="cursor:default;border:outset 1;" align="center" >
           <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
@@ -347,6 +340,11 @@
           <button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_model" >共享</button>
         </td>
       </tr>
+      <tr>
+        <td style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_group_modal" >共享到群组</button>
+        </td>
+      </tr>
     </table>
   </div>
 
@@ -355,6 +353,28 @@
         <span class="pull-right">2.1 <a href="#"><i class="fa fa-long-arrow-up"></i></a></span> © 2018 Copyright. </a>
       </div>
     </footer>
+
+<!-- 分享文件给某个组的model -->
+    <div class="modal fade" id="share_file_group_modal" tabindex="-1" role="dialog" aria-labelledby="share_groupModal"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="share_groupModalTitle">分享文件给他人</h5>
+                            <button type="button" data-dismiss="modal" class="close" aria-hidden="true">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="share_file_to_group_modal_body">
+                            <textarea typeof="text" id="share_groupID" placeholder="请输入想要分享到的群组名字，以回车分隔"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="share_file_to_group()" data-dismiss="modal">确认</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" data-dismiss="modal">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
     
       <!-- Javascript Libs -->
       <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
@@ -532,6 +552,39 @@
             }
         });
       }
+
+      // share_file_to_group. 
+      function share_file_to_group() {
+            var share_to = $('#share_groupID').val();
+            var post_data = {
+                'action' : 'share_file_to_group',
+                'file_guid' : current_file_guid,
+                'groupID' : share_to,
+            };
+            console.log(post_data);
+            $.ajax({
+                url: '/user/share_file_to_group/',
+                type: 'POST',
+                data: post_data,
+                success: function (res) {
+                    console.log('ojbk');
+                    var msg = '';
+                    if (res['correct_group'].length != 0) {
+                        msg += '已分享到群组：' + res['correct_group'] + '\n';
+                    }
+                    if (res['duplicate'].length != 0) {
+                        msg += '重复分享给：' + res['duplicate'] + '\n';
+                    }
+                    if (res['wrong_input'].length != 0) {
+                        msg += '没有找到群组' + res['wrong_input'] + ',请检查输入字段是否有误';
+                    }
+                    alert(msg)
+                },
+                error: function (err) {
+                    alert('网络连接失败,请稍后重试', err);
+                }
+            })
+        }
 
 
 $("#edit_menu").mouseleave(function(){
