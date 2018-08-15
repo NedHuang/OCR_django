@@ -855,8 +855,8 @@ def create_group(request):
 		for p in id_input:
 			if User.objects.filter(Q(username=p) | Q(email=p)).exists():
 				matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
-				member_record = GroupMember(share_group=group, shared_user=matched_user)
-				member_record.save()
+				gm = GroupMember(share_group=group, shared_user=matched_user)
+				gm.save()
 				correct_members.append(p)
 			else:
 				wrong_input.append(p)
@@ -865,8 +865,8 @@ def create_group(request):
 		if len(correct_members) == 0:
 			group.delete()
 
-		member_record = GroupMember(share_group=group, shared_user=owner);
-		member_record.save()
+		gm = GroupMember(share_group=group, shared_user=owner);
+		gm.save()
 
 	c['correct_members'] = correct_members
 	c['wrong_input'] = wrong_input
@@ -959,40 +959,94 @@ def delete_member(request):
 	c['wrong_input'] = wrong_input
 	return JsonResponse(c)
 
+
 @ensure_csrf_cookie
 @csrf_exempt
 def add_member(request):
-	c = {}
-	correct_members = []
-	wrong_input = []
-	group=None
-	user = None
-	if request.method == 'POST':
-		if User.objects.filter(user_guid = request.session['user_guid']).count():
-			user = User.objects.filter(user_guid = request.session['user_guid'])[0]
-		group_guid = request.POST.get('group')
-		group = Group.objects.select_related().filter(group_guid=group_guid)[0]
-		id_input = request.POST.get('members').split('\n')
+    c = {}
+    correct_members = []
+    wrong_input = []
 
-		for p in id_input:
-			# print(p)
-			if User.objects.filter(Q(username=p) | Q(email=p)).exists():
-				matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
-				print(matched_user.username)
-				member_record = GroupMember()
-				member_record.share_group=group
-				member_record.shared_user=matched_user
-				member_record.save()
-				correct_members.append(p)
-			else:
-				wrong_input.append(p)
+    if request.method == 'POST':
+        group_guid = request.POST.get('group')
+        group = Group.objects.filter(group_guid=group_guid)[0]
+        id_input = request.POST.get('members').split('\n')
 
-	c['correct_members'] = correct_members
-	c['wrong_input'] = wrong_input
-	print('aaaaaa')
-	for i in GroupMember.objects.filter(share_group=group):
-		print(i.shared_user.username)
-	return JsonResponse(c)
+        for p in id_input:
+            if User.objects.filter(username= p).count():
+                matched_user = User.objects.filter(username = p)[0]
+                gm = GroupMember(share_group=group, shared_user=matched_user)
+                gm.save()
+                correct_members.append(p)
+                print(gm)
+                print(GroupMember.objects.count())
+            else:
+                wrong_input.append(p)
+    print('--------------------')
+    for i in GroupMember.objects.all():
+    	print(i)
+    c['correct_members'] = correct_members
+    c['wrong_input'] = wrong_input
+    return JsonResponse(c)
+
+
+
+# @ensure_csrf_cookie
+# @csrf_exempt
+# def add_member(request):
+# 	c = {}
+# 	correct_members = []
+# 	wrong_input = []
+# 	group=None
+# 	user = None
+# 	# print(request.POST['group'])
+# 	# print(request.POST['members'])
+# 	# c = 0
+# 	# if Group.objects.filter(group_guid = request.POST['group']).count():
+# 	# 	group = Group.objects.filter(group_guid = request.POST['group'])[0]
+# 	# 	print('group_name: ' + group.group_name)
+# 	# for i in request.POST['members'].split('\n'):
+# 	# 	if User.objects.filter(username = i).count():
+# 	# 		user = User.objects.filter(username = i)[0]
+# 	# 		print('user: ' + user.username)
+# 	# 		gm=GroupMember()
+# 	# 		gm.shared_user = user
+# 	# 		gm.share_group = group
+# 	# 		gm.save()
+# 	# 		c +=1
+# 	# 		print(c)
+# 	# 		print(gm)
+# 	# return JsonResponse({'a':'b'})
+
+
+
+
+# 	if request.method == 'POST':
+# 		if User.objects.filter(user_guid = request.session['user_guid']).count():
+# 			user = User.objects.filter(user_guid = request.session['user_guid'])[0]
+# 		group_guid = request.POST.get('group')
+# 		group = Group.objects.select_related().filter(group_guid=group_guid)[0]
+# 		id_input = request.POST.get('members').split('\n')
+
+# 		for p in id_input:
+# 			# print(p)
+# 			if User.objects.filter(Q(username=p) | Q(email=p)).exists():
+# 				matched_user = User.objects.filter(Q(username=p) | Q(email=p))[0]
+# 				print(matched_user.username)
+# 				gm = GroupMember()
+# 				gm.share_group=group
+# 				gm.shared_user=matched_user
+# 				gm.save()
+# 				correct_members.append(p)
+# 			else:
+# 				wrong_input.append(p)
+
+# 	c['correct_members'] = correct_members
+# 	c['wrong_input'] = wrong_input
+# 	print('aaaaaa')
+# 	for i in GroupMember.objects.filter(share_group=group):
+# 		print(i.shared_user.username)
+# 	return JsonResponse(c)
 
 @ensure_csrf_cookie
 @csrf_exempt

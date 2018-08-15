@@ -171,10 +171,10 @@
                       </thead>
 
                       {% for record in records %}
-                          {% if record.share_group.owner != user %}
-                              <tr id= {{  record.share_group.group_id }}>
+                          {% if record.share_group.owner != user %} 
+                              <tr id= {{  record.share_group.group_guid }}>
                                   <td>{{ record.share_group.owner }}</td>
-                                  <td>{{ record.share_group.group_id }}</td>
+                                  <td>{{ record.share_group.group_guid }}</td>
                               </tr>
                           {% endif %}
                       {% endfor %}

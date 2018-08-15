@@ -85,6 +85,14 @@ DATABASES = {
         'USER':'root',
         'PASSWORD':'Hmz19940301',
     }
+    #     'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'demo',
+    #     'HOST':'172.18.40.193',
+    #     'PORT':'3306',
+    #     'USER':'huangmz',
+    #     'PASSWORD':'huangmz',
+    # }
 }
 
 
