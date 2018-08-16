@@ -79,17 +79,17 @@ class GroupFiles(models.Model):
 	share_group = models.ForeignKey(Group,on_delete=models.CASCADE,default=None)
 	shared_file = models.ForeignKey(File,on_delete=models.CASCADE,default=None)
 	def __str__(self):
-		return 'group: '+ self.group.groupname + '; file' + self.file.filename
+		return 'group: '+ self.share_group.group_name + '; file: ' + self.shared_file.filename
 
 
 
-# relationship between user and group 
+# relationship between user and group 组里有谁
 class GroupMember(models.Model):
 	# group_member_guid = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)#文件的GUID
 	share_group = models.ForeignKey(Group, on_delete=models.CASCADE, default=None)
 	shared_user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
 	def __str__(self):
-		return str(self.share_group.group_name) + ' ; ' + self.shared_user.username
+		return 'group name: '+str(self.share_group.group_name) + ' ;user ' + self.shared_user.username
 
 
 

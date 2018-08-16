@@ -61,6 +61,11 @@ urlpatterns = [
 
     url(r'^delete_group/$', views.delete_group, name='delete_group'),
     url(r'^share_file_to_group/$', views.share_file_to_group, name='share_file_to_group'),
+
+    url(r'^show_shared_file_with_me/$', views.show_shared_file_with_me, name='show_shared_file_with_me'),
+
+    url(r'^group_file_view/$', views.group_file_view, name='group_file_view'),
+    url(r'^show_my_file/$', views.show_my_file, name='show_my_file'),
 ]
 
 

@@ -1,9 +1,9 @@
-  var groupID = '';
+alert('aaaaaa');
+var groupID = '';
   function select_group(element) {
     groupID = element.id;
     console.log('groupID set to', groupID);
   }
-  
   function delete_member() {
     var post_data = {
       'action': 'delete_member',
@@ -73,7 +73,6 @@
       success: function (res) {
         if (res['message'] != 'success') {
           alert(res['message']);
-          {#window.location.href = '{% url 'user:group_management' %}';#}
           window.location.href = '/user/group_management/';
         }
 

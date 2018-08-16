@@ -109,8 +109,8 @@
                 </li>
                 <li>
                   <div class="profile-info">
-                    <h4 class="username">Emily Hart</h4>
-                    <p>emily_hart@email.com</p>
+                    <h4 class="username">{{user.username}}</h4>
+                    <p>{{user.email}}</p>
                     <div class="btn-group margin-bottom-2x" role="group">
                       <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
                       <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
@@ -206,7 +206,7 @@
           确认注销账户？
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick="logout()">
             确认注销
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">

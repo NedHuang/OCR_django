@@ -52,7 +52,7 @@ def login(request):
 			request.session['login'] = True
 			request.session.set_expiry(60*60*24)  # sesson 1天后过期
 			
-			return HttpResponseRedirect('/user/main/')
+			return HttpResponseRedirect('/user/show_shared_file_with_me/')
 		return HttpResponse(t.render(c,request))
 
 
@@ -188,6 +188,8 @@ def share_file(request):
 	already_shared = []
 	matched_co_editors = None
 	shared_file = None
+	user = None
+	owner = None 
 	#获取owner,file的UUID和要分享的用户名
 	if request.method == 'POST':
 		owner_guid = request.session.get('user_guid')
@@ -196,10 +198,17 @@ def share_file(request):
 		if File.objects.filter(file_guid = file_guid).exists():
 			print('file exists')
 			shared_file = File.objects.filter(file_guid = request.POST.get('file_guid'))[0]
-		owner = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
-		# 请登录。。。。
-		if not owner:
-			return HttpResponse('请登录')
+		if User.objects.filter(user_guid = request.session.get('user_guid')).count():
+			user = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
+		else : 
+			return login()
+		owner = shared_file.owner
+		print(owner)
+		print(user)
+		if owner != user:
+			print('nonono')
+			response_data['error']='你不是文件的所有者，无法分享文件'
+			return JsonResponse(response_data)
 		for i in co_editors: # i是输入的字段（用户名或者邮箱）
 			# 只会match到一个，除非A的用户名叫xxx@yyy.com,B的邮箱也是xxx@yyy.com, 在注册时检查一下？
 			if User.objects.filter(Q(username=i) | Q(email=i)).exists():
@@ -292,7 +301,7 @@ def file_management(request):
 	user = User.objects.filter(username=request.session.get('username'))[0]
 	files = File.objects.filter(owner = user)
 	shares = Share.objects.filter(share_user=user);
-	c ={'messgage':request.session.get('username'), 'files':files,'shares':shares}
+	c ={'messgage':request.session.get('username'), 'files':files,'shares':shares,'user':user}
 	return HttpResponse(t.render(c,request))
 
 
@@ -365,6 +374,7 @@ def load_file(request):
 	c['img_url'] ='/'.join(path.split('/')[:-1]).split('/static/')[-1]+'/'+str(page)+'.png'
 	c['owner_guid'] =request.session['owner_guid']= str(file.owner.user_guid)
 	c['resolution'] = request.session['resolution']
+	c['user']=user
 	t=loader.get_template('main.html')
 
 	print(c)
@@ -1035,11 +1045,13 @@ def homepage(request):
 
 
 #@login_required(login_url='/user/login/')
-def share_file_view(request):
+#share_file_view
+#查看分享给我的文件，单独分享给我的文件
+def show_shared_file_with_me(request):
 	user = None
 	if User.objects.filter(user_guid = request.session['user_guid']).count():
 		user = User.objects.filter(user_guid = request.session['user_guid'])[0]
-	shared_files = FileShare.objects.filter(sharer=user)
+	shared_files = Share.objects.filter(share_user=user)
 	if shared_files.exists():
 		msg_code = 0
 	else:
@@ -1049,45 +1061,105 @@ def share_file_view(request):
 		'shared_files': shared_files,
 		'msg': msg_code,
 	}
-	return render(request, 'file/shared_with_me.html', context)
+	print(context)
+	return render(request, 'shared_with_me.html', context)
 
-#@login_required(login_url='/user/login/')
+
+
+# 查看共享给我所在的组的文件
+@csrf_exempt
+@ensure_csrf_cookie
 def group_file_view(request):   # TODO: complete function
-	return render(request, 'check_success.html')
+	user = None
+	if User.objects.filter(user_guid = request.session['user_guid']).count():
+		user = User.objects.filter(user_guid = request.session['user_guid'])[0]
+	# user->group->file
+	res = []
+	gms = GroupMember.objects.filter(shared_user=user)
+	for i in gms:
+		files = GroupFiles.objects.filter(share_group = i.share_group)
+		temp = {'group':i.share_group,'GF':[]}
+		for i in files:
+			temp['GF'].append(i)
+		res.append(temp)
+	print(res)
 
+	context = {
+		'user': user,
+		'files': files,
+		'res':res,
+	}
+	print(context)
+	return render(request, 'shared_with_me.html', context)
+
+# 查看我的文件
+def show_my_file(request):
+	if (not request.session.get('username')) or (not request.session.get('login')):
+		# form = LoginForm()
+		# return render(request,'login.html',{'form':form})
+		return login(request)
+	print(request.session.get('username'))
+	user = User.objects.filter(username=request.session.get('username'))[0]
+	myfiles = File.objects.filter(owner = user)
+	c ={'messgage':request.session.get('username'), 'myfiles':myfiles,'user':user}
+	return render(request, 'shared_with_me.html', c)
 
 
 @ensure_csrf_cookie
 @csrf_exempt
 
 def share_file_to_group(request):
-    c = {}
-    correct_group = []
-    wrong_input = []
-    duplicate = []
+	c = {}
+	correct_group = []
+	wrong_input = []
+	duplicate = []
+	not_owner = []
+	user = None
+	owner = None 
+	if request.method == 'POST':
+		if not User.objects.filter(user_guid = request.session.get('user_guid')).count():
+			return login()
+		user = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
+		file_guid = request.POST.get('file_guid')
+		share_input = request.POST.get('groupID').split('\n')
+		if not File.objects.filter(file_guid=file_guid).count():
+			c['error'] = '未找到文件'
+			return JsonResponse(c)
+		shared_file = File.objects.filter(file_guid=file_guid)[0]
+		# owner = request.user
+		if user != shared_file.owner:
+			c['error'] ='你不是文件的所有者，无法分享文件'
+			return JsonResponse(c)
 
-    if request.method == 'POST':
-        # owner = request.user
-        file_guid = request.POST.get('file_guid')
-        share_input = request.POST.get('groupID').split('\n')
+		for p in share_input:
+			if Group.objects.filter(group_name=p).exists():   # if matched group exists
+				matched_group = Group.objects.select_related().filter(group_name=p)[0]
+				#不是这个群的群主
+				if matched_group.owner != user:
+					not_owner.append(p)
+					continue
+				#文件已经分享给这个群过了
+				if GroupFiles.objects.filter(share_group=matched_group, shared_file=shared_file).exists():
+					duplicate.append(p)
+				#执行分享操作
+				else:
+					group_record = GroupFiles(share_group=matched_group, shared_file=shared_file)
+					group_record.save()
+					correct_group.append(p)
+			else:
+				wrong_input.append(p)
+	c['not_owner'] = not_owner if len(not_owner) else None
+	c['correct_group'] = correct_group if len(correct_group) else None
+	c['wrong_input'] = wrong_input if len(wrong_input) else None
+	c['duplicate'] = duplicate if len(duplicate) else None
+	print(c)
+	return JsonResponse(c)
 
-        shared_file = File.objects.filter(file_guid=file_guid)[0]
-        for p in share_input:
-            if Group.objects.filter(group_name=p).exists():   # if matched group exists
-                matched_group = Group.objects.select_related().filter(group_name=p)[0]
-                if GroupFiles.objects.filter(share_group=matched_group, shared_file=shared_file).exists():
-                    duplicate.append(p)
-                else:
-                    group_record = GroupFiles(share_group=matched_group, shared_file=shared_file)
-                    group_record.save()
-                    correct_group.append(p)
-            else:
-                wrong_input.append(p)
 
-    c['correct_group'] = correct_group
-    c['wrong_input'] = wrong_input
-    c['duplicate'] = duplicate
-    return JsonResponse(c)
+def logout(request):
+	request.session.flush()
+	form = LoginForm()
+	return render(request,'login.html',{'form':form,'message':'请登录:'})
 
 
 # edit_fileedit_file
