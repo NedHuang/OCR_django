@@ -8,8 +8,9 @@ from . import models
 
 class LoginForm(forms.Form):
     username = fields.CharField()
-
     password = fields.CharField()
+    def __init__(self):
+        self.fields['username'].widget.attrs['class'] = 'input100'
 
     def clean_username(self):
         # 对username的扩展验证，查找用户是否已经存在

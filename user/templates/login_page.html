@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login V18</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+{% load static %}
+{% load widget_tweaks %}
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="{% static '/login/images/icons/favicon.ico' %}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/bootstrap/css/bootstrap.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/fonts/Linearicons-Free-v1.0.0/icon-font.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/animate/animate.css' %}">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/css-hamburgers/hamburgers.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/animsition/css/animsition.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/select2/select2.min.css' %}">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/daterangepicker/daterangepicker.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/css/util.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static '/login/css/main.css' %}">
+<!--===============================================================================================-->
+</head>
+<body style="background-color: #666666;">
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+
+
+		<!-- 		<form role="form" action="/user/login/" method="POST" novalidate="NOVALIDATE">
+					{% csrf_token %}
+					<div class="form-group">
+						<label for="username">用户名</label>
+						{{ form.username }}  <span style="color: red">{{ form.username.errors }}</span>
+					</div>
+					<div class="form-group">
+						<label for="password">密码</label>
+						{{ form.password }}<span style="color: red">{{ form.password.errors}}</span>
+					</div>
+					<input type="submit" class="btn btn-default" value="登录"/>
+					<span>没有账号？<a href="/user/register/">注册账号</a></span>
+					<span><a href="/user/logout/">注销</a></span><br>
+					<span><a href="/user/resetByUsernameForm/">忘记密码</a></span><br>
+				</form> -->
+
+
+
+				<form class="login100-form validate-form" role="form" action="/user/login/" method="POST" novalidate="NOVALIDATE" >
+					{% csrf_token %}
+					<span class="login100-form-title p-b-43">
+						请登录:
+					</span>
+					
+					
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<!-- <input class="input100" type="text" name="email"> -->
+						<!-- <label for="username">用户名</label> -->
+						{{ form.username |add_class:'input100'}}  
+						<!-- <span style="color: red">{{ form.username.errors }}</span> -->
+						<span class="focus-input100"></span>
+						<span class="label-input100">Username</span>
+					</div>
+					
+					
+					<div class="wrap-input100 validate-input" data-validate="Password is required">
+						<!-- <input class="input100" type="password" name="pass"> -->
+						<!-- <label for="password">密码</label> -->
+						{{ form.password |add_class:'input100'}}
+						<!-- <span style="color: red">{{ form.password.errors}}</span> -->
+						<span class="focus-input100"></span>
+						<span class="label-input100">Password</span>
+					</div>
+
+					<!-- <div class="flex-sb-m w-full p-t-3 p-b-32">
+						<div class="contact100-form-checkbox">
+							<input class="input-checkbox100" id="ckb1" type="checkbox" name="remember-me">
+							<label class="label-checkbox100" for="ckb1">
+								Remember me
+							</label>
+						</div>
+
+						<div>
+							<span>没有账号？<a href="/user/register/">注册账号</a></span>
+							<a href="{% static '#" class="txt1">
+								Forgot Password?
+							</a>
+						</div>
+					</div> -->
+			
+
+					<div class="container-login100-form-btn">
+				<!-- 		<button class="login100-form-btn">
+							Login
+						</button> -->
+						<input type="submit" class="login100-form-btn" value="登录"/>
+					</div>
+					
+					<!-- <div class="text-center p-t-46 p-b-20">
+						<span class="txt2">
+							or sign up using
+						</span>
+					</div>
+
+					<div class="login100-form-social flex-c-m">
+						<a href="{% static '#" class="login100-form-social-item flex-c-m bg1 m-r-5">
+							<i class="fa fa-facebook-f" aria-hidden="true"></i>
+						</a>
+
+						<a href="{% static '#" class="login100-form-social-item flex-c-m bg2 m-r-5">
+							<i class="fa fa-twitter" aria-hidden="true"></i>
+						</a>
+					</div> -->
+				</form>
+				{% for img_url in login_img_urls%}
+				<div id = {{img_url}} class="login100-more" style="background-image: url('{% static img_url %}' ); ">
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	
+	
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/animsition/js/animsition.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/bootstrap/js/popper.js' %}"></script>
+	<script src ="{% static '/login/vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/select2/select2.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/daterangepicker/moment.min.js' %}"></script>
+	<script src ="{% static '/login/vendor/daterangepicker/daterangepicker.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/countdowntime/countdowntime.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/js/main.js' %}"></script>
+
+	<script type="text/javascript">
+		// alert($('.login100-more').eq(0))
+$('.login100-more').eq(1).hide()
+$('.login100-more').eq(2).hide()		
+$('.login100-more').eq(0).slideUp(1000)
+$('.login100-more').eq(1).slideDown(2000)
+// var y = setTimeOut("$('.login100-more').eq(1).slideUp(1000)",1000)
+// var z = setTimeOut("$('.login100-more').eq(2).slideUp(1000)",1000)
+		// function change_banners(){
+		// 	var banners = $('.login100-more');
+		// 	var l = change_banners.length;
+		// }
+
+
+	</script>
+
+</body>
+</html>

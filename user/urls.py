@@ -66,6 +66,8 @@ urlpatterns = [
 
     url(r'^group_file_view/$', views.group_file_view, name='group_file_view'),
     url(r'^show_my_file/$', views.show_my_file, name='show_my_file'),
+    url(r'^share_status/(?P<file_guid>[0-9a-f-]+)$', views.share_status_management, name='share_status_management'),
+    url(r'^remove_share_record/$', views.remove_share_record, name='remove_share_record'),
 ]
 
 

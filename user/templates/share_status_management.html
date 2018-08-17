@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>文件分享状态管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fonts -->
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+  <!-- CSS Libs -->
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap.min.css' %}">
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'lib/css/font-awesome.min.css"> -->
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/fontawesome/css/all.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/animate.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap-switch.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/checkbox3.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/jquery.dataTables.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/dataTables.bootstrap.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'lib/css/select2.min.css' %}">
+  <!-- CSS App -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/css/themes/flat-green.css' %}">
+  <!-- Animation CSS-->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/animate.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/main.css' %}">
+
+
+</head>
+
+<body class="flat-green" style =" overflow-y: auto; overflow-x: auto;" >
+
+
+<div id="loading" style = "width:0%; height: 0%; display: block"  >
+  <div id="loading-center" style = "width:100%; height: 100%; " >
+    <div style ="padding-top: 20%; width:100%">
+   <!--    <p id ='loading_flag'style ="width: 20rem; margin-right: auto; margin-left: auto;position: middle; font-size: 5rem" hidden>正在识别。。。</p> -->
+    </div>
+    <div id="loading-center-absolute" style = "width:100%; height: 100%">
+      <div class="object" id="object_one"></div>
+      <div class="object" id="object_two"></div>
+      <div class="object" id="object_three"></div>
+      <div class="object" id="object_four"></div>
+      <div class="object" id="object_five"></div>
+      <div class="object" id="object_six"></div>
+      <div class="object" id="object_seven"></div>
+      <div class="object" id="object_eight"></div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div class="app-container">
+    <div class="row content-container">
+      <nav class="navbar navbar-default navbar-fixed-top navbar-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-expand-toggle">
+              <i class="fa fa-bars icon"></i>
+            </button>
+            <ol class="breadcrumb navbar-breadcrumb">
+              <li class="active"><i class="fa fa-globe"></i> 数字出版技术国家重点实验室</li>
+            </ol>
+            <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+              <i class="fa fa-th icon"></i>
+            </button>
+          </div>
+          <ul class="nav navbar-nav navbar-right">
+            <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+              <i class="fa fa-times icon"></i>
+            </button>
+            <li>
+              <a href="#">首页</a>
+            </li>
+            <li>
+                <a href="#">文档整理</a>
+            </li>
+            <li class="dropdown danger">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">其他服务</a>
+              <ul class="dropdown-menu danger  animated fadeInDown">
+                <li>
+                  <ul class="list-group notifications">
+                    <a href="#">
+                      <li class="list-group-item" onclick ="window.location.href = '{% static 'knowledge_service/page.html'">
+                         <i class="fa fa-mortar-board"></i> 知识服务
+                      </li>
+                    </a>
+                    <a href="#">
+                      <li class="list-group-item">
+                         <i class="fa fa-pencil-square-o"></i> 机器写作
+                      </li>
+                    </a>
+                    <a href="http://www.founder.com/" target="blank">
+                      <li class="list-group-item message">
+                        方正集团
+                      </li>
+                    </a>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="dropdown profile">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
+              <ul class="dropdown-menu animated fadeInDown">
+                <li class="profile-img">
+                  <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                </li>
+                <li>
+                  <div class="profile-info">
+                    <h4 class="username">{{user.username}}</h4>
+                    <p>{{user.email}}/p>
+                    <div class="btn-group margin-bottom-2x" role="group">
+                      <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
+                      <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
+                      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="side-menu sidebar-inverse">
+        <nav class="navbar navbar-default" role="navigation">
+          <div class="side-menu-container">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">
+
+                <div class="icon fa fa-newspaper-o"></div>
+                <div class="title">版面理解</div>
+              </a>
+              <button type="button" class="navbar-expand-toggle pull-right visible-xs">
+                <i class="fa fa-times icon"></i>
+              </button>
+            </div>
+            <!-- <ul class="nav navbar-nav" >
+              <li>
+                <a id='image_a'>
+                  <span class="icon fa fa-folder "></span><span id="image_button" class="title"  ><p id ="to_my_files">我的文档</p></span>
+                </a>
+              </li>
+
+              <li>
+                <a id='image_a'>
+                  <span class="icon fa fa-folder "></span><span onclick='show_shared_file_with_me()' id="image_button" class="title"  ><p id ="to_shared_with_me">与我共享的文档</p></span>
+                </a>
+              </li>
+            </ul> -->
+          </div>
+          <!-- /.navbar-collapse -->
+        </nav>
+      </div>
+      <!-- Main Content -->
+      <div class="container-fluid" id = 'file_management_main_container'>
+        <div class="side-body">
+          <div>
+            <strong>{{ file.filename }}</strong>
+          </div>
+          <br>
+          <button type="button" class="btn btn-default" id={{ file.file_guid }} onclick="select_file(this);remove_share_record();">
+              取消分享
+          </button>
+          <br>
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th scope="col"> 用户 </th>
+            </tr>
+            </thead>
+
+            {% for record in user_shares %}   {# FileShare objects #}
+            <tr id={{  record.share_guid }} oncontextmenu="select_file(this)">
+              <td>
+                <input type="checkbox" name="to_delete_user" value="{{ record.sharer.username }}">
+                {{ record.sharer.username }}
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+
+          <br>
+          <br>
+          <br>
+
+          <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col"> 分享的组 </th>
+            </tr>
+            </thead>
+
+            {% for record in group_shares %}   <!-- groupfiles -->
+              <tr id={{  record.shared_file.file_guid }} oncontextmenu="select_file(this)">
+                <td>
+                  <input type="checkbox" name="to_delete_group" value="{{ record.share_group.group_name }}">
+                  {{ record.share_group.group_name }}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+
+
+ <!-- model and menu -->
+<!-- 注销 -->
+  <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          注销
+          </h4>
+        </div>
+        <div class="modal-body">
+          确认注销账户？
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='logout()'>
+            确认注销
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!--  确定删除文件的model -->
+  <div class="modal fade" id="delete_file_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          </h4>
+        </div>
+        <div id ="delete_file_model_body" class="modal-body">
+          删除文件？
+        </div>
+        <div class="modal-footer">
+          <button onclick="delete_file()" type="button" class="btn btn-default" data-dismiss="modal">
+            删除
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <!--  共享给其他人的model -->
+  <div class="modal fade" id="share_file_model" tabindex="-1" role="dialog" aria-labelledby="share_files" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+            
+          </h4>
+        </div>
+        <div id ="delete_file_model_body" class="modal-body">
+          <textarea type="text" id='share_to_user_id' name='share_to_user' placeholder='请输入用户名或者邮箱，以回车分隔'></textarea>
+        </div>
+        <div class="modal-footer">
+          <button onclick="share()" type="button" class="btn btn-default" data-dismiss="modal">
+            确定
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!--   对文件进行操作的右键菜单 -->
+  <div id="edit_menu" class="menus" style="display:none" >
+    <table border="1"  style="border:thin;z-index: 1;width: 120px;background-color: #c3ccd5; opacity: 1; border-radius: 1rem" cellspacing="0" onmouseover='function(){this}'>
+      <tr>
+        <td  style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
+        </td>
+      </tr>
+      <tr>
+        <td style=" cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" onclick="edit_file()">编辑</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_model" >共享</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_group_modal" >共享到群组</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+
+<!-- 分享文件给某个组的model -->
+  <div class="modal fade" id="share_file_group_modal" tabindex="-1" role="dialog" aria-labelledby="share_groupModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="share_groupModalTitle">分享文件给他人</h5>
+          <button type="button" data-dismiss="modal" class="close" aria-hidden="true">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="share_file_to_group_modal_body">
+          <textarea typeof="text" id="share_groupID" placeholder="请输入想要分享到的群组名字，以回车分隔"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="share_file_to_group()" data-dismiss="modal">确认</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" data-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+  <!-- Javascript Libs -->
+  <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/bootstrap.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/Chart.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/bootstrap-switch.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/jquery.matchHeight-min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/jquery.dataTables.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/dataTables.bootstrap.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/select2.full.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/ace/ace.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/ace/mode-html.js' %}"></script>
+  <script type="text/javascript" src="{% static 'lib/js/ace/theme-github.js' %}"></script>
+  <!-- Javascript -->
+  <script type="text/javascript" src="{% static 'javascript/app.js' %}"></script>
+  <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
+  <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
+  <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
+  <script type="text/javascript" src ="{% static 'javascript/file_management.js' %}"></script>
+  <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
+
+
+  <script type="text/javascript">
+    var fileID = '';
+    function select_file(element) {
+        fileID = element.id;
+        console.log('fileID set to', fileID);
+    }
+    function remove_share_record() {
+        var post_data = {
+            'action': 'remove_share_record',
+            'file': fileID,
+            'group_to_remove': $('input[name=to_delete_group]:checked').map(function ()
+            {
+                return $(this).val();
+            }).get(),
+            'user_to_remove': $('input[name=to_delete_user]:checked').map(function ()
+            {
+                return $(this).val();
+            }).get(),
+        };
+        console.log(post_data);
+        $.ajax({
+            url: '/user/remove_share_record/',
+            type: 'POST',
+            data: post_data,
+            success: function (res) {
+                var msg = '';
+                if (res['deleted_user'].length != 0) {
+                    msg += '已取消下列用户的分享权限：' + res['deleted_user'] + '\n';
+                    {#location.reload();#}
+                }
+                if (res['deleted_group'].length != 0) {
+                    msg += '已取消下列群组的分享权限：' + res['deleted_group'] + '\n';
+                }
+                if (res['error'].length != 0) {
+                    msg += 'wrong input ' + res['error'];
+                }
+                alert(msg);
+                location.reload();
+            },
+            error: function (err) {
+                alert('网络连接失败，请稍后重试', err);
+            }
+        })
+    }
+</script>
+</body>
+
+</html>

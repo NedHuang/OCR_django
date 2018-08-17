@@ -157,70 +157,124 @@
       </div>
       <!-- Main Content -->
         <div class="side-body">
-            <ul class="nav nav-pills" style="margin-bottom: 10px;">
-                <li role="presentation" {% if myfiles != None %} class="active" {% endif %}><a href="{% url 'user:show_my_file' %}">我的文件</a></li>
-                 <li role="presentation" {% if shared_files != None %} class="active" {% endif %}><a href="{% url 'user:show_shared_file_with_me' %}">个人分享文件</a></li>
-                 <li role="presentation" {% if res != None %}class="active" {% endif %}><a href="{% url 'user:group_file_view' %}" >群分享文件</a ></li>
-            </ul>
+          <ul class="nav nav-pills" style="margin-bottom: 10px;">
+            <li role="presentation" {% if myfiles != None %} class="active" {% endif %}><a href="{% url 'user:show_my_file' %}">我的文件</a></li>
+            <li role="presentation" {% if shared_files != None %} class="active" {% endif %}><a href="{% url 'user:show_shared_file_with_me' %}">个人分享文件</a></li>
+            <li role="presentation" {% if res != None %}class="active" {% endif %}><a href="{% url 'user:group_file_view' %}" >群分享文件</a ></li>
+            <li>
+              <form id='upload' enctype='multipart/form-data' method ='post' style="margin-left: 100px">
+                <label for='file_upload' class ='btn btn-info'>导入文件</label>
+                <input type='file' name='file_upload' id='file_upload' onchange = 'loadFile(this.files[0])' style='display: none'>
+                <button type='button' class='btn btn-primary'>文件类型</button>
+                <button type='button' class='btn btn-success' value='上传' onclick='FileUpload()'>上传</button>
+                <button type='button' class="btn btn-default"> <i class=" fas fa-file"></i> </button>
+                <span id="filename" style="vertical-align:middle" >{{filename}}</span>
+              </form>
+             </li>
+          </ul>
 
 
+
+
+
+
+          <!-- 用户自己的文件 -->
             {% if myfiles != None %}
             <table class="table table-striped">
-                
-                <thead>
+              <thead>
                 <tr><h3>我的文件:</h3></tr>
                 <tr>
-                    <th scope="col"> 文件名 </th>
-                    <th scope="col"> 上传者 </th>
-                    <th scope="col"> UUID </th>
+                  <th scope="col"> 文件名 </th>
+                  <th scope="col"> 上传者 </th>
+                  <th scope="col"> 上次编辑时间 </th>
+                  <th scope="col"> 操作 </th>
                 </tr>
-                </thead>
+              </thead>
                 
 
-                {% for file in myfiles %}
-                {% if file.owner == user %}
-                    <tr id={{file.file_guid}} oncontextmenu="edit(event), select_file(this)" onclick ="edit(event), select_file(this)">
-                        <td>{{ file.filename }}</td>
-                        <td>{{ file.owner.username }}</td>
-                        <td>{{ file.file_guid }}</td>
-                        <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+              {% for file in myfiles %}
+              {% if file.owner == user %}
+              <tr id={{file.file_guid}} oncontextmenu="edit(event), select_file(this)">
+                <td>{{ file.filename }}</td>
+                <td>{{ file.owner.username }}</td>
+                <td>{{ file.last_modified }}</td>
+                <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+                
+                <td>
+                  <button type="button" class="btn btn-default">
+                    <a href="{% url 'user:share_status_management' file.file_guid %}"> 查看分享状态 </a>
+                  </button>
+                </td>
 
 
-                    </tr>
-                {% endif %}
-                {% endfor %}
+                {# 分享键 #}
+                <td>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#share_file_model"id={{ file.file_guid }} onclick="select_file(this)">
+                        分享到个人
+                    </button>
+                </td>
+
+                {# 分享到群组键 #}
+                <td>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#share_file_group_modal"
+                    id={{ file.file_guid }} onclick="select_file(this)">
+                        分享到群组
+                    </button>
+                </td>
+
+                <td>
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete_file_model" id="{{ file.file_guid }}" onclick="select_file(this)">
+                        删除文件
+                    </button>
+                </td>
+
+<!--                 {# 分享状态管理 #}
+                <td>
+                    <button type="button" class="btn btn-default">
+                        <a href="{% url 'user:share_status_management' file.file_guid %}"> 查看分享状态 </a>
+                    </button>
+                </td>
+ -->
+
+              </tr>
+              {% endif %}
+              {% endfor %}
             </table>
             {% endif %}
+
+
+
+
 
 
             <!-- 分享给我的文件 -->
             {% if shared_files != None %}
             <table class="table table-striped">
-                
-                <thead>
+              <thead>
                 <tr><h3>分享给您的文件:</h3></tr>
                 <tr>
-                    <th scope="col"> 文件名 </th>
-                    <th scope="col"> 上传者 </th>
-                    <th scope="col"> UUID </th>
+                  <th scope="col"> 文件名 </th>
+                  <th scope="col"> 上传者 </th>
+                  <th scope="col"> 上次编辑时间 </th>
+                  <th scope="col"> 操作 </th>
                 </tr>
-                </thead>
-                
-
-                {% for file in shared_files %}
-                {% if file.owner != user %}
-                    <tr id={{file.shared_file.file_guid}} oncontextmenu="select_file(this)">
-                        <td>{{ file.shared_file.filename }}</td>
-                        <td>{{ file.owner.username }}</td>
-                        <td>{{ file.shared_file.file_guid }}</td>
-                        <td><button id = {{file.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
-
-
-                    </tr>
-                {% endif %}
-                {% endfor %}
+              </thead>
+              {% for file in shared_files %}
+              {% if file.owner != user %}
+                <tr id={{file.shared_file.file_guid}} oncontextmenu="select_file(this)">
+                  <td>{{ file.shared_file.filename }}</td>
+                  <td>{{ file.owner.username }}</td>
+                  <td>{{ file.shared_file.last_modified }}</td>
+                  <td><button id = {{file.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+                </tr>
+              {% endif %}
+              {% endfor %}
             </table>
             {% endif %}
+
+
+
+
 
             <!-- 分享给我所在的小组的文件 -->
             {% for group_and_file in res %}
@@ -230,7 +284,7 @@
                     <tr>
                         <th scope="col"> 文件名 </th>
                         <th scope="col"> 上传者 </th>
-                        <th scope="col"> UUID </th>
+                        <th scope="col"> 上次编辑时间 </th>
                         <th scope="col"> 操作 </th>
                     </tr>
                     </thead>
@@ -241,18 +295,17 @@
                         <tr id={{  gf.shared_file.file_guid }} oncontextmenu="select_file(this)">
                             <td>{{ gf.shared_file.filename }}</td>
                             <td>{{ gf.shared_file.owner.username }}</td>
-                            <td>{{ gf.shared_file.file_guid }}</td>
+                            <td>{{ gf.shared_file.last_modified }}</td>
                             <td><button id = {{gf.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
                         </tr>
                    <!--  {% endif %} -->
                    {% endfor %}
                 </table>
+                <ul class="nav nav-list"><li class="divider"></li></ul>
             {% endfor %}
 
         </div>
         
-
-
 
 
     </div>
@@ -419,57 +472,7 @@
 
 
   <script type="text/javascript">
-  // var current_file_guid = '';
-  // function select_file(element){
-  //     current_file_guid = element.id;
-  //     console.log(current_file_guid);
-  // }
 
-  // function select_file(element){
-  //   current_file_guid = element.id;
-  //   console.log(current_file_guid);
-  // }
-  // function edit_file(){
-  //   console.log('edit');
-  //   var post_data = {
-  //     'file_guid': current_file_guid,
-  //     'action':'edit_file'
-  //   };
-  //   // console.log(post_data);
-  //   $.ajax({
-  //     url:'/user/edit_file/',
-  //     type:'POST',
-  //     data:post_data,
-  //     success:function(res){
-  //       var u = '/user/load_file/?file_guid='+res['file_guid']
-  //       console.log(u)
-  //       window.location.href = u;
-  //     },
-  //     error:function(err){
-  //       // alert('网络连接失败,稍后重试',err);
-  //     }
-  //   })
-  // }
-  // function edit(e){
-  //   var file_management_main_container = $('#file_management_main_container');   
-  //   var edit_menu = $('#edit_menu');
-  //   var left_edge = 0;
-  //   var top_edge = 0;
-  //   if(file_management_main_container.width() - e.clientX > edit_menu.width()){
-  //     left_edge = e.clientX +'px'; 
-  //   }else{
-  //     left_edge = e.clientX - edit_menu.width() +'px';
-  //   }
-  //   // pop below where you clicked
-  //   if(file_management_main_container.height - e.clientY > edit_menu.height()){
-  //     top_edge = e.clientY + 'px';
-  //   }
-  //   else{
-  //     top_edge = e.clientY + 'px';
-  //   }
-  //   $('#edit_menu').show().css({'left':left_edge,'top':top_edge,'position':'absolute'});
-  //   event.returnValue = false;
-  // }
   </script>
 </body>
 

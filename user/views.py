@@ -27,18 +27,20 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 登录,DONE
 def login(request):
 	# print(request.POST)
+	login_img_urls = ['/login/images/login_img_00.jpg','/login/images/login_img_01.jpg','/login/images/login_img_02.jpg'];
+	request.session.flush()
 	if request.session.get('login') != None:
 		form = LoginForm()
-		return render(request,'login.html',{'form':form,'message':'登录:'+request.session['username']})
+		return render(request,'login_page.html',{'form':form,'login_img_urls':login_img_urls})
 
 	if request.method == 'GET':
 		form = LoginForm()
 		# print('GET')
-		return render(request,'login.html',{'form':form})
+		return render(request,'login_page.html',{'form':form,'login_img_urls':login_img_urls})
 
 	elif request.method == 'POST':
 		form = LoginForm(request.POST)
-		t = loader.get_template('login.html')
+		t = loader.get_template('login_page.html')
 		c ={'messgage' :'请重新填写资料','form':form}
 		username =''
 		password =''
@@ -52,7 +54,7 @@ def login(request):
 			request.session['login'] = True
 			request.session.set_expiry(60*60*24)  # sesson 1天后过期
 			
-			return HttpResponseRedirect('/user/show_shared_file_with_me/')
+			return HttpResponseRedirect('/user/show_my_file/')
 		return HttpResponse(t.render(c,request))
 
 
@@ -972,31 +974,31 @@ def delete_member(request):
 @ensure_csrf_cookie
 @csrf_exempt
 def add_member(request):
-    c = {}
-    correct_members = []
-    wrong_input = []
+	c = {}
+	correct_members = []
+	wrong_input = []
 
-    if request.method == 'POST':
-        group_guid = request.POST.get('group')
-        group = Group.objects.filter(group_guid=group_guid)[0]
-        id_input = request.POST.get('members').split('\n')
+	if request.method == 'POST':
+		group_guid = request.POST.get('group')
+		group = Group.objects.filter(group_guid=group_guid)[0]
+		id_input = request.POST.get('members').split('\n')
 
-        for p in id_input:
-            if User.objects.filter(username= p).count():
-                matched_user = User.objects.filter(username = p)[0]
-                gm = GroupMember(share_group=group, shared_user=matched_user)
-                gm.save()
-                correct_members.append(p)
-                print(gm)
-                print(GroupMember.objects.count())
-            else:
-                wrong_input.append(p)
-    print('--------------------')
-    for i in GroupMember.objects.all():
-    	print(i)
-    c['correct_members'] = correct_members
-    c['wrong_input'] = wrong_input
-    return JsonResponse(c)
+		for p in id_input:
+			if User.objects.filter(username= p).count():
+				matched_user = User.objects.filter(username = p)[0]
+				gm = GroupMember(share_group=group, shared_user=matched_user)
+				gm.save()
+				correct_members.append(p)
+				print(gm)
+				print(GroupMember.objects.count())
+			else:
+				wrong_input.append(p)
+	print('--------------------')
+	for i in GroupMember.objects.all():
+		print(i)
+	c['correct_members'] = correct_members
+	c['wrong_input'] = wrong_input
+	return JsonResponse(c)
 
 
 
@@ -1153,6 +1155,70 @@ def share_file_to_group(request):
 	c['wrong_input'] = wrong_input if len(wrong_input) else None
 	c['duplicate'] = duplicate if len(duplicate) else None
 	print(c)
+	return JsonResponse(c)
+
+
+
+
+
+# 文件的分享状况的页面
+@ensure_csrf_cookie
+@csrf_exempt
+def share_status_management(request, file_guid):
+	user = None
+	if User.objects.filter(user_guid = request.session.get('user_guid')).count():
+		user = User.objects.filter(user_guid = request.session.get('user_guid'))[0]
+	thefile = File.objects.select_related().filter(file_guid=file_guid)[0]
+
+	# user_shares = FileShare.objects.filter(shared_file=thefile, owner=user)
+	user_shares = Share.objects.filter(shared_file=thefile)
+	group_shares = GroupFiles.objects.filter(shared_file=thefile)
+
+	context = {
+		'user': user,
+		'file': thefile,
+		'user_shares': user_shares,
+		'group_shares': group_shares,
+	}
+
+	return render(request, 'share_status_management.html', context)
+
+
+
+# 取消分享记录
+@ensure_csrf_cookie
+@csrf_exempt
+def remove_share_record(request):
+	file_id = request.POST.get('file')
+	thefile = File.objects.filter(file_guid=file_id)[0]
+
+	c = {}
+	deleted_group = []
+	deleted_user = []
+	error = []
+	if request.method == 'POST':
+		user_to_remove = request.POST.getlist('user_to_remove[]')
+		group_to_remove = request.POST.getlist('group_to_remove[]')
+		# remove user record
+		for u in user_to_remove:
+			if User.objects.filter(username=u).exists():   # check if matched user exists
+				matched_user = User.objects.filter(username=u)[0]  # TODO: 如何处理取消分享给自己？
+				Share.objects.filter(shared_file=thefile, share_user=matched_user).delete()
+				deleted_user.append(u)
+			else:
+				error.append(u)
+		# remove group record
+		for g in group_to_remove:
+			if Group.objects.filter(group_name=g).exists():   # check if matched group exists
+				matched_group = Group.objects.filter(group_name=g)[0]
+				GroupFiles.objects.filter(share_group=matched_group, shared_file=thefile).delete()
+				deleted_group.append(g)
+			else:
+				error.append(g)
+
+	c['deleted_user'] = deleted_user
+	c['deleted_group'] = deleted_group
+	c['error'] = error
 	return JsonResponse(c)
 
 
