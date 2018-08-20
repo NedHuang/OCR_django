@@ -5,7 +5,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>版面理解服务 - 数字出版技术国家重点实验室</title>
+  <title>文档管理</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Fonts -->
   <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
@@ -27,6 +27,7 @@
   <!-- Animation CSS-->
   <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/animate.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/main.css' %}">
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 
 
 </head>
@@ -172,22 +173,22 @@
               </form>
              </li>
           </ul>
-
-
-
-
-
-
+          
           <!-- 用户自己的文件 -->
             {% if myfiles != None %}
-            <table class="table table-striped">
+            <table id="my_file_table" class='display table table-striped'>
               <thead>
                 <tr><h3>我的文件:</h3></tr>
                 <tr>
-                  <th scope="col"> 文件名 </th>
+                  <th scope="col" > 文件名 </th>
                   <th scope="col"> 上传者 </th>
-                  <th scope="col"> 上次编辑时间 </th>
-                  <th scope="col"> 操作 </th>
+                  <th scope="col"> 上传时间 </th>
+                  <th scope="col"> 最后编辑时间 </th>
+                  <th scope="col"> </th>
+        <!--           <th scope="col"> </th>
+                  <th scope="col"> </th>
+                  <th scope="col"> </th>
+                  <th scope="col"> </th> -->
                 </tr>
               </thead>
                 
@@ -197,32 +198,34 @@
               <tr id={{file.file_guid}} oncontextmenu="edit(event), select_file(this)">
                 <td>{{ file.filename }}</td>
                 <td>{{ file.owner.username }}</td>
+                <td>{{ file.date_uploaded }}</td>
                 <td>{{ file.last_modified }}</td>
-                <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+                <td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button>
+           <!--      </td>
                 
-                <td>
+                <td> -->
                   <button type="button" class="btn btn-default">
                     <a href="{% url 'user:share_status_management' file.file_guid %}"> 查看分享状态 </a>
                   </button>
-                </td>
+         <!--        </td>
 
 
                 {# 分享键 #}
-                <td>
+                <td> -->
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#share_file_model"id={{ file.file_guid }} onclick="select_file(this)">
                         分享到个人
                     </button>
-                </td>
+              <!--   </td>
 
                 {# 分享到群组键 #}
-                <td>
+                <td> -->
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#share_file_group_modal"
                     id={{ file.file_guid }} onclick="select_file(this)">
                         分享到群组
                     </button>
-                </td>
+                <!-- </td>
 
-                <td>
+                <td> -->
                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete_file_model" id="{{ file.file_guid }}" onclick="select_file(this)">
                         删除文件
                     </button>
@@ -249,13 +252,14 @@
 
             <!-- 分享给我的文件 -->
             {% if shared_files != None %}
-            <table class="table table-striped">
+            <table id='shared_to_me_file_table' class="table table-striped">
               <thead>
                 <tr><h3>分享给您的文件:</h3></tr>
                 <tr>
                   <th scope="col"> 文件名 </th>
                   <th scope="col"> 上传者 </th>
-                  <th scope="col"> 上次编辑时间 </th>
+                  <th scope="col"> 上传时间 </th>
+                  <th scope="col"> 最后编辑时间 </th>
                   <th scope="col"> 操作 </th>
                 </tr>
               </thead>
@@ -264,6 +268,7 @@
                 <tr id={{file.shared_file.file_guid}} oncontextmenu="select_file(this)">
                   <td>{{ file.shared_file.filename }}</td>
                   <td>{{ file.owner.username }}</td>
+                  <td>{{ file.shared_file.date_uploaded }}</td>
                   <td>{{ file.shared_file.last_modified }}</td>
                   <td><button id = {{file.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
                 </tr>
@@ -278,28 +283,31 @@
 
             <!-- 分享给我所在的小组的文件 -->
             {% for group_and_file in res %}
-                <table class="table table-striped">
-                    <thead>
+                <table id = '' class="table table-striped my_group_file_table">
+                  <thead>
                     <tr ><h3>群组 {{group_and_file.group.group_name}} 的文件:</h3> </tr>
                     <tr>
                         <th scope="col"> 文件名 </th>
                         <th scope="col"> 上传者 </th>
-                        <th scope="col"> 上次编辑时间 </th>
+                        <th scope="col"> 上传时间 </th>
+                        <th scope="col"> 最后编辑时间 </th>
                         <th scope="col"> 操作 </th>
                     </tr>
-                    </thead>
+                  </thead>
                    
                     {% for gf in group_and_file.GF %}
-                    
+                  <tbody>
                <!--      {% if file.owner != user %} -->
-                        <tr id={{  gf.shared_file.file_guid }} oncontextmenu="select_file(this)">
-                            <td>{{ gf.shared_file.filename }}</td>
-                            <td>{{ gf.shared_file.owner.username }}</td>
-                            <td>{{ gf.shared_file.last_modified }}</td>
-                            <td><button id = {{gf.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
-                        </tr>
+                    <tr id={{  gf.shared_file.file_guid }} oncontextmenu="select_file(this)">
+                        <td>{{ gf.shared_file.filename }}</td>
+                        <td>{{ gf.shared_file.owner.username }}</td>
+                        <td>{{ gf.shared_file.date_uploaded }}</td>
+                        <td>{{ gf.shared_file.last_modified }}</td>
+                        <td><button id = {{gf.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+                    </tr>
                    <!--  {% endif %} -->
-                   {% endfor %}
+                    {% endfor %}
+                  </tbody>
                 </table>
                 <ul class="nav nav-list"><li class="divider"></li></ul>
             {% endfor %}
@@ -465,6 +473,7 @@
     <script type="text/javascript" src ="{% static 'javascript/group_management.js' %}"></script>
     <script type="text/javascript" src ="{% static 'javascript/file_management.js' %}"></script>
     <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
+    <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
    <!--    <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script> -->
@@ -472,8 +481,23 @@
 
 
   <script type="text/javascript">
+    $(document).ready(function() {
+      $('#my_file_table').DataTable();
+      $('#shared_to_me_file_table').DataTable();
+      var gps = $('.my_group_file_table');
+      // alert(gps.length)
+      for (var i = 0; i < gps.length; i++){
+        id_name = 'my_group_file_table_' + i.toString();
+        console.log(gps[i])
+        $(gps[i]).attr('id',id_name);
+        $('#'+id_name).DataTable();
+      }
+    } );
 
   </script>
+
+
+
 </body>
 
 </html>

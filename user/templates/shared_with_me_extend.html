@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>文档管理</title>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+</head>
+<body>
+	
+	{% extends 'base.html' %}
+	{% block side_menu %}
+	{% endblock %}
+
+
+	{% block content %}
+	<div class="side-body">
+		<ul class="nav nav-pills" style="margin-bottom: 10px;">
+			<li role="presentation" {% if myfiles != None %} class="active" {% endif %}><a href="{% url 'user:show_my_file' %}">我的文件</a></li>
+			<li role="presentation" {% if shared_files != None %} class="active" {% endif %}><a href="{% url 'user:show_shared_file_with_me' %}">个人分享文件</a></li>
+			<li role="presentation" {% if res != None %}class="active" {% endif %}><a href="{% url 'user:group_file_view' %}" >群分享文件</a ></li>
+			<li>
+				<form id='upload' enctype='multipart/form-data' method ='post' style="margin-left: 100px">
+					<label for='file_upload' class ='btn btn-info'>导入文件</label>
+					<input type='file' name='file_upload' id='file_upload' onchange = 'loadFile(this.files[0])' style='display: none'>
+					<button type='button' class='btn btn-primary'>文件类型</button>
+					<button type='button' class='btn btn-success' value='上传' onclick='FileUpload()'>上传</button>
+					<button type='button' class="btn btn-default"> <i class=" fas fa-file"></i> </button>
+					<span id="filename" style="vertical-align:middle" >{{filename}}</span>
+				</form>
+			 </li>
+		</ul>
+					
+		<!-- 用户自己的文件 -->
+		{% if myfiles != None %}
+		<table id="my_file_table" class='display table table-striped'>
+			<thead>
+				<tr><h3>我的文件:</h3></tr>
+				<tr>
+					<th scope="col" > 文件名 </th>
+					<th scope="col"> 上传者 </th>
+					<th scope="col"> 上传时间 </th>
+					<th scope="col"> 最后编辑时间 </th>
+					<th scope="col"> </th>
+<!--           <th scope="col"> </th>
+					<th scope="col"> </th>
+					<th scope="col"> </th>
+					<th scope="col"> </th> -->
+				</tr>
+			</thead>
+				
+
+			{% for file in myfiles %}
+			{% if file.owner == user %}
+			<tr id={{file.file_guid}} oncontextmenu="edit(event), select_file(this)">
+				<td>{{ file.filename }}</td>
+				<td>{{ file.owner.username }}</td>
+				<td>{{ file.date_uploaded }}</td>
+				<td>{{ file.last_modified }}</td>
+				<td><button id = {{file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button>
+	 <!--      </td>
+				
+				<td> -->
+					<button type="button" class="btn btn-default">
+						<a href="{% url 'user:share_status_management' file.file_guid %}"> 查看分享状态 </a>
+					</button>
+ <!--        </td>
+
+
+				{# 分享键 #}
+				<td> -->
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#share_file_model"id={{ file.file_guid }} onclick="select_file(this)">
+						分享到个人
+					</button>
+			<!--   </td>
+
+				{# 分享到群组键 #}
+				<td> -->
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#share_file_group_modal"
+					id={{ file.file_guid }} onclick="select_file(this)">
+						分享到群组
+					</button>
+				<!-- </td>
+
+				<td> -->
+					<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete_file_model" id="{{ file.file_guid }}" onclick="select_file(this)">
+						删除文件
+					</button>
+				</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
+		</table>
+		{% endif %}
+
+		<!-- 分享给我的文件 -->
+		{% if shared_files != None %}
+		<table id='shared_to_me_file_table' class="table table-striped">
+			<thead>
+				<tr><h3>分享给您的文件:</h3></tr>
+				<tr>
+					<th scope="col"> 文件名 </th>
+					<th scope="col"> 上传者 </th>
+					<th scope="col"> 上传时间 </th>
+					<th scope="col"> 最后编辑时间 </th>
+					<th scope="col"> 操作 </th>
+				</tr>
+			</thead>
+			{% for file in shared_files %}
+			{% if file.owner != user %}
+				<tr id={{file.shared_file.file_guid}} oncontextmenu="select_file(this)">
+					<td>{{ file.shared_file.filename }}</td>
+					<td>{{ file.owner.username }}</td>
+					<td>{{ file.shared_file.date_uploaded }}</td>
+					<td>{{ file.shared_file.last_modified }}</td>
+					<td><button id = {{file.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+				</tr>
+			{% endif %}
+			{% endfor %}
+		</table>
+		{% endif %}
+
+
+		<!-- 分享给我所在的小组的文件 -->
+		{% for group_and_file in res %}
+				<table id = '' class="table table-striped my_group_file_table">
+					<thead>
+						<tr ><h3>群组 {{group_and_file.group.group_name}} 的文件:</h3> </tr>
+						<tr>
+								<th scope="col"> 文件名 </th>
+								<th scope="col"> 上传者 </th>
+								<th scope="col"> 上传时间 </th>
+								<th scope="col"> 最后编辑时间 </th>
+								<th scope="col"> 操作 </th>
+						</tr>
+					</thead>
+					 
+						{% for gf in group_and_file.GF %}
+					<tbody>
+			 <!--      {% if file.owner != user %} -->
+						<tr id={{  gf.shared_file.file_guid }} oncontextmenu="select_file(this)">
+							<td>{{ gf.shared_file.filename }}</td>
+							<td>{{ gf.shared_file.owner.username }}</td>
+							<td>{{ gf.shared_file.date_uploaded }}</td>
+							<td>{{ gf.shared_file.last_modified }}</td>
+							<td><button id = {{gf.shared_file.file_guid}} type="button" class="btn btn-default" onclick="select_file(this),edit_file()">编辑文件</button></td>
+						</tr>
+					 <!--  {% endif %} -->
+						{% endfor %}
+					</tbody>
+				</table>
+				<ul class="nav nav-list"><li class="divider"></li></ul>
+		{% endfor %}
+	</div>
+	
+
+	{% endblock %}
+
+
+
+	{% block modals %}
+
+	<!--  确定删除文件的model -->
+	<div class="modal fade" id="delete_file_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+					</h4>
+				</div>
+				<div id ="delete_file_model_body" class="modal-body">
+					删除文件？
+				</div>
+				<div class="modal-footer">
+					<button onclick="delete_file()" type="button" class="btn btn-default" data-dismiss="modal">
+						删除
+					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">
+						取消
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+		<!--  共享给其他人的model -->
+	<div class="modal fade" id="share_file_model" tabindex="-1" role="dialog" aria-labelledby="share_files" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						
+					</h4>
+				</div>
+				<div id ="delete_file_model_body" class="modal-body">
+					<textarea type="text" id='share_to_user_id' name='share_to_user' placeholder='请输入用户名或者邮箱，以回车分隔'></textarea>
+				</div>
+				<div class="modal-footer">
+					<button onclick="share()" type="button" class="btn btn-default" data-dismiss="modal">
+						确定
+					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">
+						取消
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<!--   对文件进行操作的右键菜单 -->
+	<div id="edit_menu" class="menus" style="display:none" >
+		<table border="1"  style="border:thin;z-index: 1;width: 120px;background-color: #c3ccd5; opacity: 1; border-radius: 1rem" cellspacing="0" onmouseover='function(){this}'>
+			<tr>
+				<td  style="cursor:default;border:outset 1;" align="center" >
+					<button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
+				</td>
+			</tr>
+			<tr>
+				<td style=" cursor:default;border:outset 1;" align="center" >
+					<button type="button" class="btn btn-default" onclick="edit_file()">编辑</button>
+				</td>
+			</tr>
+			<tr>
+				<td style="cursor:default;border:outset 1;" align="center" >
+					<button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_model" >共享</button>
+				</td>
+			</tr>
+			<tr>
+				<td style="cursor:default;border:outset 1;" align="center" >
+					<button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_group_modal" >共享到群组</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+
+<!-- 分享文件给某个组的model -->
+	<div class="modal fade" id="share_file_group_modal" tabindex="-1" role="dialog" aria-labelledby="share_groupModal" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="share_groupModalTitle">分享文件给他人</h5>
+					<button type="button" data-dismiss="modal" class="close" aria-hidden="true">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="share_file_to_group_modal_body">
+					<textarea typeof="text" id="share_groupID" placeholder="请输入想要分享到的群组名字，以回车分隔"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" onclick="share_file_to_group()" data-dismiss="modal">确认</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal" data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% load static %}
+  <!-- Javascript Libs -->
+    <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/Chart.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/bootstrap-switch.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/jquery.matchHeight-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/dataTables.bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/select2.full.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/ace/ace.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/ace/mode-html.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/ace/theme-github.js' %}"></script>
+    <!-- Javascript -->
+    <script type="text/javascript" src="{% static 'javascript/app.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
+    <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
+    <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
+    <script type="text/javascript" src ="{% static 'javascript/group_management.js' %}"></script>
+    <script type="text/javascript" src ="{% static 'javascript/file_management.js' %}"></script>
+    <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
+    <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
+   <!--    <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
+      <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script> -->
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#my_file_table').DataTable();
+      $('#shared_to_me_file_table').DataTable();
+      var gps = $('.my_group_file_table');
+      // alert(gps.length)
+      for (var i = 0; i < gps.length; i++){
+        id_name = 'my_group_file_table_' + i.toString();
+        console.log(gps[i])
+        $(gps[i]).attr('id',id_name);
+        $('#'+id_name).DataTable();
+      }
+    } );
+
+  </script>
+{% endblock %}
+	
+	
+</body>
+</html>

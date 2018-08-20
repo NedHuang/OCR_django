@@ -29,6 +29,7 @@ def login(request):
 	# print(request.POST)
 	login_img_urls = ['/login/images/login_img_00.jpg','/login/images/login_img_01.jpg','/login/images/login_img_02.jpg'];
 	request.session.flush()
+	print(request.POST)
 	if request.session.get('login') != None:
 		form = LoginForm()
 		return render(request,'login_page.html',{'form':form,'login_img_urls':login_img_urls})
@@ -53,7 +54,7 @@ def login(request):
 			request.session['user_guid'] = str(User.objects.filter(username=username)[0].user_guid)
 			request.session['login'] = True
 			request.session.set_expiry(60*60*24)  # sesson 1天后过期
-			
+			print('is_valid')
 			return HttpResponseRedirect('/user/show_my_file/')
 		return HttpResponse(t.render(c,request))
 
@@ -62,6 +63,7 @@ def login(request):
 def register(request):
 	print('register')
 	if request.method =='GET':
+		print('get')
 		request.session.flush()
 		t = loader.get_template('register.html')
 		form = RegisterForm()
@@ -69,6 +71,7 @@ def register(request):
 		return HttpResponse(t.render(c,request))
 
 	if request.method == 'POST':
+		print('post')
 		request.session.flush()
 		form = RegisterForm(request.POST) 
 		if form.is_valid():
@@ -80,7 +83,7 @@ def register(request):
 			user.account_type = 'plastic'
 			user.save()
 			print(user)
-			t = loader.get_template('login.html')
+			t = loader.get_template('register.html')
 			loginform = LoginForm()
 			c ={'message' :'注册成功，请重新登录','form':loginform}
 			return HttpResponse(t.render(c,request))
@@ -95,13 +98,13 @@ def logout(request):
 	if request.method == 'POST' or request.method == 'GET':
 		request.session.flush()
 		form = LoginForm()
-		return render(request,'login.html',{'form':form,'message':'已注销，请重新登录'})
+		return render(request,'login_page.html',{'form':form,'message':'已注销，请重新登录'})
 
 #修改密码,DONE
 def resetByUsernameForm(request):
 	if request.method =='GET':
 		request.session.flush()
-		t = loader.get_template('resetByUsernameForm.html')
+		t = loader.get_template('reset_password.html')
 		form = ResetByUsernameForm()
 		c ={'message' :'resetByUsernameForm','form':form}
 		return HttpResponse(t.render(c,request))
@@ -1064,7 +1067,7 @@ def show_shared_file_with_me(request):
 		'msg': msg_code,
 	}
 	print(context)
-	return render(request, 'shared_with_me.html', context)
+	return render(request, 'shared_with_me_extend.html', context)
 
 
 
@@ -1092,7 +1095,7 @@ def group_file_view(request):   # TODO: complete function
 		'res':res,
 	}
 	print(context)
-	return render(request, 'shared_with_me.html', context)
+	return render(request, 'shared_with_me_extend.html', context)
 
 # 查看我的文件
 def show_my_file(request):
@@ -1104,7 +1107,7 @@ def show_my_file(request):
 	user = User.objects.filter(username=request.session.get('username'))[0]
 	myfiles = File.objects.filter(owner = user)
 	c ={'messgage':request.session.get('username'), 'myfiles':myfiles,'user':user}
-	return render(request, 'shared_with_me.html', c)
+	return render(request, 'shared_with_me_extend.html', c)
 
 
 @ensure_csrf_cookie
