@@ -21,6 +21,7 @@ from django.db.models import Q
 import os, shutil, tarfile, zipfile
 import time
 from PIL import Image
+import time
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -101,7 +102,7 @@ def logout(request):
 		return render(request,'login_page.html',{'form':form,'message':'已注销，请重新登录'})
 
 #修改密码,DONE
-def resetByUsernameForm(request):
+def reset_password(request):
 	if request.method =='GET':
 		request.session.flush()
 		t = loader.get_template('reset_password.html')
@@ -1176,7 +1177,10 @@ def share_status_management(request, file_guid):
 	# user_shares = FileShare.objects.filter(shared_file=thefile, owner=user)
 	user_shares = Share.objects.filter(shared_file=thefile)
 	group_shares = GroupFiles.objects.filter(shared_file=thefile)
-
+	print(user.username)
+	print(thefile.filename)
+	print(user_shares[0])
+	print(group_shares)
 	context = {
 		'user': user,
 		'file': thefile,
@@ -1184,7 +1188,8 @@ def share_status_management(request, file_guid):
 		'group_shares': group_shares,
 	}
 
-	return render(request, 'share_status_management.html', context)
+	# return render(request, 'share_status_management.html', context)
+	return render(request, 'share_status_management_extend.html', context)	
 
 
 
@@ -1193,6 +1198,8 @@ def share_status_management(request, file_guid):
 @csrf_exempt
 def remove_share_record(request):
 	file_id = request.POST.get('file')
+	print('==========================================================================')
+	print(file_id)
 	thefile = File.objects.filter(file_guid=file_id)[0]
 
 	c = {}
@@ -1230,6 +1237,51 @@ def logout(request):
 	form = LoginForm()
 	return render(request,'login.html',{'form':form,'message':'请登录:'})
 
+def user_homepage(request):
+	if not request.session.get('username'):
+		return login(request)
+	else:
+		this_username = request.session.get('username')
+		if not User.objects.filter(username = this_username).count():
+			return login(request)
+		this_user = User.objects.filter(username = this_username)[0]
+		print(this_user)
+		return render(request,'user_homepage.html',{'user':this_user})
+
+def guest_login(request):
+	user = User()
+	user.username = '/guest_user/'+str(user.user_guid)
+	user.password = ''
+	user.cellphone = ''
+	user.email = ''
+	user.account_type = 'guest'
+	user.save()
+	request.session['login'] = True
+	request.session['username'] = user.username
+	request.session['user_guid'] = str(user.user_guid)
+	c = {
+		'user': user,
+		'shared_files': None,
+		'msg': None,
+	}
+	return render(request, 'shared_with_me_extend.html', c)
+
+def delete_guest_user(user):
+	files = File.objects.filter(owner = user)
+	for i in files:
+		delete_file_path = str(i.path)
+		delete_file_guid = str(i.file_guid)
+		# 文件所在的文件夹，连通png文件以及txt文件一并删除
+		delete_dir_path = '/'.join(delete_file_path.split('/')[:-1])
+		print('path:'+delete_dir_path)
+		if os.path.exists(delete_dir_path):  
+			shutil.rmtree(delete_dir_path)
+		File.objects.filter(file_guid = delete_file_guid).delete()
+		b = delete_file_guid.split('guest_user')
+		guest_folder = b[0] +'guest_user' + '/'+b[1].split('/')[1]
+		shutil.rmtree(guest_folder)
+		user.delete()
+	return 'success' if not os.path.exists(guest_folder) else 'false'
 
 # edit_fileedit_file
 #@login_required(login_url='/user/login/')

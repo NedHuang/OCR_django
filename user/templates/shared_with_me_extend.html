@@ -260,34 +260,11 @@
 		</div>
 	</div>
 
+	{% endblock %}
 	{% load static %}
-  <!-- Javascript Libs -->
-    <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/Chart.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/bootstrap-switch.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/jquery.matchHeight-min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/jquery.dataTables.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/dataTables.bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/select2.full.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/ace/ace.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/ace/mode-html.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/js/ace/theme-github.js' %}"></script>
-    <!-- Javascript -->
-    <script type="text/javascript" src="{% static 'javascript/app.js' %}"></script>
-    <script type="text/javascript" src="{% static 'javascript/index.js' %}"></script>
-    <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
-    <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
-    <script type="text/javascript" src ="{% static 'javascript/group_management.js' %}"></script>
-    <script type="text/javascript" src ="{% static 'javascript/file_management.js' %}"></script>
-    <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
-    <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
-   <!--    <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
-      <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
-      <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script> -->
 
-
-
+	{% block scripts%}
+	<script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
   <script type="text/javascript">
     $(document).ready(function() {
       $('#my_file_table').DataTable();
@@ -303,7 +280,9 @@
     } );
 
   </script>
-{% endblock %}
+
+  {% endblock %}
+
 	
 	
 </body>

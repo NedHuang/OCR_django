@@ -144,7 +144,7 @@
 
               <li>
                 <a id='image_a'>
-                  <span class="icon fa fa-folder "></span><span onclick='show_shared_file_with_me()' id="image_button" class="title"  ><p id ="to_shared_with_me">与我共享的文档</p></span>
+                  <span class="icon fa fa-folder "></span><span onclick='show_shared_file_with_me()' id="image_button" class="title"  ><p id ="to_shared_with_me_extend">与我共享的文档</p></span>
                 </a>
               </li>
             </ul> -->
@@ -174,7 +174,7 @@
             <tr id={{  record.share_guid }} oncontextmenu="select_file(this)">
               <td>
                 <input type="checkbox" name="to_delete_user" value="{{ record.sharer.username }}">
-                {{ record.sharer.username }}
+                {{ record.share_user.username }}
               </td>
             </tr>
             {% endfor %}
@@ -201,15 +201,6 @@
             {% endfor %}
           </table>
         </div>
-
-
-
-
-
-
-
-
-
       </div>
     </div>
 
@@ -364,53 +355,53 @@
   <script type="text/javascript" src="{% static 'javascript/jquery-3.3.1.js' %}"></script>
   <script type="text/javascript" src ="{% static 'javascript/vue.js' %}"></script>
   <script type="text/javascript" src ="{% static 'javascript/file_management.js' %}"></script>
-  <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
-
+  <!-- <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script> -->
+  <script type="text/javascript" src ="{% static 'javascript/share_status_management.js' %}"></script>
 
   <script type="text/javascript">
-    var fileID = '';
-    function select_file(element) {
-        fileID = element.id;
-        console.log('fileID set to', fileID);
-    }
-    function remove_share_record() {
-        var post_data = {
-            'action': 'remove_share_record',
-            'file': fileID,
-            'group_to_remove': $('input[name=to_delete_group]:checked').map(function ()
-            {
-                return $(this).val();
-            }).get(),
-            'user_to_remove': $('input[name=to_delete_user]:checked').map(function ()
-            {
-                return $(this).val();
-            }).get(),
-        };
-        console.log(post_data);
-        $.ajax({
-            url: '/user/remove_share_record/',
-            type: 'POST',
-            data: post_data,
-            success: function (res) {
-                var msg = '';
-                if (res['deleted_user'].length != 0) {
-                    msg += '已取消下列用户的分享权限：' + res['deleted_user'] + '\n';
-                    {#location.reload();#}
-                }
-                if (res['deleted_group'].length != 0) {
-                    msg += '已取消下列群组的分享权限：' + res['deleted_group'] + '\n';
-                }
-                if (res['error'].length != 0) {
-                    msg += 'wrong input ' + res['error'];
-                }
-                alert(msg);
-                location.reload();
-            },
-            error: function (err) {
-                alert('网络连接失败，请稍后重试', err);
-            }
-        })
-    }
+    // var fileID = '';
+    // function select_file(element) {
+    //     fileID = element.id;
+    //     console.log('fileID set to', fileID);
+    // }
+    // function remove_share_record() {
+    //     var post_data = {
+    //         'action': 'remove_share_record',
+    //         'file': fileID,
+    //         'group_to_remove': $('input[name=to_delete_group]:checked').map(function ()
+    //         {
+    //             return $(this).val();
+    //         }).get(),
+    //         'user_to_remove': $('input[name=to_delete_user]:checked').map(function ()
+    //         {
+    //             return $(this).val();
+    //         }).get(),
+    //     };
+    //     console.log(post_data);
+    //     $.ajax({
+    //         url: '/user/remove_share_record/',
+    //         type: 'POST',
+    //         data: post_data,
+    //         success: function (res) {
+    //             var msg = '';
+    //             if (res['deleted_user'].length != 0) {
+    //                 msg += '已取消下列用户的分享权限：' + res['deleted_user'] + '\n';
+    //                 {#location.reload();#}
+    //             }
+    //             if (res['deleted_group'].length != 0) {
+    //                 msg += '已取消下列群组的分享权限：' + res['deleted_group'] + '\n';
+    //             }
+    //             if (res['error'].length != 0) {
+    //                 msg += 'wrong input ' + res['error'];
+    //             }
+    //             alert(msg);
+    //             location.reload();
+    //         },
+    //         error: function (err) {
+    //             alert('网络连接失败，请稍后重试', err);
+    //         }
+    //     })
+    // }
 </script>
 </body>
 

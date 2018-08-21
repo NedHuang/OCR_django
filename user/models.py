@@ -30,7 +30,7 @@ class File(models.Model):
 	last_modified = models.DateTimeField('date last modified', auto_now = True)
 	def __str__(self):
 		return 'owner: '+self.owner.username+'\tfilename: '+self.filename+'\tfile_guid: ' \
-		+self.file_guid+'\tpath: '+ self.path+'\tdate_upload: '+str(self.date_uploaded)\
+		+str(self.file_guid)+'\tpath: '+ self.path+'\tdate_upload: '+str(self.date_uploaded)\
 		+'\tlast_modified' + str(self.last_modified)
 
 class Object(models.Model):

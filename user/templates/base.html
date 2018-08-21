@@ -25,6 +25,7 @@
   <!-- Animation CSS-->
   <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/animate.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/animation_css/main.css' %}">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 
 
@@ -55,8 +56,8 @@
 
   <div class="app-container">
     <div class="row content-container">
-      <nav class="navbar navbar-default navbar-fixed-top navbar-top">
-        <div class="container-fluid">
+      <nav class="navbar navbar-default navbar-fixed-top navbar-top" style='height: 60px'>
+        <div class="container-fluid" style='height: 60px'>
           <div class="navbar-header">
             <button type="button" class="navbar-expand-toggle">
               <i class="fa fa-bars icon"></i>
@@ -84,7 +85,7 @@
                 <li>
                   <ul class="list-group notifications">
                     <a href="#">
-                      <li class="list-group-item" onclick ="window.location.href = '{% static 'knowledge_service/page.html'">
+                      <li class="list-group-item" onclick="window.location.href = '{% static 'knowledge_service/page.html'">
                          <i class="fa fa-mortar-board"></i> 知识服务
                       </li>
                     </a>
@@ -108,22 +109,39 @@
                 <li class="profile-img">
                   <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
                 </li>
+                {% if user.account_type != 'guest' %}
                 <li>
                   <div class="profile-info">
                     <h4 class="username">{{user.username}}</h4>
                     <p>{{user.email}}</p>
                     <div class="btn-group margin-bottom-2x" role="group">
-                      <button type="button" class="btn btn-default"><i class="fa fa-user"></i>主页</button>
+                      <button type="button" class="btn btn-default" onclick="window.location.href='/user/user_homepage/'"><i class="fa fa-user"></i>主页</button>
                       <!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
                       <button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
                     </div>
                   </div>
                 </li>
+                {% endif %}
+
+                {% if user.account_type == 'guest' %}
+                <li>
+                  <div class="profile-info">
+                    <h4 class="username">Hello, Guest User</h4>
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
+                    <a href="/user/register/"><button type="button" class="btn btn-primary">注册</button></a>
+                  </div>
+                </li>
+                {% endif %}
               </ul>
             </li>
           </ul>
         </div>
       </nav>
+
+
+
+
+
       <div class="side-menu sidebar-inverse">
         <nav class="navbar navbar-default" role="navigation">
           <div class="side-menu-container">
@@ -136,6 +154,18 @@
                 <i class="fa fa-times icon"></i>
               </button>
             </div>
+                      <div>
+            <ul class="nav navbar-nav " >
+              <li>
+                <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
+                  <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
+                </a>
+
+              </li>
+
+
+            </ul>
+          </div>
     
         {% block side_menu %}
         {% endblock %}
@@ -171,7 +201,7 @@
           确认注销账户？
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='window.location.href = "/user/login/"'>
             确认注销
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">
@@ -237,9 +267,10 @@
       <script type="text/javascript" src ="{% static 'javascript/group_management.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/file_management.js' %}"></script>
       <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
-      <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
-      <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
-
+     <!--  <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
+      <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script> -->
+  {% block scripts %}
+  {% endblock %}
 
 </body>
 

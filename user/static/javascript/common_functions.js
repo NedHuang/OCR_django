@@ -5,7 +5,6 @@
 function logout(){
  	window.location.href = '/user/logout/';
 }
-upload
 var current_file_guid = '';
 var current_filename='';
 function edit(e){
@@ -31,7 +30,7 @@ function edit(e){
 
 function select_file(element){
   current_file_guid = element.id;
-  console.log(current_file_guid);
+  console.log('selected: '+current_file_guid);
 }
 
 

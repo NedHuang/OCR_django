@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>个人主页</title>
+	<meta charset="utf-8">
+</head>
+<body>
+
+
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<title></title>
+	<link rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.css"/>
+	<link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css"/>
+	<link rel="stylesheet" href="/static/css/edmure.css"/>
+	<link rel="stylesheet" href="/static/css/commons.css"/>
+	<link rel="stylesheet" href="/static/css/account.css"/>
+	<style>
+
+	</style>
+</head>
+<body>
+
+{% extends 'base.html' %}
+{% load static %}
+{% block side_menu %}
+
+{% endblock %}
+
+
+{% block content %}
+<div class="side-body" style="width: 500px; margin-left: auto; margin-right: auto">
+	<div style="font-size: 25px; font-weight: bold;text-align: center;">
+		修改密码
+	</div>
+<table class="table table-hover">
+  <thead>
+    <tr hidden>
+      <th scope="col"></th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">用户名</th>
+      <td>{{user.username}}</td>
+      <td>
+      	<button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_username_model">修改</button>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">密码</th>
+      <td>********</td>
+      <td>
+      	<button type="button" class="btn btn-default" onclick='window.location.href ="/user/reset_password/"'>修改</button>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">电话</th>
+      <td>{{user.cellphone}}</td>
+      <td>
+      	<button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_cellphone_model">修改</button>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">邮箱</th>
+      <td>{{user.email}}</td>
+      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_email_model">修改</button>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">账户等级</th>
+      <td>{{user.account_type}}</td>
+      <td>
+      	<button type="button" class="btn btn-default" data-toggle="modal" data-target="#i_am_fuck_rich_model">充值</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+	=======================================================================
+		<div class="form-group">
+			{{ user.username}}  <span style="color: red">{{ form.username.errors }}</span>
+		</div>
+		<div class="form-group">
+			{{ user.password}}  <span style="color: red">{{ form.username.errors }}</span>
+		</div>
+		<div class="form-group">
+			{{ user.cellphone}}  <span style="color: red">{{ form.username.errors }}</span>
+		</div>
+		<div class="form-group">
+			{{ user.email}}  <span style="color: red">{{ form.username.errors }}</span>
+		</div>
+		<div class="form-group">
+			{{ user.account_type}}  <span style="color: red">{{ form.username.errors }}</span>
+		</div>
+		
+		<span><a href="/user/login/"><bnutton class='btn btn-default'>登录</bnutton></a></span>
+		<span style="width:100px"></span>
+		<span><a href="/user/ResetPasswordForm/"><bnutton class='btn btn-default'>修改密码</bnutton></a></span><br>
+</div>
+{% endblock %}
+
+{% block modals %}
+
+ <!-- 修改用户名 -->
+  <div class="modal fade" id="change_username_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          	修改用户名
+          </h4>
+        </div>
+        <div class="modal-body">
+        	<span>请输入新用户名:<span>
+          <input type="text" name="new_username">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_username()'>
+            确认修改
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+   <!-- 修改电话 -->
+  <div class="modal fade" id="change_cellphone_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          	修改用户名
+          </h4>
+        </div>
+        <div class="modal-body">
+        <span style="width:120px">请输入新电话号码:</span>
+          <input type="text" name="new_cellphone">
+        <br>
+        <span style="width:120px">请输入验证码:</span>
+          <input type="text" name="varification_code">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_cellphone()'>
+            确认修改
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改邮箱 -->
+  <div class="modal fade" id="change_email_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          	修改用户名
+          </h4>
+        </div>
+        <div class="modal-body">
+        	<span>请输入新用户名:<span>
+          <input type="text" name="new_username">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_username()'>
+            确认修改
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 充钱 -->
+  <div class="modal fade" id="i_am_fuck_rich_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          	I am fuckin rich.
+          </h4>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_username()'>
+            确认
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	function reset_pwd(){
+
+	}
+</script>
+{% endblock %}
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

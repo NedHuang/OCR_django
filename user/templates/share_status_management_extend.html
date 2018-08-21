@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>文档管理</title>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+</head>
+<body>
+	
+	{% extends 'base.html' %}
+	{% block side_menu %}
+	{% endblock %}
+
+
+	{% block content %}
+	<div class="side-body">
+		  <div>
+			<strong>{{ file.filename }}</strong>
+		  </div>
+		  <br>
+		  <button type="button" class="btn btn-default" id={{ file.file_guid }} onclick="select_file_button(this);remove_share_record();">
+			  取消分享
+		  </button>
+		  <br>
+		  <table class="table table-striped">
+			<thead>
+			<tr>
+			  <th scope="col"> 用户 </th>
+			</tr>
+			</thead>
+
+			{% for record in user_shares %}   {# FileShare objects #}
+			<tr id={{  record.share_guid }} oncontextmenu="select_file_button(this)">
+			  <td>
+				<input type="checkbox" name="to_delete_user" value="{{ record.sharer.username }}">
+				{{ record.share_user.username }}
+			  </td>
+			</tr>
+			{% endfor %}
+		  </table>
+
+		  <br>
+		  <br>
+		  <br>
+
+		  <table class="table table-striped">
+			<thead>
+			<tr>
+				<th scope="col"> 分享的组 </th>
+			</tr>
+			</thead>
+
+			{% for record in group_shares %}   <!-- groupfiles -->
+			  <tr id={{  record.shared_file.file_guid }} oncontextmenu="select_file_button(this)">
+				<td>
+				  <input type="checkbox" name="to_delete_group" value="{{ record.share_group.group_name }}">
+				  {{ record.share_group.group_name }}
+				</td>
+			  </tr>
+			{% endfor %}
+		  </table>
+		</div>
+
+	{% endblock %}
+
+
+
+	{% block modals %}
+	{% endblock %}
+	{% load static %}
+ 
+ 	{% block scripts%}
+	<!-- <script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script> -->
+	<script type="text/javascript" src ="{% static 'javascript/share_status_management.js' %}"></script>
+	{% endblock %}
+   <!--    <script type="text/javascript" src ="{% static 'javascript/draw_min.js' %}"></script>
+	  <script type="text/javascript" src ="{% static 'javascript/upload_file.js' %}"></script>
+	  <script type="text/javascript" src ="{% static 'javascript/save_changes.js' %}"></script> -->
+
+
+
+
+	
+	
+</body>
+</html>
