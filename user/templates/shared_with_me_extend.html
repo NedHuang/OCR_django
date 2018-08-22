@@ -14,9 +14,17 @@
 	{% block content %}
 	<div class="side-body">
 		<ul class="nav nav-pills" style="margin-bottom: 10px;">
-			<li role="presentation" {% if myfiles != None %} class="active" {% endif %}><a href="{% url 'user:show_my_file' %}">我的文件</a></li>
-			<li role="presentation" {% if shared_files != None %} class="active" {% endif %}><a href="{% url 'user:show_shared_file_with_me' %}">个人分享文件</a></li>
-			<li role="presentation" {% if res != None %}class="active" {% endif %}><a href="{% url 'user:group_file_view' %}" >群分享文件</a ></li>
+			<li role="presentation" {% if myfiles != None %} class="active" {% endif %}>
+				<a href="{% url 'user:show_my_file' %}">我的文件</a>
+			</li>
+			{% if user.account_type != 'guest' %}
+			<li role="presentation" {% if shared_files != None %} class="active" {% endif %}>
+				<a href="{% url 'user:show_shared_file_with_me' %}">个人分享文件</a>
+			</li>
+			<li role="presentation" {% if res != None %}class="active" {% endif %}>
+				<a href="{% url 'user:group_file_view' %}" >群分享文件</a >
+			</li>
+			{% endif %}
 			<li>
 				<form id='upload' enctype='multipart/form-data' method ='post' style="margin-left: 100px">
 					<label for='file_upload' class ='btn btn-info'>导入文件</label>

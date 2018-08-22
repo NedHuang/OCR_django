@@ -18,8 +18,8 @@ function create_group() {
         if (res['correct_members'].length != 0) {
           alert('已成功创建群组' + name + '，并添加' + res['correct_members']);
         }
-        if (res['wrong_input'].length != 0) {
-          alert('wrong input' + res['wrong_input']);
+        if (res['wrong_input: '].length != 0) {
+          alert('wrong input: ' + res['wrong_input']);
         }
         location.reload()
       },

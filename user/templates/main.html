@@ -135,7 +135,6 @@
           <div class="side-menu-container">
             <div class="navbar-header">
               <a class="navbar-brand" href="#">
-
                 <div class="icon fa fa-newspaper-o"></div>
                 <div class="title">版面理解</div>
               </a>
@@ -144,14 +143,25 @@
               </button>
             </div>
           <div>
-            <ul class="nav navbar-nav " >
+            <ul class="nav navbar-nav ">
+              <li>
+                <a id='to_my_file' href= "/user/show_my_file/">
+                  <span class="icon fa fa-copy "></span>
+                  <span class='title'>文件管理</span>
+                </a>
+              </li>
+              <li>
+                <a id='file_management' href= "/user/group_management/">
+                  <span class="icon fa fas fa-users "></span>
+                  <span class='title'>分组管理</span>
+                </a>
+              </li>
+
               <li>
                 <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
                   <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
                 </a>
-
               </li>
-
               <li>
                 <a id='table_a' onclick = 'change_category_to_table();edit_mode();'>
                   <span class="icon fa fa-pen "></span><span id="table_button" class="title" onclick = "change_button('table_button')"><p id ="table_p">标注表格</p></span>

@@ -107,7 +107,8 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
               <ul class="dropdown-menu animated fadeInDown">
                 <li class="profile-img">
-                  <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                  <!-- <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img"> -->
+                  <img src="http://st.cdjapan.co.jp/pictures/l/14/08/KIXA-290.jpg?v=1" style="width :50%">
                 </li>
                 {% if user.account_type != 'guest' %}
                 <li>
@@ -154,15 +155,22 @@
                 <i class="fa fa-times icon"></i>
               </button>
             </div>
-                      <div>
+            <div>
             <ul class="nav navbar-nav " >
               <li>
-                <a id='image_a' onclick = 'change_category_to_image();edit_mode();'>
-                  <span class="icon fa fa-pen "></span><span id="image_button" class="title" onclick = "change_button('image_button')" ><p id ="image_p">标注图片</p></span>
+                <a id='to_my_file' href= "/user/show_my_file/">
+                  <span class="icon fa fa-copy "></span>
+                  <span class='title'>文件管理</span>
                 </a>
-
               </li>
-
+              {% if user.account_type != 'guest' %}
+              <li>
+                <a id='file_management' href= "/user/group_management/">
+                  <span class="icon fa fas fa-users "></span>
+                  <span class='title'>分组管理</span>
+                </a>
+              </li>
+              {% endif %}
 
             </ul>
           </div>

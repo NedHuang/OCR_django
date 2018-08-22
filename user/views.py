@@ -266,6 +266,7 @@ def upload(request):
 			return JsonResponse(c)
 		if request.session.get('login'):
 			file_dir = BASE_DIR +'/user/static/files/'+username+'/'+filename+'/'
+			# file_dir = BASE_DIR +'/files/'+username+'/'+filename+'/'
 		else:
 			file_dir = BASE_DIR +'/user/static/files/temp/'+username+'/'+filename+'/'
 		if not os.path.exists(file_dir):
@@ -853,13 +854,15 @@ def create_group(request):
 	wrong_input = []
 
 	if request.method == 'POST':
+
 		if User.objects.filter(user_guid = request.session['user_guid']).count():
 			owner = User.objects.filter(user_guid = request.session['user_guid'])[0]
 		else:
 			return JsonResponse({'message':'error, log in please'})
 		id_input = request.POST.get('members').split('\n')
 		name_input = request.POST.get('name')
-
+		print(id_input)
+		print(name_input)
 		if Group.objects.filter(group_name=name_input).exists():   # check if group with same name exists
 			c = {'error': 'duplicate', }
 			return JsonResponse(c)
@@ -874,20 +877,21 @@ def create_group(request):
 				gm.save()
 				correct_members.append(p)
 			else:
+				print('wrong_input: ' + p)
 				wrong_input.append(p)
 
 		# if no valid group member is found, delete the generated group
 		if len(correct_members) == 0:
 			group.delete()
-
-		gm = GroupMember(share_group=group, shared_user=owner);
-		gm.save()
+		else: 
+			gm = GroupMember(share_group=group, shared_user=owner);
+			gm.save()
 
 	c['correct_members'] = correct_members
 	c['wrong_input'] = wrong_input
 	return JsonResponse(c)
 
-
+# 查看自己创建的小组
 #@login_required(login_url='/user/login/')
 def group_management(request):
 	if User.objects.filter(user_guid = request.session['user_guid']).count():
@@ -905,7 +909,7 @@ def group_management(request):
 		'groups': groups,
 		'user': user,
 	}
-	t = loader.get_template('group_management.html')
+	t = loader.get_template('group_management_extend.html')
 	return HttpResponse(t.render(c,request))
 	# return render(request, 'group_management.html', context)
 	# return HttpResponse('asd')
@@ -920,7 +924,7 @@ def shared_group_management(request):
 		'records': records,
 		'user': user,
 	}
-	return render(request, 'shared_group_management.html', context)
+	return render(request, 'shared_group_management_extend.html', context)
 
 
 #@login_required(login_url='/user/login/')

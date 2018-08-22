@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+
+
+</head>
+
+<body>
+  {% extends 'base.html' %}
+  {% block side_menu %}
+  {% load static %}
+  {% endblock %}
+
+
+  {% block content %}
+  <div class="side-body">
+    <ul class="nav nav-pills" style="margin-bottom: 10px;">
+        <li role="presentation"><a href='/user/group_management/'>我创建的群组</a></li>
+        <li role="presentation" class="active"><a href='/user/shared_group_management/'>我加入的群组</a ></li>
+    </ul>
+
+    <div>
+      <table id="my_group_table" class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col"> 创建人 </th>
+            <th scope="col"> 名称 </th>
+            <th scope="col"> 创建时间 </th>
+        </tr>
+        </thead>
+        {% for record in records %}
+            {% if record.share_group.owner != user %} 
+                <tr id= {{ record.share_group.group_guid }}>
+                    <td>{{ record.share_group.owner.username }}</td>
+                    <td>{{ record.share_group.group_name }}</td>
+                    <td>{{ record.share_group.date_create }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endblock %}
+
+  {% block modals %}
+  <!-- 添加组的model -->
+  <div class="modal fade" id="create_group_modal" tabindex="-1" role="dialog" aria-labelledby="create_group_Modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="create_group_ModalTitle">新建群组</h5>
+          <button type="button" data-dismiss="modal" class="close" aria-hidden="true">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="create_group_modal_body">
+          <textarea typeof="text" id="group_name" placeholder="请输入群组名"></textarea>
+          <textarea typeof="text" id="group_userID" placeholder="请输入用户名或邮箱，以回车分隔"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="create_group()">确认</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--  确定删除文件的model -->
+  <div class="modal fade" id="delete_file_model" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+          </h4>
+        </div>
+        <div id ="delete_file_model_body" class="modal-body">
+          删除文件？
+        </div>
+        <div class="modal-footer">
+          <button onclick="delete_file()" type="button" class="btn btn-default" data-dismiss="modal">
+            删除
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <!--  共享给其他人的model -->
+  <div class="modal fade" id="share_file_model" tabindex="-1" role="dialog" aria-labelledby="share_files" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+          <h4 class="modal-title" id="myModalLabel">
+            
+          </h4>
+        </div>
+        <div id ="delete_file_model_body" class="modal-body">
+          <textarea type="text" id='share_to_user_id' name='share_to_user' placeholder='请输入用户名或者邮箱，以回车分隔'></textarea>
+        </div>
+        <div class="modal-footer">
+          <button onclick="share()" type="button" class="btn btn-default" data-dismiss="modal">
+            确定
+          </button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!--   对文件进行操作的右键菜单 -->
+  <div id="edit_menu" class="menus" style="display:none" >
+    <table border="1"  bgcolor="#cccccc" style="border:thin;z-index: 1;width: 200px;background-color: #AAAAAA; opacity: 1;" cellspacing="0" onmouseover='function(){this}'>
+      <tr>
+        <td  style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#delete_file_model" >删除</button>
+        </td>
+      </tr>
+      <tr>
+        <td style=" cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" onclick="edit_file()">编辑</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="cursor:default;border:outset 1;" align="center" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#share_file_model" >共享</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  {% endblock %}
+
+  {% block scripts %}
+  <script type="text/javascript" src ="{% static 'javascript/group_management.js' %}"></script>
+  <script type="text/javascript" src ="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" ></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#my_group_table').DataTable();
+    } );
+  </script>
+  {% endblock %}
+
+
+
+
+</body>
+
+</html>
