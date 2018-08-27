@@ -25,8 +25,9 @@ SECRET_KEY = 'z814_u__85368dk0@(a@hj^cfl@dwca7$t46mgcs23qqyv$2dz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.18.38.54',]
 
 
 # Application definition
@@ -136,9 +137,15 @@ USE_TZ = True
 # STATIC_URL = '/static/'
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [STATIC_URL]
 # MEDIA_URL = '/files/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'files')
 # STATICFILES_DIRS = (  
 #      os.path.join(BASE_DIR, 'static').replace('\\', '/'), 
 # )
+
+MEDIA_URL = "/files/"   # 媒体文件别名(相对路径) 和 绝对路径
+MEDIA_ROOT = (
+    os.path.join(BASE_DIR, '/files')
+)
 

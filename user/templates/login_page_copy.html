@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login V18</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+{% load static %}
+{% load widget_tweaks %}
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="{% static '/login/images/icons/favicon.ico' %}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/bootstrap/css/bootstrap.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/fonts/Linearicons-Free-v1.0.0/icon-font.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/animate/animate.css' %}">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/css-hamburgers/hamburgers.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/animsition/css/animsition.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/select2/select2.min.css' %}">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="{% static '/login/vendor/daterangepicker/daterangepicker.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static '/login/css/util.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static '/login/css/main.css' %}">
+<!--===============================================================================================-->
+</head>
+<body style="background-color: #666666;">
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100" style = "">
+				<form class="login100-form validate-form" role="form" action="/user/login/" method="POST" novalidate="NOVALIDATE" style="width: ">
+					{% csrf_token %}
+					<span class="login100-form-title p-b-43">
+						请登录:
+					</span>
+					
+					
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<!-- <input class="input100" type="text" name="email"> -->
+						<!-- <label for="username">用户名</label> -->
+						{{ form.username | add_class:'input100'}}  
+						<!-- <span style="color: red">{{ form.username.errors }}</span> -->
+						<span class="focus-input100"></span>
+						<span class="label-input100">Username</span>
+						<span id='username_err' style="color: red" class="label-input100" >{{ form.username.errors }}</span>
+					</div>
+						
+					
+					<div class="wrap-input100 validate-input" data-validate="Password is required">
+						<!-- <input class="input100" type="password" name="pass"> -->
+						<!-- <label for="password">密码</label> -->
+						{{ form.password | add_class:'input100'}}
+						<!-- <button onclick='xx()'>aaa</button> -->
+						<span class="focus-input100"></span>
+						<span class="label-input100">Password</span>
+						<span id='password_err' style="color: red">{{ form.password.errors}}</span>
+					</div>
+			
+					<div class="container-login100-form-btn">
+				<!-- 		<button class="login100-form-btn">
+							Login
+						</button> -->
+						<input type="submit" class="login100-form-btn" value="登录"/>
+					</div>
+					
+					<div class="text-center p-t-46 p-b-20">
+						<!-- <span class="txt2">
+							or sign up using
+						</span> -->
+					</div>
+
+					<div class="login100-form-social flex-c-m">
+						<a href="/user/reset_password/"class="login100-form-social-item flex-c-m bg1 m-r-5">
+							<i class="fa fa-key" aria-hidden="true"></i> 
+						</a>忘记密码
+						<span style="width: 50px">        </span>
+
+						<a href="/user/register/" class="login100-form-social-item flex-c-m bg2 m-r-5">
+							<!-- <i class="fa fa-register" aria-hidden="true"></i> -->
+							<i class="fas fa fa-sign-in" aria-hidden="true"></i> 
+						</a>注册
+						<span style="width: 50px">        </span>
+
+						<a href="/user/guest_login/" class="login100-form-social-item flex-c-m bg3 m-r-5">
+							<!-- <i class="fa fa-register" aria-hidden="true"></i> -->
+							<i class="fa fa-user-secret" aria-hidden="true"></i> 
+						</a>游客登录
+
+					</div>
+				</form>
+
+
+				{% for img_url in login_img_urls%}
+				<div id = {{img_url}} class="login100-more" style="background-image: url('{% static img_url %}' ); " >
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	
+	
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/animsition/js/animsition.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/bootstrap/js/popper.js' %}"></script>
+	<script src ="{% static '/login/vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/select2/select2.min.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/daterangepicker/moment.min.js' %}"></script>
+	<script src ="{% static '/login/vendor/daterangepicker/daterangepicker.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/vendor/countdowntime/countdowntime.js' %}"></script>
+<!--===============================================================================================-->
+	<script src ="{% static '/login/js/main.js' %}"></script>
+
+	<script src="{% static '/login/js/jssor.slider-27.4.0.min.js' %}" type="text/javascript"></script>
+	<script type="text/javascript">
+			jssor_1_slider_init = function() {
+					var jssor_1_SlideoTransitions = [
+						[{b:0,d:600,y:-290,e:{y:27}}],
+						[{b:0,d:1000,y:185},{b:1000,d:500,o:-1},{b:1500,d:500,o:1},{b:2000,d:1500,r:360},{b:3500,d:1000,rX:30},{b:4500,d:500,rX:-30},{b:5000,d:1000,rY:30},{b:6000,d:500,rY:-30},{b:6500,d:500,sX:1},{b:7000,d:500,sX:-1},{b:7500,d:500,sY:1},{b:8000,d:500,sY:-1},{b:8500,d:500,kX:30},{b:9000,d:500,kX:-30},{b:9500,d:500,kY:30},{b:10000,d:500,kY:-30},{b:10500,d:500,c:{x:125.00,t:-125.00}},{b:11000,d:500,c:{x:-125.00,t:125.00}}],
+						[{b:0,d:600,x:535,e:{x:27}}],
+						[{b:-1,d:1,o:-1},{b:0,d:600,o:1,e:{o:5}}],
+						[{b:-1,d:1,c:{x:250.0,t:-250.0}},{b:0,d:800,c:{x:-250.0,t:250.0},e:{c:{x:7,t:7}}}],
+						[{b:-1,d:1,o:-1},{b:0,d:600,x:-570,o:1,e:{x:6}}],
+						[{b:-1,d:1,o:-1,r:-180},{b:0,d:800,o:1,r:180,e:{r:7}}],
+						[{b:0,d:1000,y:80,e:{y:24}},{b:1000,d:1100,x:570,y:170,o:-1,r:30,sX:9,sY:9,e:{x:2,y:6,r:1,sX:5,sY:5}}],
+						[{b:2000,d:600,rY:30}],
+						[{b:0,d:500,x:-105},{b:500,d:500,x:230},{b:1000,d:500,y:-120},{b:1500,d:500,x:-70,y:120},{b:2600,d:500,y:-80},{b:3100,d:900,y:160,e:{y:24}}],
+						[{b:0,d:1000,o:-0.4,rX:2,rY:1},{b:1000,d:1000,rY:1},{b:2000,d:1000,rX:-1},{b:3000,d:1000,rY:-1},{b:4000,d:1000,o:0.4,rX:-1,rY:-1}]
+					];
+					var jssor_1_options = {
+						$AutoPlay: 1,
+						$Idle: 2000,
+						$CaptionSliderOptions: {
+							$Class: $JssorCaptionSlideo$,
+							$Transitions: jssor_1_SlideoTransitions,
+							$Breaks: [
+								[{d:2000,b:1000}]
+							]
+						},
+						$ArrowNavigatorOptions: {
+							$Class: $JssorArrowNavigator$
+						},
+						$BulletNavigatorOptions: {
+							$Class: $JssorBulletNavigator$
+						}
+					};
+					var jssor_1_slider = new $JssorSlider$("jssor_1", jssor_1_options);
+					/*#region responsive code begin*/
+					var MAX_WIDTH = 980;
+					function ScaleSlider() {
+							var containerElement = jssor_1_slider.$Elmt.parentNode;
+							var containerWidth = containerElement.clientWidth;
+							if (containerWidth) {
+									var expectedWidth = Math.min(MAX_WIDTH || containerWidth, containerWidth);
+									jssor_1_slider.$ScaleWidth(expectedWidth);
+							}
+							else {
+									window.setTimeout(ScaleSlider, 30);
+							}
+					}
+					ScaleSlider();
+					$Jssor$.$AddEvent(window, "load", ScaleSlider);
+					$Jssor$.$AddEvent(window, "resize", ScaleSlider);
+					$Jssor$.$AddEvent(window, "orientationchange", ScaleSlider);
+					/*#endregion responsive code end*/
+			};
+	</script>
+
+</body>
+</html>
