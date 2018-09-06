@@ -69,7 +69,8 @@
     <tr>
       <th scope="row">邮箱</th>
       <td>{{user.email}}</td>
-      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_email_model">修改</button>
+      <td>
+        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_email_model">修改</button>
       </td>
     </tr>
     <tr>
@@ -81,7 +82,7 @@
     </tr>
   </tbody>
 </table>
-	=======================================================================
+	<!-- =======================================================================
 		<div class="form-group">
 			{{ user.username}}  <span style="color: red">{{ form.username.errors }}</span>
 		</div>
@@ -101,7 +102,7 @@
 		<span><a href="/user/login/"><bnutton class='btn btn-default'>登录</bnutton></a></span>
 		<span style="width:100px"></span>
 		<span><a href="/user/ResetPasswordForm/"><bnutton class='btn btn-default'>修改密码</bnutton></a></span><br>
-</div>
+</div> -->
 {% endblock %}
 
 {% block modals %}

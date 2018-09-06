@@ -32,42 +32,43 @@
        resize_editor_region();
     });
     //改变侧边栏按钮的颜色ps, as是tag的p 和 a, s表示复数。。
-    function change_button(b){
-      var buttons = ['image_button','table_button','formula_button','erase_button'];
-      var ps =['image_p','table_p','formula_p','erase_p'];
-      var as =['image_a','table_a','formula_a','erase_a'];
-      // j是 as,ps的index
-      var j = -1;
+    // function change_button(b){
+    //   var buttons = ['image_button','table_button','formula_button','erase_button'];
+    //   var ps =['image_p','table_p','formula_p','erase_p'];
+    //   var as =['image_a','table_a','formula_a','erase_a'];
+    //   // j是 as,ps的index
+    //   var j = -1;
       
-      for(var i = 0; i < 4; i++){
-        if(b == buttons[i]){
-          j = i;
-           $('#'+buttons[i]).css('background-color','#e0e0e0');
-          $('#'+as[j]).css('background-color','#e0e0e0');    
-          if(j==0){
-            $('#'+ps[i]).css('color','#3232CD');
-          }
-          if(j==1){
-            $('#'+ps[i]).css('color','#32CD32');
-          }
-          if(j==2){
-            $('#'+ps[i]).css('color','#F5270B');
-          }          
-          if(j==3){
-            $('#'+ps[i]).css('color','#16A085');
-          }
-          console.log(b)
-        }
-      }
-      for(var i = 0; i < 4; i++){
-        if(j != i){
-          $('#'+buttons[i]).css('background-color','');
-          $('#'+as[i]).css('background-color','');
-          $('#'+ps[i]).css('color','');
-          console.log(b)
-        }
-      }
-    }
+    //   for(var i = 0; i < 4; i++){
+    //     if(b == buttons[i]){
+    //       j = i;
+    //        $('#'+buttons[i]).css('background-color','#e0e0e0');
+    //       $('#'+as[j]).css('background-color','#e0e0e0');    
+    //       if(j==0){
+    //         $('#'+ps[i]).css('color','#feae19');
+    //       }
+    //       if(j==1){
+    //         $('#'+ps[i]).css('color','#32CD32');
+    //       }
+    //       if(j==2){
+    //         $('#'+ps[i]).css('color','#F5270B');
+    //       }          
+    //       if(j==3){
+    //         $('#'+ps[i]).css('color','#16A085');
+    //       }
+    //       console.log(b)
+    //     }
+    //   }
+    //   for(var i = 0; i < 4; i++){
+    //     if(j != i){
+    //       $('#'+buttons[i]).css('background-color','');
+    //       $('#'+as[i]).css('background-color','');
+    //       $('#'+ps[i]).css('color','');
+    //       console.log(b)
+    //     }
+    //   }
+    // }
+    
     //读取 file_uplod input中的file, 上传
     function FileUpload() {
       var file = $('#file_upload')[0].files[0]
@@ -537,12 +538,12 @@ function calculate_diatance(x,y,x_1,y_1,x_2,y_2){
 function draw(input_box){
   //根据 box的category属性选择不同的颜色
   var coordinates = input_box['coordinates'];
-      context.strokeStyle = '#3232CD';
+      context.strokeStyle = '#feae19';
   if(input_box.category == 'figure'){
     console.log('draw image');
     console.log(coordinates);
     context.lineWidth = 2;
-    context.strokeStyle = '#3232CD';
+    context.strokeStyle = '#feae19';
   }
 
   if(input_box.category == 'formula'){
@@ -1053,6 +1054,10 @@ function clear_all_canvas(){
           alert(err['message']);
         }
       });
+    }
+
+    function group_management(){
+      window.location.open('/user/group_management/') 
     }
     
 // console.log('change_resolution');

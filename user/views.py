@@ -99,7 +99,8 @@ def logout(request):
 	if request.method == 'POST' or request.method == 'GET':
 		request.session.flush()
 		form = LoginForm()
-		return render(request,'login_page.html',{'form':form,'message':'已注销，请重新登录'})
+		print('logout')
+		return render(request,'login.html',{'form':form,'message':'已注销，请重新登录'})
 
 #修改密码,DONE
 def reset_password(request):
@@ -138,7 +139,7 @@ def main(request):
 	if request.method =='POST':
 		print(request.POST.get('data'))
 		return HttpResponse(request.POST.get('data'))
-	return render(request,'main.html',{'message':'message'+request.session['username']})
+	return render(request,'index.html',{'message':'message'+request.session['username']})
 
 # 根据post的action字段来执行不同function
 def ajax(request):
@@ -250,7 +251,7 @@ def share_file(request):
 def upload(request):
 
 	c ={}  #return message
-	t = loader.get_template('main.html')
+	t = loader.get_template('index.html')
 	if request.method == 'POST':# 获取对象
 		obj = request.FILES.get('file')
 		filename = obj.name	#filename
@@ -332,7 +333,7 @@ def edit_file(request):
 	file.save()
 	user = User.objects.filter(username=request.session.get('username'))[0]
 	c = {}
-	t=loader.get_template('main.html')
+	t=loader.get_template('index.html')
 	
 	request.session['file_guid'] = str(file_guid)
 	request.session['total_page'] = file.total_page
@@ -382,7 +383,7 @@ def load_file(request):
 	c['owner_guid'] =request.session['owner_guid']= str(file.owner.user_guid)
 	c['resolution'] = request.session['resolution']
 	c['user']=user
-	t=loader.get_template('main.html')
+	t=loader.get_template('index.html')
 
 	print(c)
 	return HttpResponse(t.render(c,request))

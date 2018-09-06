@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>版面理解服务 - 数字出版技术国家重点实验室</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	{% load static %}
+	<!-- Fonts -->
+	<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+	<!-- CSS Libs -->
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/bootstrap.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/font-awesome.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/animate.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/bootstrap-switch.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/checkbox3.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/jquery.dataTables.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/dataTables.bootstrap.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/lib/css/select2.min.css' %}">
+	<!-- CSS App -->
+	<link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'main/css/themes/flat-green.css' %}">
+
+
+
+	  <link rel="stylesheet" type="text/css" href="{% static 'lib/fontawesome/css/all.css' %}">
+</head>
+
+<body class="flat-green">
+	<div class="app-container">
+		<div class="row content-container">
+			<nav class="navbar navbar-default navbar-fixed-top navbar-top">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-expand-toggle">
+							<i class="fa fa-bars icon"></i>
+						</button>
+						<ol class="breadcrumb navbar-breadcrumb">
+							<li class="active"><i class="fa fa-globe"></i> 数字出版技术国家重点实验室</li>
+						</ol>
+						<button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+							<i class="fa fa-th icon"></i>
+						</button>
+					</div>
+					<ul class="nav navbar-nav navbar-right">
+						<button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+							<i class="fa fa-times icon"></i>
+						</button>
+						<li>
+							<a href="#">首页</a>
+						</li>
+						<li>
+								<a href="#">文档整理</a>
+						</li>
+						<li class="dropdown danger">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">其他服务</a>
+							<ul class="dropdown-menu danger  animated fadeInDown">
+								<li>
+									<ul class="list-group notifications">
+										<a href="#">
+											<li class="list-group-item">
+												 <i class="fa fa-mortar-board"></i> 知识服务
+											</li>
+										</a>
+										<a href="#">
+											<li class="list-group-item">
+												 <i class="fa fa-pencil-square-o"></i> 机器写作
+											</li>
+										</a>
+										<a href="http://www.founder.com/" target="blank">
+											<li class="list-group-item message">
+												方正集团
+											</li>
+										</a>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					 <li class="dropdown profile">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">我的账户<span class="caret"></span></a>
+							<ul class="dropdown-menu animated fadeInDown">
+								<li class="profile-img">
+									<!-- <img src="{% static 'assets/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img"> -->
+									<img src="http://st.cdjapan.co.jp/pictures/l/14/08/KIXA-290.jpg?v=1" style="width :50%">
+								</li>
+								{% if user.account_type != 'guest' %}
+								<li>
+									<div class="profile-info">
+										<h4 class="username">{{user.username}}</h4>
+										<p>{{user.email}}</p>
+										<div class="btn-group margin-bottom-2x" role="group">
+											<button type="button" class="btn btn-default" onclick="window.location.href='/user/user_homepage/'"><i class="fa fa-user"></i>主页</button>
+											<!-- <button type="button" class="btn btn-default"><i class="fa fa-sign-out"></i> Logout</button> -->
+											<button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
+										</div>
+									</div>
+								</li>
+								{% endif %}
+
+								{% if user.account_type == 'guest' %}
+								<li>
+									<div class="profile-info">
+										<h4 class="username">Hello, Guest User</h4>
+										<button type="button" class="btn btn-default" data-toggle="modal" data-target="#logoutModel">注销</button>
+										<a href="/user/register/"><button type="button" class="btn btn-primary">注册</button></a>
+									</div>
+								</li>
+								{% endif %}
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<div class="side-menu sidebar-inverse">
+				<nav class="navbar navbar-default" role="navigation">
+					<div class="side-menu-container">
+						<div class="navbar-header">
+							<a class="navbar-brand" href="#">
+								<div class="icon fa fa-newspaper-o"></div>
+								<div class="title">版面理解</div>
+							</a>
+							<button type="button" class="navbar-expand-toggle pull-right visible-xs">
+								<i class="fa fa-times icon"></i>
+							</button>
+						</div>
+						<ul class="nav navbar-nav">
+							<li>
+								<a>
+									<span class="icon fa fa-folder-open"></span><span class="title">文件与分组</span>
+								</a>
+								<div class="box">
+									<ul class="sub-nav">
+										<ul class="flex-content">
+											<!-- <span class="title">文件与分组管理</span> -->
+											<li><span class="icon fa fa-users" onclick = 'redirect_group_management()'></span><i>群组管理</i></li>
+											<li><span class="icon fa fa-folder-open" onclick = 'redirect_file_management()'></span><i>文件管理</i></li>
+
+										</ul>
+										<!-- <ul class="flex-content">
+											<span class="title">功能2</span>
+											<li><span class="icon fa fa-folder-open"></span><i>添加</i></li>
+											<li><span class="icon fa fa-trash"></span><i>删除</i></li>
+											<li><span class="icon fa fa-cogs"></span><i>选择</i></li>
+											<li><span class="icon fa fa-save"></span><i>保存</i></li>
+											<li><span class="icon fa fa-external-link"></span><i>导出</i></li>
+										</ul>
+										<ul class="flex-content">
+											<span class="title">功能3</span>
+											<li><span class="icon fa fa-folder-open"></span><i>添加</i></li>
+											<li><span class="icon fa fa-trash"></span><i>删除</i></li>
+											<li><span class="icon fa fa-cogs"></span><i>选择</i></li>
+											<li><span class="icon fa fa-save"></span><i>保存</i></li>
+											<li><span class="icon fa fa-external-link"></span><i>导出</i></li>
+										</ul> -->
+									</ul>
+								</div>
+							</li>
+							<li>
+								<a>
+									<span class="icon fa fa-pen"></span><span class="title">编辑</span>
+								</a>
+								<div class="box">
+									<ul class="sub-nav">
+										<ul class="flex-content">
+											<!-- <span class="title">标注</span> -->
+											<li onclick = "change_category_to_image();edit_mode();change_button('image_button')"><span class="icon fa fas fa-pen"></span><i id ="image_p">标注图片</i></li>
+											<li onclick = "change_category_to_table();edit_mode();change_button('table_button')"><span class="icon fa fas fa-pen"></span><i id ="table_p">标注表格</i></li>
+											<li onclick = "change_category_to_formula();edit_mode();change_button('formula_button')"><span class="icon fa fas fa-pen" ></span><i id ="formula_p">标注公式</i></li>
+
+										</ul>
+										<ul class="flex-content">
+											<!-- <span class="title"></span> -->
+											<li><span class="icon fa fa-trash" onclick = "erase_mode();change_button('image_button')" ></span><i>删除</i></li>
+											<li><span class="icon fa fa-undo" onclick = "undo()"></span><i onclick = 'undo()'>撤销</i></li>
+											<li><span class="icon fa fa-redo" onclick = "redo()"></span><i onclick = 'redo()'>重做</i></li>
+
+										</ul>
+										<ul class="flex-content">
+<!-- 											<span class="title">功能3</span> -->
+											<li onclick="save_change_to_server()"><span class="icon fa fa-upload"></span><i>保存修改</i></li>
+											<li data-toggle="modal" data-target="#getResultModel"><span class="icon fa fa-download"></span><i>下载数据</i></li>
+<!-- 											<li><span class="icon fa fa-cogs"></span><i>选择</i></li>
+											<li><span class="icon fa fa-save"></span><i>保存</i></li>
+											<li><span class="icon fa fa-external-link"></span><i>导出</i></li> -->
+										</ul>
+									</ul>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<!-- /.navbar-collapse -->
+				</nav>
+			</div>
+			<div class="container-fluid">
+				<div class="side-body" >
+					<div id = "editor-menu-container" class="row " style="background-color: rgb(232, 236, 230);margin: 0px;padding: 0px; margin-top:20px">
+							<div class="row-fluid" >
+								<div class="  col-sm-2 col-md-3  col-lg-3 span3" >
+									<form id='upload' enctype='multipart/form-data' method ='post'>
+										<label for='file_upload' class ='btn btn-info'>导入文件</label>
+										<input type='file' name='file_upload' id='file_upload' onchange = 'loadFile(this.files[0])' style='display: none'>
+										<button type='button' class='btn btn-primary'>文件类型</button>
+										<button type='button' class='btn btn-success' value='上传' onclick='FileUpload()'>开始识别</button>
+									</form>
+								</div>
+								<div class=" col-sm-7 col-md-7 col-lg-6 span5 ">
+									<button type="button" class="btn btn-default" onclick='showFirstPage()'>首页</button>
+									<button type="button" class="btn btn-default" onclick='showPrevPage()'>上一页</button>
+									<button type="button" class="btn btn-default" onclick='showNextPage()'>下一页</button>
+									<button type="button" class="btn btn-default" onclick='showLastPage()'>末页</button>
+									<button type="button" class="btn btn-default" >页码</button>
+									<label class="form-inline">
+										<input type="number" id="myNumber" class="form-control" value="1" min="1" style="width:70px">
+										<!-- <input type="number" class="form-control"  style="width: 70px" /> -->
+									</label>
+									<button type="button" class="btn btn-default" onclick="select_page()">跳转</button>
+									 <label class="form-inline"><p id = "total_page">总页数: {{total_page}}</p></label>
+								</div>
+								<div class="  col-sm-3 col-md-2 col-lg-3 span4">
+									<button type="button" class="btn btn-default"> <i class="fas fa-file"></i> </button>
+									<span id="filename" style="vertical-align:middle" >{{filename}}</span>
+								</div>
+							</div>
+					</div>
+					<div id = 'editor-container' class="container editor" style="background-color: #eeeeee; border :1px solid" >
+						<canvas id='editor_canvas' style = "position: absolute;  z-index: 2;" width = 0; height = 0></canvas>
+						<canvas id='animation_canvas' style = "position: absolute;  z-index: 1;" width = 0; height = 0></canvas>
+						<!-- <canvas id='dummy_canvas' style = "position: absolute; margin-top: 50px; z-index: 2" ></canvas> -->
+						 {% load staticfiles %}
+						<img id='input_img' src="{% static img_url %}" style = "position: absolute;  z-index: 0">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 注销 -->
+	<div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+					</h4>
+				</div>
+				<div class="modal-body">
+					确认注销账户？
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						取消
+					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick='logout()'>
+						确认注销
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 账户管理 -->
+	<div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+					
+					</h4>
+				</div>
+				<div class="modal-body">
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						取消
+					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">
+						确认注销
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- 导出结果 -->
+	<div class="modal fade" id="getResultModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+					 导出选项
+					</h4>
+				</div>
+				<div class="modal-body">
+					<p> 请选择需要导出的标注 </p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">
+						取消
+					</button>
+					<button type="button" class="btn btn-success" data-dismiss="modal" onclick='get_my_data()'>
+						导出我的标注
+					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick='get_group_data()'>
+						导出所有标注
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+		<!-- 修改分辨率 -->
+	<div class="modal fade" id="changeResolutionModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+					 导出选项
+					</h4>
+				</div>
+				<div class="modal-body">
+					<p style='display:inline'> 分辨率为</p><p id = 'the_resolution' style='display:inline'>{{resolution}}</p><p style='display:inline'>%，可选范围: 100% - 500%</p>
+				</div>
+				<div class="modal-footer">
+	 <!--        <form action='/user/change_resolution/' method='post' target='the_iframe'>
+						 <input type='number' id='resolution' class='form-control' value='400' min='100' max='1000' style='width:70px;'>
+						 <input type='submit' value='提交' class='btn btn-primary' data-dismiss='modal'>
+					</form>   -->
+					<input type='number' id='resolution' class='form-control' value='400' min='100' max='1000' style='width:70px'>
+					<button type='button' class='btn btn-default' data-dismiss='modal'>
+						取消
+					</button>
+					<button type='button' class='btn btn-primary' data-dismiss='modal' onclick='change_resolution()'>
+						确定
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<div>
+			<!-- Javascript Libs -->
+			<script type="text/javascript" src="{% static 'main/lib/js/jquery.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/bootstrap.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/Chart.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/bootstrap-switch.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/jquery.matchHeight-min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/jquery.dataTables.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/dataTables.bootstrap.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/select2.full.min.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/ace/ace.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/ace/mode-html.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/lib/js/ace/theme-github.js' %}"></script>
+			<!-- Javascript -->
+			<script type="text/javascript" src="{% static 'main/js/app.js' %}"></script>
+			<script type="text/javascript" src="{% static 'main/js/index.js' %}"></script>
+
+			<!-- main -->
+			<script type="text/javascript" src ="{% static 'javascript/main.js' %}"></script>
+			<script type="text/javascript" src ="{% static 'javascript/common_functions.js' %}"></script>
+			<script type="text/javascript">
+				function redirect_group_management(){
+					window.location.href = ('/user/group_management/');
+				}
+				function redirect_file_management(){
+					window.location.href = ('/user/show_my_file/');
+				}
+			</script>
+</body>
+
+</html>

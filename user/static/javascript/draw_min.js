@@ -240,11 +240,11 @@ function calculate_diatance(x,y,x_1,y_1,x_2,y_2){
 function draw(input_box){
   //根据 box的category属性选择不同的颜色
   var coordinates = input_box['coordinates'];
-      context.strokeStyle = '#3232CD';
+      context.strokeStyle = '#feae19';
   if(input_box.category == 'image'){
     console.log('draw image');
     context.lineWidth = 2;
-    context.strokeStyle = '#3232CD';
+    context.strokeStyle = '#feae19';
   }
 
   if(input_box.category == 'formula'){
