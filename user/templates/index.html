@@ -135,24 +135,7 @@
 											<!-- <span class="title">文件与分组管理</span> -->
 											<li><span class="icon fa fa-users" onclick = 'redirect_group_management()'></span><i>群组管理</i></li>
 											<li><span class="icon fa fa-folder-open" onclick = 'redirect_file_management()'></span><i>文件管理</i></li>
-
 										</ul>
-										<!-- <ul class="flex-content">
-											<span class="title">功能2</span>
-											<li><span class="icon fa fa-folder-open"></span><i>添加</i></li>
-											<li><span class="icon fa fa-trash"></span><i>删除</i></li>
-											<li><span class="icon fa fa-cogs"></span><i>选择</i></li>
-											<li><span class="icon fa fa-save"></span><i>保存</i></li>
-											<li><span class="icon fa fa-external-link"></span><i>导出</i></li>
-										</ul>
-										<ul class="flex-content">
-											<span class="title">功能3</span>
-											<li><span class="icon fa fa-folder-open"></span><i>添加</i></li>
-											<li><span class="icon fa fa-trash"></span><i>删除</i></li>
-											<li><span class="icon fa fa-cogs"></span><i>选择</i></li>
-											<li><span class="icon fa fa-save"></span><i>保存</i></li>
-											<li><span class="icon fa fa-external-link"></span><i>导出</i></li>
-										</ul> -->
 									</ul>
 								</div>
 							</li>
@@ -174,15 +157,14 @@
 											<li><span class="icon fa fa-trash" onclick = "erase_mode();change_button('image_button')" ></span><i>删除</i></li>
 											<li><span class="icon fa fa-undo" onclick = "undo()"></span><i onclick = 'undo()'>撤销</i></li>
 											<li><span class="icon fa fa-redo" onclick = "redo()"></span><i onclick = 'redo()'>重做</i></li>
-
 										</ul>
 										<ul class="flex-content">
-<!-- 											<span class="title">功能3</span> -->
+											<li onclick="zoom_in()"><span class="icon fa fa-search-plus"></span><i>放大</i></li>
+											<li onclick="zoom_out()"><span class="icon fa fa-search-minus"></span><i>缩小</i></li>
+										</ul>
+										<ul class="flex-content">
 											<li onclick="save_change_to_server()"><span class="icon fa fa-upload"></span><i>保存修改</i></li>
 											<li data-toggle="modal" data-target="#getResultModel"><span class="icon fa fa-download"></span><i>下载数据</i></li>
-<!-- 											<li><span class="icon fa fa-cogs"></span><i>选择</i></li>
-											<li><span class="icon fa fa-save"></span><i>保存</i></li>
-											<li><span class="icon fa fa-external-link"></span><i>导出</i></li> -->
 										</ul>
 									</ul>
 								</div>
@@ -212,7 +194,6 @@
 									<button type="button" class="btn btn-default" >页码</button>
 									<label class="form-inline">
 										<input type="number" id="myNumber" class="form-control" value="1" min="1" style="width:70px">
-										<!-- <input type="number" class="form-control"  style="width: 70px" /> -->
 									</label>
 									<button type="button" class="btn btn-default" onclick="select_page()">跳转</button>
 									 <label class="form-inline"><p id = "total_page">总页数: {{total_page}}</p></label>

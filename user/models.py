@@ -10,6 +10,7 @@ class User(models.Model):
 	cellphone = models.CharField(max_length=256)	#用户电话号码
 	email = models.CharField(max_length=256)		#用户的邮箱
 	account_type = models.CharField(max_length=256)	#账户类型
+	is_activated = models.BooleanField(default = False) #邮箱认证，需要激活
 	date_registration = models.DateTimeField('date account created', default=timezone.now)
 	date_last_login = models.DateTimeField('date last logined', auto_now = True)
 
@@ -92,6 +93,14 @@ class GroupMember(models.Model):
 		return 'group name: '+str(self.share_group.group_name) + ' ;user ' + self.shared_user.username
 
 
+#验证码等（激活，修改密码）
+class Verifivation_code(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	category = models.CharField(max_length=256,null=False, editable = False)
+	verifivation_code = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)
+	date_requested = models.DateTimeField('date file uploaded', default=None)
+	date_expired = models.DateTimeField('date file uploaded', default=None)
+	date_activated = models.DateTimeField('date file uploaded', default=None)
 
 
 #join groupuser and file_share

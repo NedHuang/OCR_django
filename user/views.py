@@ -22,6 +22,8 @@ import os, shutil, tarfile, zipfile
 import time
 from PIL import Image
 import time
+from django.utils import timezone
+from datetime import timedelta
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,13 +48,17 @@ def login(request):
 		c ={'messgage' :'请重新填写资料','form':form}
 		username =''
 		password =''
-		
 		if form.is_valid():
 			username = form.cleaned_data.get('username')
 			password = form.cleaned_data.get('password')
+			this_user = User.objects.filter(username=username)[0]
+			# 用户注册但未激活
+			if this_user.is_activated == False:
+				return HttpResponse('用户未激活，请通过邮件中的链接激活')
+
 			session_uuid = str(uuid.uuid1())
-			request.session['username'] = username
-			request.session['user_guid'] = str(User.objects.filter(username=username)[0].user_guid)
+			request.session['username'] = this_user.username
+			request.session['user_guid'] = str(this_user.user_guid)
 			request.session['login'] = True
 			request.session.set_expiry(60*60*24)  # sesson 1天后过期
 			print('is_valid')
@@ -60,7 +66,7 @@ def login(request):
 		return HttpResponse(t.render(c,request))
 
 
-# 注册,DONE
+# 注册,DONE，发送验证邮件
 def register(request):
 	print('register')
 	if request.method =='GET':
@@ -76,17 +82,40 @@ def register(request):
 		request.session.flush()
 		form = RegisterForm(request.POST) 
 		if form.is_valid():
-			user = User()
-			user.username = form.cleaned_data.get('username')
-			user.password = form.cleaned_data.get('password_1')
-			user.cellphone = form.cleaned_data.get('cellphone')
-			user.email = form.cleaned_data.get('email')
-			user.account_type = 'plastic'
-			user.save()
-			print(user)
+			#创建 User
+			this_user = User()
+			this_user.username = form.cleaned_data.get('username')
+			this_user.password = form.cleaned_data.get('password_1')
+			this_user.cellphone = form.cleaned_data.get('cellphone')
+			this_user.email = form.cleaned_data.get('email')
+			this_user.account_type = 'plastic'
+			this_user.save()
+			print(this_user)
+			#创建 Varifivation_code 并且发送邮件
+			time_now = timezone.now()
+			time_delta = timedelta(minutes = 30)
+			time_expired = time_now + time_delta
+			code = uuid.uuid1()
+			var_code = Varifivation_code()
+			var_code.user = this_user
+			var_code.category = 'activate_account'
+			var_code.varifivation_code = code
+			var_code.date_requested = time_now
+			var_code.date_activated = time_expired
+			var_code.save()
+			# 发送邮件, p1是用户的guid, p2是激活的guid(用来验证？)
+			email_content = "请点击链接激活账号，如无法跳转请复制到浏览器中访问。" +"localhost:8000/user/activate_account/?p1=" + \
+			str(this_user.user_guid) + "&p2=" + var_code.varifivation_code +'/' 
+			send_mail(
+			    '国家数字出版实验室，账户激活',
+			    email_content,
+			    '245512890@qq.com',
+			    [this_user.email],
+			    fail_silently=False,
+			)
 			t = loader.get_template('register.html')
 			loginform = LoginForm()
-			c ={'message' :'注册成功，请重新登录','form':loginform}
+			c ={'message' :'注册成功，请点击邮件中的链接激活','form':loginform}
 			return HttpResponse(t.render(c,request))
 		else:
 
@@ -1236,12 +1265,14 @@ def remove_share_record(request):
 	c['error'] = error
 	return JsonResponse(c)
 
-
+# 注销
 def logout(request):
 	request.session.flush()
 	form = LoginForm()
 	return render(request,'login.html',{'form':form,'message':'请登录:'})
 
+
+# 返回用户的个人信息页面
 def user_homepage(request):
 	if not request.session.get('username'):
 		return login(request)
@@ -1252,6 +1283,40 @@ def user_homepage(request):
 		this_user = User.objects.filter(username = this_username)[0]
 		print(this_user)
 		return render(request,'user_homepage.html',{'user':this_user})
+
+@csrf_exempt
+def change_username(request):
+	new_username = request.POST.get('new_username')
+	this_username = request.session.get('username')
+	print(this_username )
+	print(new_username)
+	this_user = ''
+	if not request.session.get('username'):
+		return login(request)
+	else:
+		if not User.objects.filter(username = this_username).count():
+			return login(request)
+		this_user = User.objects.filter(username = this_username)[0]
+		# 新用户名被占用
+		if User.objects.filter(username = new_username).count():
+			return JsonResponse({'status': 'fail', 'error':'用户名已经被注册'})
+		else:
+			this_user.username = new_username
+			this_user.save()
+
+		if this_user.username == new_username:
+			request.session['username'] = new_username
+			return JsonResponse({'status': 'success', 'error':'', 'new_username' : this_user.username})
+	return render(request, 'user_homepage.html',{user: this_user})
+
+
+
+
+
+
+
+
+
 
 def guest_login(request):
 	user = User()
@@ -1288,6 +1353,22 @@ def delete_guest_user(user):
 		user.delete()
 	return 'success' if not os.path.exists(guest_folder) else 'false'
 
+
+#激活账户。 部署的时候需要更改访问的url
+def activate_account(request):
+	user_guid = request.GET.get('p1')
+	varifivation_code = request.GET.get('p2')
+	msg = 'username : ' + username +', guid: '+ guid
+	print(msg)
+	if not User.objects.filter(user_guid = guid).count():
+		return HttpResponse('未能激活账户，请重试 <br>' + msg)
+	else:
+		this_user = User.objects.filter(user_guid = guid)[0]
+		this_user.is_activated = True
+		this_user.save()
+		login_msg = '已激活账户'
+		return login(request,login_msg)
+	return HttpResponse(msg)
 # edit_fileedit_file
 #@login_required(login_url='/user/login/')
 # def edit_file(request):  # TODO: complete function

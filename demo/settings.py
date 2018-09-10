@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 'user.apps.UserConfig',
     'user',
+    'rest_framework',
     'widget_tweaks',
 ]
 
@@ -116,6 +117,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# email
+EMAIL_HOST="smtp.qq.com"
+EMAIL_PORT=25 #默认
+EMAIL_HOST_USER="245512890@qq.com"
+EMAIL_HOST_PASSWORD="flfecxzvzzuobjcf"
+EMAIL_USE_TLS=False  #默认
+EMAIL_FROM="245512890@qq.com"
 
 
 # Internationalization

@@ -70,7 +70,7 @@
       <th scope="row">邮箱</th>
       <td>{{user.email}}</td>
       <td>
-        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_email_model">修改</button>
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#change_email_model">修改</button>
       </td>
     </tr>
     <tr>
@@ -121,7 +121,7 @@
         </div>
         <div class="modal-body">
         	<span>请输入新用户名:<span>
-          <input type="text" name="new_username">
+          <input type="text" name="new_username_input" id = "new_username_input">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_username()'>
@@ -179,11 +179,11 @@
           </h4>
         </div>
         <div class="modal-body">
-        	<span>请输入新用户名:<span>
+        	<span>输入新邮箱地址:<span>
           <input type="text" name="new_username">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_username()'>
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='xxx()'>
             确认修改
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">
@@ -208,7 +208,7 @@
         </div>
         
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='change_username()'>
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='xxxx()'>
             确认
           </button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">
@@ -222,8 +222,31 @@
 
 {% block scripts %}
 <script type="text/javascript">
-	function reset_pwd(){
-
+  //修改用户名
+	function change_username(){
+    post_data = {
+      'new_username': $('#new_username_input').val(),
+    };
+    console.log(post_data);
+    $.ajax(
+  {
+    url: '/user/change_username/',
+    type:'post',
+    data: post_data,
+    success:function(res){
+      if(res['status'] == 'success'){
+        alert('用户名已更改为：' + res['new_username']);
+      location.reload();
+      }
+      else
+      {
+        alert(res['error'])
+      }
+    },
+    error:function(err){
+      alert('网络链接失败');
+    }
+  })
 	}
 </script>
 {% endblock %}

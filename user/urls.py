@@ -70,6 +70,10 @@ urlpatterns = [
     url(r'^show_my_file/$', views.show_my_file, name='show_my_file'),
     url(r'^share_status/(?P<file_guid>[0-9a-f-]+)$', views.share_status_management, name='share_status_management'),
     url(r'^remove_share_record/$', views.remove_share_record, name='remove_share_record'),
+    #改用户名
+    url(r'^change_username/$', views.change_username, name='change_username'),
+    #激活账户, p1 = guid, p2 = username
+    url(r'^activate_account/$', views.activate_account, name = 'activate_account'),
 ]
 
 
