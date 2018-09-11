@@ -72,8 +72,13 @@ urlpatterns = [
     url(r'^remove_share_record/$', views.remove_share_record, name='remove_share_record'),
     #改用户名
     url(r'^change_username/$', views.change_username, name='change_username'),
-    #激活账户, p1 = guid, p2 = username
+    #激活账户, p1 = verification_code, p2 = username
     url(r'^activate_account/$', views.activate_account, name = 'activate_account'),
+    #忘记密码，等待输入用户名或者邮箱
+    url(r'^forget_password/$', views.forget_password, name = 'forget_password'),
+    #忘记密码，输入用户名/邮箱以后。处理请求并且发送邮件
+    url(r'^forget_password_submit/$', views.forget_password_submit, name = 'forget_password_submit'),
+    
 ]
 
 

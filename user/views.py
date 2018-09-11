@@ -9,8 +9,8 @@ from django.shortcuts import render,redirect,HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import escape_uri_path
 from io import BytesIO
-from .models import User,File,Object,Share,Group,GroupMember,GroupFiles
-from .forms import RegisterForm,LoginForm,ResetByUsernameForm
+from .models import User,File,Object,Share,Group,GroupMember,GroupFiles,Verification_code
+from .forms import RegisterForm,LoginForm,ResetByUsernameForm,ForgetPasswordForm
 import datetime
 import uuid
 from django.core.validators import validate_email
@@ -24,13 +24,15 @@ from PIL import Image
 import time
 from django.utils import timezone
 from datetime import timedelta
-
+from smtplib import SMTPException
+from django.core.mail import send_mail
+login_img_urls = ['/login/images/login_img_00.jpg','/login/images/login_img_01.jpg','/login/images/login_img_02.jpg']
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 登录,DONE
 def login(request):
 	# print(request.POST)
-	login_img_urls = ['/login/images/login_img_00.jpg','/login/images/login_img_01.jpg','/login/images/login_img_02.jpg'];
+	login_img_urls = ['/login/images/login_img_00.jpg','/login/images/login_img_01.jpg','/login/images/login_img_02.jpg']
 	request.session.flush()
 	print(request.POST)
 	if request.session.get('login') != None:
@@ -91,30 +93,11 @@ def register(request):
 			this_user.account_type = 'plastic'
 			this_user.save()
 			print(this_user)
-			#创建 Varifivation_code 并且发送邮件
-			time_now = timezone.now()
-			time_delta = timedelta(minutes = 30)
-			time_expired = time_now + time_delta
-			code = uuid.uuid1()
-			var_code = Varifivation_code()
-			var_code.user = this_user
-			var_code.category = 'activate_account'
-			var_code.varifivation_code = code
-			var_code.date_requested = time_now
-			var_code.date_activated = time_expired
-			var_code.save()
-			# 发送邮件, p1是用户的guid, p2是激活的guid(用来验证？)
-			email_content = "请点击链接激活账号，如无法跳转请复制到浏览器中访问。" +"localhost:8000/user/activate_account/?p1=" + \
-			str(this_user.user_guid) + "&p2=" + var_code.varifivation_code +'/' 
-			send_mail(
-			    '国家数字出版实验室，账户激活',
-			    email_content,
-			    '245512890@qq.com',
-			    [this_user.email],
-			    fail_silently=False,
-			)
-			t = loader.get_template('register.html')
-			loginform = LoginForm()
+			#创建 Verifivation_code 并且发送邮件
+			if not sending_verification(request,this_user,'activate_account'):
+				return HttpResponse('未能发送验证邮件')
+			t = loader.get_template('login_page.html')
+			form = LoginForm()
 			c ={'message' :'注册成功，请点击邮件中的链接激活','form':loginform}
 			return HttpResponse(t.render(c,request))
 		else:
@@ -1039,9 +1022,6 @@ def add_member(request):
 	return JsonResponse(c)
 
 
-
-
-
 @ensure_csrf_cookie
 @csrf_exempt
 def delete_group(request):
@@ -1309,15 +1289,6 @@ def change_username(request):
 			return JsonResponse({'status': 'success', 'error':'', 'new_username' : this_user.username})
 	return render(request, 'user_homepage.html',{user: this_user})
 
-
-
-
-
-
-
-
-
-
 def guest_login(request):
 	user = User()
 	user.username = '/guest_user/'+str(user.user_guid)
@@ -1325,6 +1296,7 @@ def guest_login(request):
 	user.cellphone = ''
 	user.email = ''
 	user.account_type = 'guest'
+	user.is_activated = True
 	user.save()
 	request.session['login'] = True
 	request.session['username'] = user.username
@@ -1357,19 +1329,106 @@ def delete_guest_user(user):
 #激活账户。 部署的时候需要更改访问的url
 def activate_account(request):
 	user_guid = request.GET.get('p1')
-	varifivation_code = request.GET.get('p2')
-	msg = 'username : ' + username +', guid: '+ guid
+	verification_code = request.GET.get('p2')
+	verification_code = verification_code[:-1] if verification_code[-1] =='/' else verification_code
+	msg = 'user_guid : ' + user_guid +', ver_code: '+ verification_code
 	print(msg)
-	if not User.objects.filter(user_guid = guid).count():
-		return HttpResponse('未能激活账户，请重试 <br>' + msg)
+	#用户guid或者verification code错误
+	if not User.objects.filter(user_guid = user_guid).count():
+		return HttpResponse('User does not exist，请重试 <br>' + msg  )
+	if not Verification_code.objects.filter(verification_code = verification_code).count():
+		return HttpResponse('code is wrong，请重试 <br>' + msg)
+	#是否过期，如过期，重发
 	else:
-		this_user = User.objects.filter(user_guid = guid)[0]
-		this_user.is_activated = True
-		this_user.save()
-		login_msg = '已激活账户'
-		return login(request,login_msg)
+		this_user = User.objects.filter(user_guid = user_guid)[0]
+		ver_record = Verification_code.objects.filter(verification_code = verification_code)[0]
+		# 过期
+		time_now = timezone.now()
+		if ver_record.date_expired < time_now:
+			return HttpResponse('重发验证邮件') # to be finished
+		else:
+			this_user.is_activated = True
+			this_user.save()
+			ver_record.date_activated = timezone.now
+			login_msg = '已激活账户'
+			form = LoginForm()
+			return render(request,'login_page.html',{'form':form,'login_img_urls':login_img_urls, 'login_msg' : login_msg})
+
 	return HttpResponse(msg)
-# edit_fileedit_file
-#@login_required(login_url='/user/login/')
-# def edit_file(request):  # TODO: complete function
-# 	return render(request, 'check_success.html')
+
+
+#whatfor 表示验证码用来干什么的， 比如：激活账户，修改密码等
+def sending_verification(request, this_user, whatfor):
+	date_now = timezone.now()
+	#30分钟后失效
+	date_delta = timedelta(minutes = 30)
+	date_expired = date_now + date_delta
+	print(date_now)
+	print(date_delta)
+	print(date_expired)
+	#创建verification
+	ver_code = Verification_code()
+	ver_code.user = this_user
+	ver_code.category = whatfor
+	ver_code.date_requested = date_now
+	ver_code.date_expired = date_expired
+	ver_code.date_activated = date_now - timedelta(days=365)
+	ver_code.save()
+	email_content = ""
+	email_title = ""
+	# 发送邮件, p1是用户的guid, p2是激活的guid(用来验证)
+	if whatfor =='activate_account':
+		email_content = "请点击链接激活账号，如无法跳转请复制到浏览器中访问。" +"172.18.38.54:8000/user/activate_account/?p1=" + \
+		str(this_user.user_guid) + "&p2=" + str(ver_code.verification_code) + '\r 30分钟后失效。'
+		email_title = "激活账户--数字出版国家重点实验室"
+	elif whatfor == 'change_password':
+		print('hhhhhh')
+	else:
+		print('failed to send email')
+	print(email_content)
+	send_mail(
+		email_title,
+		email_content,
+		'245512890@qq.com',
+		[this_user.email],
+		fail_silently=False,
+	)
+	return True
+
+#生成忘记密码的页面
+def forget_password(request):
+	t = loader.get_template('forget_password.html')
+	form = ForgetPasswordForm()
+	c ={'title' :'请输入邮箱或者用户名','form':form}
+	return HttpResponse(t.render(c,request))
+
+#忘记密码后，提交用户名/邮箱
+@csrf_exempt
+def forget_password_submit(request):
+	username = request.POST.get('username')
+	email =request.POST.get('email')
+	user1 = None
+	user2 = None
+	if username == '' and email == '':
+		t = loader.get_template('forget_password.html')
+		form = ForgetPasswordForm()
+		c ={'title' :'请输入邮箱或者用户名','form':form, 'message':'用户名与邮箱不可都为空'}
+		return render(request,'forget_password.html',c)
+	# 如果都输入了。判断一下是否符合
+	if username != '' and User.objects.filter(username = username).count():
+		user1 = User.objects.filter(username = username)[0]
+	if email != '' and User.objects.filter(email = email).count():
+		user2 = User.objects.filter(email = email)[0]
+	if user1 != user2:
+		return HttpResponse('aaa')
+	else:
+		t = loader.get_template('forget_password.html')
+		form = ForgetPasswordForm()
+		c ={'title' :'请输入邮箱或者用户名','form':form, 'message':'用户名/邮箱错误'}
+		return render(request,'forget_password.html',c)
+
+
+	print(email)
+	print(username)
+	return HttpResponse('yes')
+

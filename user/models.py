@@ -94,10 +94,10 @@ class GroupMember(models.Model):
 
 
 #验证码等（激活，修改密码）
-class Verifivation_code(models.Model):
+class Verification_code(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	category = models.CharField(max_length=256,null=False, editable = False)
-	verifivation_code = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)
+	verification_code = models.UUIDField(default=uuid.uuid4,null=False,auto_created=True,editable=False, primary_key=True)
 	date_requested = models.DateTimeField('date file uploaded', default=None)
 	date_expired = models.DateTimeField('date file uploaded', default=None)
 	date_activated = models.DateTimeField('date file uploaded', default=None)

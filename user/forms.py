@@ -212,10 +212,27 @@ class ResetByUsernameForm(forms.Form):
 				# self.error_dict['password_again'] = '两次密码不匹配'
 				raise ValidationError('两次密码不匹配！')
 
-	#def clean(self):
-		#self.clean_username()
-		#self.clean_old_password()
-		# self.clean_new_password_2()
+
+
+
+class ForgetPasswordForm(forms.Form):
+	email = fields.EmailField(
+		required=True,
+		widget=widgets.TextInput(attrs={'class': "form-control",'placeholder': '请输入邮箱'}),
+		# strip=True,
+		error_messages={'required': '邮箱不能为空',
+						'invalid':'请输入正确的邮箱格式'},
+	)
+	username = fields.CharField(
+		required=True,
+		widget=widgets.TextInput(attrs={'class': "form-control",'placeholder': '请输入用户名'}),
+		min_length=6,
+		max_length=12,
+		strip=True,
+		error_messages={'required': '用户名不能为空',}
+	)
+
+
 
 
 
