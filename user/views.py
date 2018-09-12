@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.encoding import escape_uri_path
 from io import BytesIO
 from .models import User,File,Object,Share,Group,GroupMember,GroupFiles,Verification_code
-from .forms import RegisterForm,LoginForm,ResetByUsernameForm,ForgetPasswordForm
+from .forms import RegisterForm,LoginForm,ResetByUsernameForm,ForgetPasswordForm,SetNewPasswordForm
 import datetime
 import uuid
 from django.core.validators import validate_email
@@ -1336,7 +1336,7 @@ def activate_account(request):
 	#用户guid或者verification code错误
 	if not User.objects.filter(user_guid = user_guid).count():
 		return HttpResponse('User does not exist，请重试 <br>' + msg  )
-	if not Verification_code.objects.filter(verification_code = verification_code).count():
+	elif not Verification_code.objects.filter(verification_code = verification_code).count():
 		return HttpResponse('code is wrong，请重试 <br>' + msg)
 	#是否过期，如过期，重发
 	else:
@@ -1381,8 +1381,11 @@ def sending_verification(request, this_user, whatfor):
 		email_content = "请点击链接激活账号，如无法跳转请复制到浏览器中访问。" +"172.18.38.54:8000/user/activate_account/?p1=" + \
 		str(this_user.user_guid) + "&p2=" + str(ver_code.verification_code) + '\r 30分钟后失效。'
 		email_title = "激活账户--数字出版国家重点实验室"
-	elif whatfor == 'change_password':
-		print('hhhhhh')
+	#点击重置密码的邮件中的链接
+	elif whatfor == 'set_new_password':
+		email_content = "请点击链接修改密码，如无法跳转请复制到浏览器中访问。" +"172.18.38.54:8000/user/set_new_password/?p1=" + \
+		str(this_user.user_guid) + "&p2=" + str(ver_code.verification_code) + '\r 30分钟后失效。'
+		email_title = "修改密码--数字出版国家重点实验室"
 	else:
 		print('failed to send email')
 	print(email_content)
@@ -1405,22 +1408,38 @@ def forget_password(request):
 #忘记密码后，提交用户名/邮箱
 @csrf_exempt
 def forget_password_submit(request):
+	t = loader.get_template('forget_password.html')
+	form = ForgetPasswordForm()
 	username = request.POST.get('username')
 	email =request.POST.get('email')
 	user1 = None
 	user2 = None
 	if username == '' and email == '':
-		t = loader.get_template('forget_password.html')
-		form = ForgetPasswordForm()
 		c ={'title' :'请输入邮箱或者用户名','form':form, 'message':'用户名与邮箱不可都为空'}
 		return render(request,'forget_password.html',c)
-	# 如果都输入了。判断一下是否符合
+	# 设定是只需要输入用户名/注册邮箱中的一个就行
 	if username != '' and User.objects.filter(username = username).count():
 		user1 = User.objects.filter(username = username)[0]
 	if email != '' and User.objects.filter(email = email).count():
 		user2 = User.objects.filter(email = email)[0]
-	if user1 != user2:
-		return HttpResponse('aaa')
+	#
+	if user1 == None and user2 == None:
+		c ={'title' :'请输入邮箱或者用户名','form':form, 'message':'用户名或邮箱错误'}
+		return render(request,'forget_password.html',c)
+	#通过用户名找到了对应的用户
+	if user1 != None:
+		c ={'title' :'密码重置邮件已经发送','user':user1}
+		print('username was entered ')
+		print(user1)
+		sending_verification(request,user1,'set_new_password')
+		return render(request,'feedback.html',c)
+	#通过邮箱找到了对应的用户
+	elif user2 != None:
+		c ={'title' :'密码重置邮件已经发送','user' : user2}
+		print('email was entered ')
+		print(user2)
+		sending_verification(request,user2,'set_new_password')
+		return render(request,'feedback.html',c)
 	else:
 		t = loader.get_template('forget_password.html')
 		form = ForgetPasswordForm()
@@ -1431,4 +1450,53 @@ def forget_password_submit(request):
 	print(email)
 	print(username)
 	return HttpResponse('yes')
+
+#用户点击邮件中的链接后。更新密码的页面
+def set_new_password(request):
+	user_guid = request.GET.get('p1')
+	verification_code = request.GET.get('p2')
+	verification_code = verification_code[:-1] if verification_code[-1] =='/' else verification_code
+	msg = 'user_guid : ' + user_guid +', ver_code: '+ verification_code
+	# 验证码错误
+	if not Verification_code.objects.filter(verification_code = verification_code).count(): 
+		return render(request,'feedback.html',{'message':'验证码错误，请重试。'})
+	# user_guid不match 
+	elif not User.objects.filter(user_guid = user_guid).count():
+		return render(request,'feedback.html',{'message':'用户不存在，请重试。'})
+	#验证过期
+	else:
+		this_user = User.objects.filter(user_guid = user_guid)[0]
+		ver_record = Verification_code.objects.filter(verification_code = verification_code)[0]
+		# 验证码过期 或者验证码已经被使用
+		time_now = timezone.now()
+		if ver_record.date_expired < time_now:
+			return render(request,'feedback.html',{'title':'error','error_message':'验证码过期，请重试。'}) # to be finished
+		# 
+		if not ver_record.is_valid:
+			return render(request,'feedback.html',{'title':'error','error_message':'链接已使用，请重试。'}) # to be finished
+		# 提供修改密码的页面。不再需要认证
+		else:
+			form = SetNewPasswordForm()
+			#验证码被使用过一次。不可再用
+			ver_record.is_valid = False
+			ver_record.save()
+			return render(request,'feedback.html',{'title':'请输入新密码', 'form':form, 'user':this_user})
+
+
+
+def set_new_password_confirm(request):
+	user_guid = request.GET.get('p1')
+	new_password = request.POST.get('new_password')
+	print('user_guid is' + user_guid)
+	this_user = User.objects.filter(user_guid = user_guid)[0]
+	this_user.password = new_password
+	this_user.save()
+	c = {'title': '密码修改成功'}
+	return render(request,'feedback.html',c)
+
+def test(request):
+	form = SetNewPasswordForm()
+	this_user = User.objects.filter(username = 'cosmos123!')[0]
+	return render(request,'feedback.html',{'title':'test', 'form':form, 'user':this_user})
+
 

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 重设密码等功能完成后给用户反馈的页面 -->
+	<title></title>
+	<meta charset="utf-8">
+</head>
+<body>
+
+
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="/static/css/edmure.css"/>
+    <link rel="stylesheet" href="/static/css/commons.css"/>
+    <link rel="stylesheet" href="/static/css/account.css"/>
+    <style>
+
+    </style>
+</head>
+<body>
+
+{% extends 'base.html' %}
+{% block side_menu %}
+{% endblock %}
+
+
+{% block content %}
+<div class="side-body" style="width: 500px; margin-left: auto; margin-right: auto">
+    <!-- 已发送密码重置的邮件的feedback -->
+    {% if title == '密码重置邮件已经发送' %}
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        {{title}}    
+    </div>
+
+    <label>邮件已发送至：</label>
+    <br>
+    <label>{{user.email}}</label>
+    <br>
+    <label>请查询您的邮箱并且重设密码</label>
+    <br>
+    <span><a href="/user/login/"><bnutton class='btn btn-default'>确认并转到登录界面</bnutton></a></span>
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        {{message}}    
+    </div>
+    {% endif %}
+
+
+    <!-- 点击邮件中的链接输入新密码 -->
+    {% if title == '请输入新密码' %}
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        {{title}}    
+    <form role="form" action="/user/set_new_password_confirm/?p1={{user.user_guid}}" method="POST" novalidate="NOVALIDATE">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">请输入用户{{user.username}}新密码</label>
+            {{ form.new_password }}  <span style="color: red">{{ form.new_password.errors }}</span>
+        </div>
+
+        <input type="submit" class="btn btn-default" value="确认"/>
+        <br>
+        <span><a href="/user/login/"><bnutton class='btn btn-default'>转到登录界面</bnutton></a></span>
+    </form>
+    {% endif %}
+
+    <!-- 密码修改成功 -->
+    {% if title == '密码修改成功' %}
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        {{title}}
+        <br>    
+        <span><a href="/user/login/"><bnutton class='btn btn-default'>转到登录界面</bnutton></a></span>
+    </div>
+    {% endif %}
+
+    <!-- 报错 -->
+    {% if title == 'error' %}
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        {{error_message}}
+        <br>      
+        <span><a href="/user/login/"><bnutton class='btn btn-default'>转到登录界面</bnutton></a></span>
+    </div>
+    {% endif %}
+
+
+    {% if title == 'test' %}
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        {{title}}    
+    <form role="form" action="/user/set_new_password_confirm/{{user.username}}" method="POST" novalidate="NOVALIDATE">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">请输入用户{{user.username}}新密码</label>
+            {{ form.new_password }}  <span style="color: red">{{ form.new_password.errors }}</span>
+        </div>
+        <div class="form-group" hidden>
+            <label for="username">请输入用户{{user.username}}新密码</label>
+            {{ form.new_password }}  <span style="color: red">{{ form.new_password.errors }}</span>
+        </div>
+
+        <input type="submit" class="btn btn-default" value="确认"/>
+        <br>
+        <span><a href="/user/login/"><bnutton class='btn btn-default'>转到登录界面</bnutton></a></span>
+    </form>
+    {% endif %}
+
+    
+</div>
+
+
+{% endblock %}
+</body>
+</html>

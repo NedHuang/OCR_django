@@ -101,6 +101,7 @@ class Verification_code(models.Model):
 	date_requested = models.DateTimeField('date file uploaded', default=None)
 	date_expired = models.DateTimeField('date file uploaded', default=None)
 	date_activated = models.DateTimeField('date file uploaded', default=None)
+	is_valid = models.BooleanField(default = True)
 
 
 #join groupuser and file_share

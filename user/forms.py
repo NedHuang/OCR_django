@@ -214,7 +214,7 @@ class ResetByUsernameForm(forms.Form):
 
 
 
-
+#忘记密码。输入邮箱或用户名，发送邮件到用户邮箱
 class ForgetPasswordForm(forms.Form):
 	email = fields.EmailField(
 		required=True,
@@ -232,7 +232,25 @@ class ForgetPasswordForm(forms.Form):
 		error_messages={'required': '用户名不能为空',}
 	)
 
-
+#点击邮箱中的链接。重新设置新密码
+class SetNewPasswordForm(forms.Form):
+	new_password = fields.CharField(
+		required=True,
+		widget=widgets.PasswordInput(attrs={'class': "form-control",'placeholder': '请输入密码，必须包含数字,字母,特殊字符'},render_value=True),
+		min_length=6,
+		max_length=12,
+		strip=True,
+		validators=[
+			# 下面的正则内容一目了然，我就不注释了
+			RegexValidator(r'((?=.*\d))^.{6,12}$', '必须包含数字'),
+			RegexValidator(r'((?=.*[a-zA-Z]))^.{6,12}$', '必须包含字母'),
+			RegexValidator(r'((?=.*[^a-zA-Z0-9]))^.{6,12}$', '必须包含特殊字符'),
+			#RegexValidator(r'^.(\S){6,10}$', '密码不能包含空白字符'),
+		], #用于对密码的正则验证
+		error_messages={'required': '密码不能为空!',
+						'min_length': '密码最少为6个字符',
+						'max_length': '密码最多不超过为12个字符!',},
+	)
 
 
 

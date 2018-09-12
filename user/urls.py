@@ -78,7 +78,13 @@ urlpatterns = [
     url(r'^forget_password/$', views.forget_password, name = 'forget_password'),
     #忘记密码，输入用户名/邮箱以后。处理请求并且发送邮件
     url(r'^forget_password_submit/$', views.forget_password_submit, name = 'forget_password_submit'),
-    
+    #忘记密码，用户收到邮件以后点击，输入新密码
+    url(r'^set_new_password/$', views.set_new_password, name = 'set_new_password'),
+    #输入新密码后。点击确定。
+    url(r'^set_new_password_confirm/$', views.set_new_password_confirm, name = 'set_new_password_confirm'),
+
+    url(r'^test/$', views.test, name = 'test')
+
 ]
 
 
